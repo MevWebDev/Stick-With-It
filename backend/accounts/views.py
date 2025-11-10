@@ -116,9 +116,13 @@ def logout_view(request):
         data = json.loads(request.body)
         refresh_token = data.get('refresh')
         
-        if refresh_token:
+        # Sprawdź czy token został podany i nie jest pusty
+        if refresh_token is not None and refresh_token != '':
             token = RefreshToken(refresh_token)
             token.blacklist()  # Dodaj token do czarnej listy
+        elif refresh_token == '':
+            # Pusty string to błąd
+            raise ValueError('Empty token')
         
         return JsonResponse({'success': True})
     except Exception as e:
@@ -139,3 +143,32 @@ def user_info(request):
         'username': user.username,
         'email': user.email
     })
+
+
+# ODŚWIEŻANIE TOKENA
+@require_http_methods(["POST"])
+def refresh_token_view(request):
+    """Odświeża access token używając refresh tokena"""
+    try:
+        data = json.loads(request.body)
+        refresh_token = data.get('refresh')
+        
+        if not refresh_token:
+            return JsonResponse({
+                'success': False,
+                'error': 'Refresh token jest wymagany'
+            }, status=400)
+        
+        # Utwórz obiekt RefreshToken i wygeneruj nowy access token
+        token = RefreshToken(refresh_token)
+        
+        return JsonResponse({
+            'success': True,
+            'access': str(token.access_token)
+        })
+        
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'error': 'Nieprawidłowy lub wygasły refresh token'
+        }, status=401)
