@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useAuth } from "../../lib/auth/authContext";
 import { useRouter } from "next/navigation";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
@@ -14,8 +14,14 @@ export function RegisterForm() {
   const [username, setUsername] = useState("");
   const [error, setError] = useState("");
   const [step, setStep] = useState<1 | 2>(1); // Step 1: email & passwords, Step 2: username
-  const { register, isLoading } = useAuth();
+  const { register, isLoading, user } = useAuth();
   const router = useRouter();
+
+  useEffect(() => {
+    if (user) {
+      router.push("/");
+    }
+  }, [user, router]);
 
   const handleFirstStep = (e: React.FormEvent) => {
     e.preventDefault();
@@ -57,9 +63,9 @@ export function RegisterForm() {
       {step === 1 ? (
         <form
           onSubmit={handleFirstStep}
-          className="space-y-4 w-full flex flex-col      max-w-md "
+          className="space-y-4  flex flex-col w-xs mx-auto "
         >
-          <p className="text-xl">Get started and create accounts</p>
+          <p className="text-xl my-3">Get started and create accounts</p>
           <div>
             <input
               id="email"
