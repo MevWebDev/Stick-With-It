@@ -7,9 +7,9 @@ import { useAuth } from "../lib/auth/authContext";
 export default function Topbar() {
   const { user } = useAuth();
 
-  if (!user) {
-    return null;
-  }
+  // if (!user) {
+  //   return null;
+  // }
   return (
     <div className="flex justify-between items-center gap-6 p-8 text-3xl ">
       <button>

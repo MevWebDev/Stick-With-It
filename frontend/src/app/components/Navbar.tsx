@@ -9,9 +9,9 @@ export default function Navbar() {
 
   console.log(user);
 
-  if (!user) {
-    return null;
-  }
+  // if (!user) {
+  //   return null;
+  // }
   return (
     <div className="flex justify-evenly items-center gap-6 p-8 text-3xl ">
       <button>
