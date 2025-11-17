@@ -9,6 +9,7 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 import json
 # REJESTRACJA
+@csrf_exempt
 @require_http_methods(["POST"])
 def register_view(request):
     try:
@@ -68,6 +69,7 @@ def register_view(request):
 
 
 # LOGOWANIE
+@csrf_exempt
 @require_http_methods(["POST"])
 def login_view(request):
     """Logowanie użytkownika - zwraca JWT tokeny"""
@@ -109,6 +111,7 @@ def login_view(request):
 
 
 # WYLOGOWANIE (opcjonalne z JWT, ale możemy blacklistować token)
+@csrf_exempt
 @require_http_methods(["POST"])
 def logout_view(request):
     """Wylogowanie - dodaje refresh token do blacklisty"""
@@ -133,6 +136,7 @@ def logout_view(request):
 
 
 # INFO O UŻYTKOWNIKU
+@csrf_exempt
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])  # Wymaga ważnego JWT tokena
 def user_info(request):
@@ -146,6 +150,7 @@ def user_info(request):
 
 
 # ODŚWIEŻANIE TOKENA
+@csrf_exempt
 @require_http_methods(["POST"])
 def refresh_token_view(request):
     """Odświeża access token używając refresh tokena"""
