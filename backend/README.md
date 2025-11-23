@@ -260,12 +260,13 @@ curl -X POST http://127.0.0.1:8000/api/auth/refresh/ \
 - [x] Refresh token endpoint (12 testów)
 - [x] CORS configuration dla frontendu
 
+### kroki w ramach tego brancha:
+- [ ] Rozwój bazy danych użytkownika, dodanie tabeli z challenges {title, description, category, difficulty}
+- [ ] Dodanie osobnej tabeli dla statystyk użytkownika, a więc listę jego postanowień wraz z ich streakiem, streak i ilość wypełniowych daily challengy, listę zblacklistowanych kategorii, etc. 
+- [ ] Dodanie endpointu API umożliwiającego komunikację z bazą i losowanie challengy na dany dzień
+
 ### 🔜 Następne kroki:
 - [ ] Reset hasła
 - [ ] Weryfikacja email
 - [ ] Migracja z SQLite do PostgreSQL
 
-### 📊 Statystyki:
-- **Łącznie testów:** 60
-- **Endpointy:** 5 (register, login, logout, me, refresh)
-- **Pokrycie:** Wszystkie endpointy w pełni przetestowane
