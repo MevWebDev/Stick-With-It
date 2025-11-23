@@ -261,9 +261,11 @@ curl -X POST http://127.0.0.1:8000/api/auth/refresh/ \
 - [x] CORS configuration dla frontendu
 
 ### kroki w ramach tego brancha:
-- [ ] Rozwój bazy danych użytkownika, dodanie tabeli z challenges {title, description, category, difficulty}
-- [ ] Dodanie osobnej tabeli dla statystyk użytkownika, a więc listę jego postanowień wraz z ich streakiem, streak i ilość wypełniowych daily challengy, listę zblacklistowanych kategorii, etc. 
+- [X] Rozwój bazy danych użytkownika, dodanie tabeli z challenges {title, description, category, difficulty}
+- [x] Dodanie osobnej tabeli dla statystyk użytkownika, a więc listę jego postanowień wraz z ich streakiem, streak i ilość wypełniowych daily challengy, listę zblacklistowanych kategorii, etc. 
 - [ ] Dodanie endpointu API umożliwiającego komunikację z bazą i losowanie challengy na dany dzień
+- [ ] Dodanie odznak 
+- [ ] Obsługa AdminPanel z łatwą możliwością dodawania nowych elementów do bazy
 
 ### 🔜 Następne kroki:
 - [ ] Reset hasła
