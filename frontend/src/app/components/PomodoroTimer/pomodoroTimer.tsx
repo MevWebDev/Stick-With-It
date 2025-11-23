@@ -1,23 +1,25 @@
 "use client";
-import { useState, useEffect } from "react";
-import SessionTime from "./sessionTime";
+import { useState, useEffect, useRef } from "react";
+import FocusTime from "./focusTime";
 import BreakTime from "./breakTime";
 import StartStopButton from "./startStopButton";
 import EndSessionPopup from "./endSessionPopup";
 
 export default function PomodoroTimer() {
-  const [sessionTime, setSessionTime] = useState(25 * 60);
+  const [focusTime, setFocusTime] = useState(25 * 60);
   const [breakTime, setBreakTime] = useState(5 * 60);
+  const [timeLeft, setTimeLeft] = useState(focusTime);
+  const intervalRef = useRef<number | null>(null);
 
-  const [sessionTimePopup, setSessionTimePopup] = useState(false);
-  const [breakTimePopup, setBreakTimePopup] = useState(false);
+  const [popUp, setPopup] = useState<
+    "focusTime" | "breakTime" | "ended" | null
+  >(null);
+  const [mode, setMode] = useState<"focus" | "break">("focus");
+  const [timerStatus, setTimerStatus] = useState<"idle" | "running" | "paused">(
+    "idle"
+  );
 
-  const [timeLeft, setTimeLeft] = useState(sessionTime);
-  const [isRunning, setIsRunning] = useState(false);
-  const [mode, setMode] = useState<"session" | "break">("session");
-
-  const [endSession, setEndSession] = useState(false);
-
+  //function to format running time
   const formatTime = (seconds: number) => {
     const m = Math.floor(seconds / 60)
       .toString()
@@ -27,112 +29,128 @@ export default function PomodoroTimer() {
   };
 
   useEffect(() => {
-    if (!isRunning) return;
+    if (timerStatus !== "running") {
+      if (intervalRef.current) clearInterval(intervalRef.current);
+      intervalRef.current = null;
+      return;
+    }
 
-    const interval = setInterval(() => {
-      setTimeLeft((prev) => prev - 1);
-    }, 1);
+    intervalRef.current = window.setInterval(() => {
+      setTimeLeft((t) => t - 1);
+    }, 1000);
 
-    return () => clearInterval(interval);
-  }, [isRunning]);
+    return () => {
+      if (intervalRef.current) clearInterval(intervalRef.current);
+    };
+  }, [timerStatus]);
 
   useEffect(() => {
-    if (!isRunning) return;
-    if (timeLeft > 0) return;
+    if (timerStatus !== "running" || timeLeft !== 0) return;
 
-    if (mode === "session") {
+    if (mode === "focus") {
       setMode("break");
       setTimeLeft(breakTime);
     } else {
-      setTimeLeft(sessionTime);
-      setIsRunning(false);
-      setEndSession(true);
-      setMode("session");
+      setTimerStatus("idle");
+      setPopup("ended");
+      setMode("focus");
+      setTimeLeft(focusTime);
     }
-  }, [timeLeft, mode, isRunning, breakTime]);
+  }, [timeLeft]);
 
   useEffect(() => {
-    if (!isRunning && mode === "session") {
-      setTimeLeft(sessionTime);
-    }
-  }, [sessionTime, isRunning, mode]);
+    if (timerStatus === "running") return;
 
-  useEffect(() => {
-    if (!isRunning && mode === "break") {
-      setTimeLeft(breakTime);
-    }
-  }, [breakTime, isRunning, mode]);
+    setTimeLeft(mode === "focus" ? focusTime : breakTime);
+  }, [focusTime, breakTime, mode]);
+
+  // function to display current mode
+  const getStatusMessage = () => {
+    if (timerStatus === "idle") return "‎"; //empty sign
+    if (timerStatus === "paused") return "Paused";
+
+    if (timerStatus === "running" && mode === "focus") return "Focus Mode";
+
+    if (timerStatus === "running" && mode === "break") return "Break Mode";
+
+    return "";
+  };
 
   return (
-    <div className="space-y-3 mt-[5vh] flex flex-col items-center">
-      <h1 className="text-3xl font-extrabold text-center">
+    <div className="space-y-3 flex flex-col items-center">
+      <h1 className="text-4xl font-bold rounded-md mb-10 text-center">
         Pomodoro <br /> Timer
       </h1>
 
-      <div className="w-55 h-55 mt-[10vh] flex flex-col items-center justify-center rounded-full bg-[#EBEDEF] border-5 border-[#5E5E5E]">
+      <p className="text-center text-xl">{getStatusMessage()}</p>
+
+      <div className="w-55 h-55 mt-[2vh] flex flex-col items-center justify-center rounded-full bg-[#EBEDEF] border-5 border-[#5E5E5E]">
         <h3 className="text-5xl font-semibold tracking-[0.1em] text-[#677381]">
           {formatTime(timeLeft)}
         </h3>
       </div>
 
-      <p className="text-lg text-[#677381] m-0">
-        Break Time: {Math.floor(breakTime / 60)}:00
-      </p>
-
-      {!isRunning && (
-        <div className="flex flex-col">
+      {timerStatus === "idle" && (
+        <div className="flex flex-col mt-[2vh]">
+          <p className="text-lg text-[#5E5E5E] m-0">
+            Break Time: {Math.floor(breakTime / 60)}:00
+          </p>
           <button
-            className="py-2 font-medium text-[#677381]"
-            onClick={() => setBreakTimePopup(true)}
+            className="text-xl py-2 font-medium text-[#677381] hover:text-black"
+            onClick={() => setPopup("breakTime")}
           >
             Break Time
           </button>
 
           <button
-            className="font-medium text-[#677381]"
-            onClick={() => setSessionTimePopup(true)}
+            className="text-xl font-medium text-[#677381] hover:text-black"
+            onClick={() => setPopup("focusTime")}
           >
-            Session Time
+            Focus Time
           </button>
         </div>
       )}
 
       <StartStopButton
-        isRunning={isRunning}
-        onStart={() => {
-          setMode("session");
-          setTimeLeft(sessionTime);
-          setIsRunning(true);
-        }}
-        onStop={() => {
-          setMode("session");
-          setTimeLeft(sessionTime);
-          setIsRunning(false);
+        timerStatus={timerStatus}
+        onStart={() => setTimerStatus("running")}
+        onStop={() => setTimerStatus("paused")}
+        onReset={() => {
+          setTimerStatus("idle");
+          setMode("focus");
+          setFocusTime(focusTime);
+          setBreakTime(breakTime);
+          setTimeLeft(focusTime);
         }}
       />
 
-      {sessionTimePopup && (
-        <SessionTime
-          onClose={() => setSessionTimePopup(false)}
-          onSetTime={(newTime) => setSessionTime(newTime * 60)}
-          currentTime={Math.floor(sessionTime / 60)}
+      {popUp === "focusTime" && (
+        <FocusTime
+          onClose={() => setPopup(null)}
+          onSetTime={(newTime) => setFocusTime(newTime * 60)}
+          currentTime={Math.floor(focusTime / 60)}
         />
       )}
 
-      {breakTimePopup && (
+      {popUp === "breakTime" && (
         <BreakTime
-          onClose={() => setBreakTimePopup(false)}
+          onClose={() => setPopup(null)}
           onSetTime={(newTime) => setBreakTime(newTime * 60)}
           currentTime={Math.floor(breakTime / 60)}
         />
       )}
 
-      {endSession && (
+      {popUp === "ended" && (
         <EndSessionPopup
+          onContinue={() => {
+            setPopup(null);
+            setTimerStatus("running");
+            setMode("focus");
+          }}
           onClose={() => {
-            setEndSession(false);
-            setIsRunning(false);
-            setMode("session");
+            setPopup(null);
+            setTimerStatus("idle");
+            setMode("focus");
           }}
         />
       )}

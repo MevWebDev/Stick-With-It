@@ -1,28 +1,50 @@
 export default function StartStopButton({
   onStart,
   onStop,
-  isRunning,
+  onReset,
+  timerStatus,
 }: {
   onStart: () => void;
   onStop: () => void;
-  isRunning: boolean;
+  onReset: () => void;
+  timerStatus: "idle" | "running" | "paused";
 }) {
   return (
     <>
-      {isRunning ? (
+      {timerStatus === "running" && (
         <button
-          className="w-full text-3xl font-semibold tracking-wide rounded-lg text-[#bf2424]"
+          className="text-3xl mt-[3vh] font-semibold tracking-wide rounded-lg text-[#bf2424] hover:text-[#9c1e1e]"
           onClick={onStop}
         >
-          Stop
+          Pause
         </button>
-      ) : (
+      )}
+
+      {timerStatus === "idle" && (
         <button
-          className="w-full text-3xl font-semibold tracking-wide rounded-lg text-[#677381]"
+          className="text-3xl font-semibold tracking-wide rounded-lg text-[#677381] hover:text-black"
           onClick={onStart}
         >
           Start!
         </button>
+      )}
+
+      {timerStatus === "paused" && (
+        <div className="mt-[1vh] flex flex-col">
+          <button
+            className="text-3xl font-semibold tracking-wide rounded-lg text-[#677381] hover:text-black"
+            onClick={onStart}
+          >
+            Resume
+          </button>
+
+          <button
+            className="text-xl mt-[1vh] tracking-wide rounded-lg text-[#677381] hover:text-black"
+            onClick={onReset}
+          >
+            Reset
+          </button>
+        </div>
       )}
     </>
   );
