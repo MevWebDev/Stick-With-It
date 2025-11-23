@@ -11,7 +11,7 @@ export default function Topbar() {
   //   return null;
   // }
   return (
-    <div className="flex justify-between items-center gap-6 p-8 text-3xl ">
+    <div className="bg-flex justify-between items-center gap-6 p-8 text-3xl ">
       <button>
         <FaUser />
       </button>
