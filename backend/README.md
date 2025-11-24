@@ -10,6 +10,18 @@ docker compose up --build
 
 Serwer dostępny pod: `http://127.0.0.1:8000`
 
+### 🌱 Seeding Bazy Danych (Wypełnianie danymi)
+
+Aby wypełnić bazę danych przykładowymi wyzwaniami (Health, Productivity, Education, Mindfulness), użyj komendy:
+
+```bash
+# Jeśli używasz Dockera:
+docker compose exec backend python manage.py seed_challenges
+
+# Jeśli uruchamiasz lokalnie:
+python3 manage.py seed_challenges
+```
+
 ---
 
 ## 📚 Dokumentacja API
@@ -94,12 +106,12 @@ Definicje odznak.
 - [x] Automatyczne przyznawanie odznak
 - [x] Panel Administratora (Django Admin)
 - [x] Optymalizacja zapytań do bazy (`select_related`, `order_by("?")`)
+- [x] Seed Data: Skrypt do automatycznego wypełniania bazy przykładowymi wyzwaniami (`seed_challenges`)
 
 ### 🟡 Do zrobienia (Next Steps)
 - [ ] **Walidacja:** Sprawdzanie czy kategoria istnieje przy dodawaniu do blacklisty
 - [ ] **Limity:** Zwiększenie limitów znaków dla tytułów wyzwań (obecnie 20 znaków)
 - [ ] **Historia:** Endpoint `/challenge-history/` (ostatnie 20 wyzwań)
-- [ ] **Seed Data:** Skrypt do automatycznego wypełniania bazy przykładowymi wyzwaniami
 - [ ] **Testy:** Rozszerzenie testów jednostkowych o nowe funkcjonalności challenges
 
 ### 🔜 Roadmap
