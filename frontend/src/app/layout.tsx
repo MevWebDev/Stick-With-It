@@ -2,8 +2,6 @@ import type { Metadata } from "next";
 import { Geologica, Figtree } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "./lib/auth/authContext";
-import Navbar from "./components/Navbar";
-import Topbar from "./components/Topbar";
 
 const geologica = Geologica({
   variable: "--font-geologica",
@@ -30,11 +28,7 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${geologica.variable} ${figtree.variable} antialiased`}>
         <AuthProvider>
-          <div className="h-screen flex flex-col">
-            <Topbar />
-            <div className="flex-grow">{children}</div>
-            <Navbar />
-          </div>
+          {children}
         </AuthProvider>
       </body>
     </html>
