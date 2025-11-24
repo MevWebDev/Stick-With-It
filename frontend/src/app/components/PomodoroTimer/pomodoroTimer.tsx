@@ -31,7 +31,7 @@ export default function PomodoroTimer() {
 
     const interval = setInterval(() => {
       setTimeLeft((prev) => prev - 1);
-    }, 1);
+    }, 1000);
 
     return () => clearInterval(interval);
   }, [isRunning]);
