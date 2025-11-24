@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { FaTasks, FaClock, FaTimes, FaCalendarAlt, FaStickyNote, FaHome } from "react-icons/fa";
+import { usePathname } from "next/navigation";
 import CustomToolButton from "./CustomToolButton";
 
 interface ToolsMenuProps {
@@ -18,6 +19,14 @@ const tools = [
 ];
 
 export default function ToolsMenu({ onClose }: ToolsMenuProps) {
+  const pathname = usePathname();
+
+  const handleToolClick = (href: string) => {
+    if (pathname === href) {
+      onClose();
+    }
+  };
+
   return (
     <div className="fixed inset-0 bg-white/95 backdrop-blur-sm z-50 flex flex-col items-center justify-center animate-in fade-in duration-200">
       <div className="grid grid-cols-3 gap-8 p-8 max-w-md w-full">
@@ -27,19 +36,11 @@ export default function ToolsMenu({ onClose }: ToolsMenuProps) {
             name={tool.name}
             icon={tool.icon}
             href={tool.href}
+            onClick={() => handleToolClick(tool.href)}
           />
         ))}
       </div>
 
-      <div className="absolute bottom-10">
-        <button
-          onClick={onClose}
-          className="p-4 bg-gray-100 hover:cursor-pointer rounded-full text-gray-600 hover:bg-gray-200 transition-colors"
-          title="Close"
-        >
-          <FaTimes size={24} />
-        </button>
-      </div>
     </div>
   );
 }
