@@ -10,36 +10,7 @@ import {
   FaBan,
   FaTimes,
 } from "react-icons/fa";
-
-// Define the Task interface
-interface Task {
-  id: number;
-  name: string;
-  description: string;
-  difficulty: string;
-  category: string;
-}
-
-// Mock function to simulate API call
-const fetchRandomTask = async (): Promise<Task> => {
-  // In the future, this will be a real API call
-  // const response = await fetch('/api/tasks/random');
-  // return response.json();
-
-  // Simulating network delay
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve({
-        id: 1,
-        name: "Take a 15-minute Walk",
-        description:
-          "Go outside and take a brisk walk to clear your mind and get some fresh air.",
-        difficulty: "Hard",
-        category: "Physical",
-      });
-    }, 500);
-  });
-};
+import { challengeService, type DailyChallenge } from "@/app/lib/challenges/challengeService";
 
 const getCategoryIcon = (category: string) => {
   switch (category) {
@@ -56,49 +27,97 @@ const getCategoryIcon = (category: string) => {
   }
 };
 
-const getDifficultyColor = (difficulty: string) => {
+const getDifficultyColor = (difficulty: number) => {
   switch (difficulty) {
-    case "Easy":
+    case 1:
       return "bg-green-100 text-green-700 border-green-200";
-    case "Medium":
+    case 2:
       return "bg-yellow-100 text-yellow-700 border-yellow-200";
-    case "Hard":
+    case 3:
       return "bg-red-100 text-red-700 border-red-200";
     default:
       return "bg-gray-100 text-gray-700 border-gray-200";
   }
 };
 
+const getDifficultyLabel = (difficulty: number) => {
+  switch (difficulty) {
+    case 1:
+      return "Easy";
+    case 2:
+      return "Medium";
+    case 3:
+      return "Hard";
+    default:
+      return "Unknown";
+  }
+};
+
 export default function RandomTask() {
-  const [task, setTask] = useState<Task | null>(null);
+  const [dailyChallenge, setDailyChallenge] = useState<DailyChallenge | null>(null);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [actionLoading, setActionLoading] = useState(false);
 
   useEffect(() => {
-    const loadTask = async () => {
+    const loadChallenge = async () => {
       try {
-        const data = await fetchRandomTask();
-        setTask(data);
+        const data = await challengeService.getDailyChallenge();
+        setDailyChallenge(data);
       } catch (error) {
-        console.error("Failed to fetch random task:", error);
+        console.error("Failed to fetch daily challenge:", error);
       } finally {
         setLoading(false);
       }
     };
 
-    loadTask();
+    loadChallenge();
   }, []);
 
-  const handleDone = () => {
-    console.log("Task marked as done");
-    setIsModalOpen(false);
-    // TODO: Call API to mark task as done
+  const handleDone = async () => {
+    if (!dailyChallenge || dailyChallenge.completed) return;
+    
+    setActionLoading(true);
+    try {
+      const result = await challengeService.completeChallenge();
+      console.log("Challenge completed!", result);
+      
+      // Update local state to mark as completed
+      setDailyChallenge({
+        ...dailyChallenge,
+        completed: true,
+      });
+      
+      setIsModalOpen(false);
+      // Optionally show a success message with points earned
+    } catch (error) {
+      console.error("Failed to complete challenge:", error);
+      alert("Failed to complete challenge. Please try again.");
+    } finally {
+      setActionLoading(false);
+    }
   };
 
-  const handleBlacklist = () => {
-    console.log("Task blacklisted");
-    setIsModalOpen(false);
-    // TODO: Call API to blacklist task
+  const handleBlacklist = async () => {
+    if (!dailyChallenge) return;
+    
+    setActionLoading(true);
+    try {
+      const result = await challengeService.toggleBlacklist(dailyChallenge.challenge.category);
+      console.log("Category blacklisted:", result);
+      
+      setIsModalOpen(false);
+      // Reload to get a new challenge
+      setLoading(true);
+      const newChallenge = await challengeService.getDailyChallenge();
+      setDailyChallenge(newChallenge);
+      setLoading(false);
+    } catch (error) {
+      console.error("Failed to blacklist category:", error);
+      alert("Failed to blacklist category. Please try again.");
+    } finally {
+      setActionLoading(false);
+    }
   };
 
   if (loading) {
@@ -110,23 +129,24 @@ export default function RandomTask() {
     );
   }
 
-  if (!task) return null;
+  if (!dailyChallenge) return null;
 
-  const colorClasses = getDifficultyColor(task.difficulty);
+  const { challenge, completed } = dailyChallenge;
+  const colorClasses = getDifficultyColor(challenge.difficulty);
 
   return (
     <>
       {/* Small Component (Trigger) - Mobile First */}
       <div
         onClick={() => setIsModalOpen(true)}
-        className={`w-full px-5 py-6 rounded-3xl border-2 cursor-pointer active:scale-95 transition-transform flex items-center gap-4 ${colorClasses}`}
+        className={`w-full px-5 py-6 rounded-3xl border-2 cursor-pointer active:scale-95 transition-transform flex items-center gap-4 ${colorClasses} ${completed ? 'opacity-60' : ''}`}
       >
-        <div className="text-4xl flex-shrink-0">{getCategoryIcon(task.category)}</div>
+        <div className="text-4xl flex-shrink-0">{getCategoryIcon(challenge.category)}</div>
         <div className="flex-1 min-w-0">
           <div className="text-xs font-bold uppercase opacity-60 mb-1 tracking-wide">
-            Daily Challenge
+            {completed ? "Completed Today!" : "Daily Challenge"}
           </div>
-          <div className="font-bold font-geologica text-xl truncate">{task.name}</div>
+          <div className="font-bold font-geologica text-xl truncate">{challenge.title}</div>
         </div>
       </div>
 
@@ -147,38 +167,54 @@ export default function RandomTask() {
               {/* Header with Color */}
               <div className={`p-6 sm:p-8 ${colorClasses}`}>
                 <div className="flex items-center gap-2 text-sm font-bold uppercase tracking-wider mb-3 opacity-80">
-                  <span className="text-xl">{getCategoryIcon(task.category)}</span>
-                  <span>{task.category}</span>
+                  <span className="text-xl">{getCategoryIcon(challenge.category)}</span>
+                  <span>{challenge.category}</span>
                 </div>
                 <h2 className="text-3xl sm:text-4xl font-bold font-geologica leading-tight pr-8">
-                  {task.name}
+                  {challenge.title}
                 </h2>
                 <span className="inline-block mt-4 px-4 py-1.5 bg-white/60 rounded-full text-xs font-bold border border-black/5">
-                  {task.difficulty}
+                  {getDifficultyLabel(challenge.difficulty)} • {challenge.difficulty} {challenge.difficulty === 1 ? 'point' : 'points'}
                 </span>
               </div>
 
               {/* Body */}
               <div className="p-6 sm:p-8">
                 <p className="text-gray-600 text-lg sm:text-xl leading-relaxed font-figtree mb-8">
-                  {task.description}
+                  {challenge.description}
                 </p>
 
-                {/* Actions - Mobile Optimized */}
-                <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
-                  <button
-                    onClick={handleDone}
-                    className="w-full sm:flex-1 bg-green-500 text-white py-4 px-6 rounded-2xl font-bold active:scale-95 hover:bg-green-600 transition-all flex items-center justify-center gap-2 shadow-lg shadow-green-200 text-lg"
-                  >
-                    <FaCheck /> Done
-                  </button>
-                  <button
-                    onClick={handleBlacklist}
-                    className="w-full sm:flex-1 bg-gray-100 text-gray-700 py-4 px-6 rounded-2xl font-bold active:scale-95 hover:bg-gray-200 transition-all flex items-center justify-center gap-2 text-lg"
-                  >
-                    <FaBan /> Blacklist
-                  </button>
-                </div>
+                {completed ? (
+                  <div className="bg-green-50 border-2 border-green-200 rounded-2xl p-6 text-center">
+                    <FaCheck className="text-green-500 text-4xl mx-auto mb-3" />
+                    <p className="text-green-700 font-bold text-lg">
+                      Challenge Completed!
+                    </p>
+                    <p className="text-green-600 text-sm mt-1">
+                      Come back tomorrow for a new challenge
+                    </p>
+                  </div>
+                ) : (
+                  <>
+                    {/* Actions - Mobile Optimized */}
+                    <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
+                      <button
+                        onClick={handleDone}
+                        disabled={actionLoading}
+                        className="w-full sm:flex-1 bg-green-500 text-white py-4 px-6 rounded-2xl font-bold active:scale-95 hover:bg-green-600 transition-all flex items-center justify-center gap-2 shadow-lg shadow-green-200 text-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        <FaCheck /> {actionLoading ? "Processing..." : "Done"}
+                      </button>
+                      <button
+                        onClick={handleBlacklist}
+                        disabled={actionLoading}
+                        className="w-full sm:flex-1 bg-gray-100 text-gray-700 py-4 px-6 rounded-2xl font-bold active:scale-95 hover:bg-gray-200 transition-all flex items-center justify-center gap-2 text-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        <FaBan /> {actionLoading ? "Processing..." : "Blacklist"}
+                      </button>
+                    </div>
+                  </>
+                )}
               </div>
             </div>
           </div>
