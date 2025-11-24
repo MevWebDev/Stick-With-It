@@ -1,274 +1,109 @@
 # Backend API - Django REST
 
-## Uruchomienie Backendu
-Backend jest aktualnie zdockeryzowany, a więc aby go uruchomić wystarczy wpisać  ```docker compose up --build```
+## 🚀 Szybki Start
 
-## Endpointy API
+Backend jest zdockeryzowany. Aby go uruchomić:
+
+```bash
+docker compose up --build
+```
+
+Serwer dostępny pod: `http://127.0.0.1:8000`
+
+---
+
+## 📚 Dokumentacja API
 
 Bazowy URL: `/api/auth/`
 
-### 1. Rejestracja
+### 🔐 Autentykacja (JWT)
 
-**POST** `/api/auth/register/`
+| Metoda | Endpoint | Opis | Auth |
+|--------|----------|------|------|
+| `POST` | `/register/` | Rejestracja nowego użytkownika | ❌ |
+| `POST` | `/login/` | Logowanie (zwraca access + refresh token) | ❌ |
+| `POST` | `/logout/` | Wylogowanie (blacklist refresh token) | ❌ |
+| `POST` | `/refresh/` | Odświeżenie access tokena | ❌ |
+| `GET`  | `/me/` | Dane zalogowanego użytkownika | ✅ |
 
-Tworzy nowego użytkownika i zwraca tokeny JWT.
+### 🎯 Wyzwania (Challenges)
 
-**Request Body:**
-```json
-{
-  "username": "string",
-  "email": "string",
-  "password": "string"
-}
-```
+| Metoda | Endpoint | Opis | Auth |
+|--------|----------|------|------|
+| `GET`  | `/daily-challenge/` | Pobierz dzisiejsze wyzwanie (lub wylosuj nowe) | ✅ |
+| `POST` | `/complete-challenge/` | Oznacz dzisiejsze wyzwanie jako ukończone | ✅ |
+| `POST` | `/blacklist/` | Dodaj/usuń kategorię z blacklisty | ✅ |
 
-**Response (201 Created):**
-```json
-{
-  "success": true,
-  "user": {
-    "id": 1,
-    "username": "testuser",
-    "email": "test@example.com"
-  },
-  "tokens": {
-    "access": "treść tokenu",
-    "refresh": "treść tokenu"
-  }
-}
-```
+### 🏆 Statystyki i Odznaki
 
-**Błędy:**
-- `400` - Brak wymaganych pól lub użytkownik już istnieje
----
-### 2. Logowanie
-
-**POST** `/api/auth/login/`
-
-Loguje użytkownika i zwraca tokeny JWT.
-
-**Request Body:**
-```json
-{
-  "username": "string",
-  "password": "string"
-}
-```
-
-**Response (200 OK):**
-```json
-{
-  "success": true,
-  "user": {
-    "id": 1,
-    "username": "testuser",
-    "email": "test@example.com"
-  },
-  "tokens": {
-    "access": "treść tokenu",
-    "refresh": "treść tokenu"
-  }
-}
-```
-
-**Błędy:**
-- `401` - Nieprawidłowe dane logowania
+| Metoda | Endpoint | Opis | Auth |
+|--------|----------|------|------|
+| `GET`  | `/stats/` | Statystyki użytkownika (punkty, streak) | ✅ |
+| `GET`  | `/badges/` | Lista wszystkich odznak (zdobyte/niezdobyte) | ✅ |
 
 ---
 
-### 3. Wylogowanie
+## 🛠️ Szczegóły Implementacji
 
-**POST** `/api/auth/logout/`
+### System Streaku
+- **Zasada:** Ukończenie wyzwania codziennie zwiększa `current_streak`.
+- **Reset:** Brak aktywności przez >1 dzień resetuje streak do 1.
+- **Rekord:** `longest_streak` przechowuje najlepszy wynik.
 
-Dodaje refresh token do blacklisty (unieważnia token).
+### Punktacja
+- Poziom 1 (Łatwy) = **1 pkt**
+- Poziom 2 (Średni) = **2 pkt**
+- Poziom 3 (Trudny) = **3 pkt**
 
-**Request Body:**
-```json
-{
-  "refresh": "token"
-}
-```
-
-**Response (200 OK):**
-```json
-{
-  "success": true
-}
-```
-
-**Błędy:**
-- `400` - Nieprawidłowy token
+### System Odznak (Badges)
+Odznaki są przyznawane automatycznie po spełnieniu warunków (np. "First Steps" za pierwsze wyzwanie).
 
 ---
 
-### 4. Informacje o użytkowniku
+## 📊 Modele Bazy Danych
 
-**GET** `/api/auth/me/`
+### `Challenge`
+Wyzwania dostępne w systemie.
+- `title`, `description`, `category`, `difficulty` (1-3)
 
-Zwraca dane zalogowanego użytkownika. **Wymaga autoryzacji JWT.**
+### `UserStats`
+Statystyki użytkownika (OneToOne z User).
+- `points`, `current_streak`, `longest_streak`
+- `total_completed`, `level1_completed`, `level2_completed`, `level3_completed`
+- `blacklisted_categories` (JSON)
+- `earned_badges` (ManyToMany)
 
-**Headers:**
-```
-Authorization: Bearer <access_token>
-```
+### `DailyChallenge`
+Przypisanie wyzwania do użytkownika na dany dzień.
+- `user`, `challenge`, `assigned_date`, `completed`
 
-**Response (200 OK):**
-```json
-{
-  "id": 1,
-  "username": "testuser",
-  "email": "test@example.com"
-}
-```
-
-**Błędy:**
-- `401` - Brak tokenu, token wygasły lub nieprawidłowy
+### `Badges`
+Definicje odznak.
+- `key`, `title`, `description`, `icon`, `rarity`
 
 ---
 
-### 5. Odświeżanie tokenu
+## ⚠️ Status Projektu (TODO)
 
-**POST** `/api/auth/refresh/`
+### ✅ Zakończone
+- [x] Pełna autentykacja JWT (Register, Login, Logout, Refresh)
+- [x] Konfiguracja CORS dla frontendu Next.js
+- [x] Modele bazy danych (Challenges, Stats, Badges)
+- [x] Logika losowania wyzwań (z uwzględnieniem blacklisty)
+- [x] System punktacji i streaków
+- [x] Automatyczne przyznawanie odznak
+- [x] Panel Administratora (Django Admin)
+- [x] Optymalizacja zapytań do bazy (`select_related`, `order_by("?")`)
 
-Odświeża access token używając refresh tokena.
+### 🟡 Do zrobienia (Next Steps)
+- [ ] **Walidacja:** Sprawdzanie czy kategoria istnieje przy dodawaniu do blacklisty
+- [ ] **Limity:** Zwiększenie limitów znaków dla tytułów wyzwań (obecnie 20 znaków)
+- [ ] **Historia:** Endpoint `/challenge-history/` (ostatnie 20 wyzwań)
+- [ ] **Seed Data:** Skrypt do automatycznego wypełniania bazy przykładowymi wyzwaniami
+- [ ] **Testy:** Rozszerzenie testów jednostkowych o nowe funkcjonalności challenges
 
-**Request Body:**
-```json
-{
-  "refresh": "refresh_token"
-}
-```
-
-**Response (200 OK):**
-```json
-{
-  "success": true,
-  "access": "nowy_access_token"
-}
-```
-
-**Błędy:**
-- `400` - Refresh token jest wymagany
-- `401` - Nieprawidłowy lub wygasły refresh token
-
----
-
-## 🔐 Autentykacja JWT
-
-### Jak działa?
-
-1. **Rejestracja/Logowanie** → Otrzymujesz 2 tokeny:
-   - `access` - token dostępu (ważny 60 min)
-   - `refresh` - token odświeżania (ważny 7 dni)
-
-2. **Każdy chroniony request** → Dodaj header:
-   ```
-   Authorization: Bearer <access_token>
-   ```
-
-3. **Access token wygasł?** → Użyj endpointu `/api/auth/refresh/` z refresh tokenem do uzyskania nowego access tokena
-
-4. **Wylogowanie** → Refresh token trafia na blacklistę (nie można go już użyć)
-
-### Konfiguracja JWT
-
-```python
-# settings.py
-SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),
-    'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
-    'ROTATE_REFRESH_TOKENS': True,
-    'BLACKLIST_AFTER_ROTATION': True,
-}
-```
-
----
-
-## 🌐 CORS (Cross-Origin Resource Sharing)
-
-Backend jest skonfigurowany do przyjmowania requestów z frontendu Next.js.
-
-**Dozwolone Origins:**
-- `http://localhost:3000` (Next.js dev server)
-- `http://127.0.0.1:3000`
-
-**Ustawienia:**
-```python
-# settings.py
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000",
-    "http://127.0.0.1:3000",
-]
-CORS_ALLOW_CREDENTIALS = True
-```
-
----
-
-## 🧪 Testowanie API
-
-### Przykład z cURL:
-
-**Rejestracja:**
-```bash
-curl -X POST http://127.0.0.1:8000/api/auth/register/ \
-  -H "Content-Type: application/json" \
-  -d '{
-    "username": "testuser",
-    "email": "test@example.com",
-    "password": "securepassword123"
-  }'
-```
-
-**Logowanie:**
-```bash
-curl -X POST http://127.0.0.1:8000/api/auth/login/ \
-  -H "Content-Type: application/json" \
-  -d '{
-    "username": "testuser",
-    "password": "securepassword123"
-  }'
-```
-
-**Sprawdź profil (z tokenem):**
-```bash
-curl http://127.0.0.1:8000/api/auth/me/ \
-  -H "Authorization: Bearer YOUR_ACCESS_TOKEN"
-```
-
-**Odśwież token:**
-```bash
-curl -X POST http://127.0.0.1:8000/api/auth/refresh/ \
-  -H "Content-Type: application/json" \
-  -d '{
-    "refresh": "YOUR_REFRESH_TOKEN"
-  }'
-```
-
----
-## ⚠️ TODO
-
-### ✅ Zakończone:
-- [x] Testy jednostkowe (48 testów)
-  - [x] Rejestracja użytkownika (poprawne dane)
-  - [x] Rejestracja użytkownika (duplikat username/email)
-  - [x] Logowanie (poprawne dane)
-  - [x] Logowanie (błędne hasło)
-  - [x] Endpoint `/me/` bez tokena
-  - [x] Endpoint `/me/` z prawidłowym tokenem
-  - [x] Endpoint `/me/` z wygasłym tokenem
-  - [x] Wylogowanie (blacklisting tokena)
-- [x] Refresh token endpoint (12 testów)
-- [x] CORS configuration dla frontendu
-
-### kroki w ramach tego brancha:
-- [X] Rozwój bazy danych użytkownika, dodanie tabeli z challenges {title, description, category, difficulty}
-- [x] Dodanie osobnej tabeli dla statystyk użytkownika, a więc listę jego postanowień wraz z ich streakiem, streak i ilość wypełniowych daily challengy, listę zblacklistowanych kategorii, etc. 
-- [ ] Dodanie endpointu API umożliwiającego komunikację z bazą i losowanie challengy na dany dzień
-- [ ] Dodanie odznak 
-- [ ] Obsługa AdminPanel z łatwą możliwością dodawania nowych elementów do bazy
-
-### 🔜 Następne kroki:
-- [ ] Reset hasła
-- [ ] Weryfikacja email
-- [ ] Migracja z SQLite do PostgreSQL
-
+### 🔜 Roadmap
+- [ ] Reset hasła (email)
+- [ ] Weryfikacja adresu email
+- [ ] Migracja na PostgreSQL (produkcja)
+- [ ] Powiadomienia WebSocket o zdobytych odznakach
