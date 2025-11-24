@@ -2,23 +2,24 @@
 
 ## Co zrobiłam
 
-- Zmieniłam przycisk stop na pause
-- Dodałam przycisk reset
-- Dodałam wyświetlanie stanu (focus mode/break mode/paused)
-- Poprawiłam kod
+- Stworzyłam działający timer
+- Przyciski do ustawiania study i break session
+- Przycisk start/stop
 
 ## Funkcjonalność
 
-- Przycisk pause powinien zatrzymać timer i powinien zachować czas na którym się zatrzymał
+- Przycisk stop zatrzyma timer i powinien przywrócić go do wcześniej ustawionego czasu
 - Po skończeniu czasu ze study session timer automatycznie wyświetla czas z break session
-- Po skończeniu czasu z break session wyświetla się popup że sesja skończona, można kontynuować drugą taką samą albo nie
+- Po skończeniu czasu z break session wyświetla się popup że sesja skończona
 
 ## Do zrobienia
 
 ### 1. Dodam do pomodoro
 
-- Dźwięki
+- Jakieś wyświetlanie że study session zmieniło się na break session
 - Po zakończeniu sesji dać użytkownikowi coś w rodzaju nagrody (jakieś punkty, coinsy)
+- Dźwięki
+- Hover na przyciski
 
 ### 2. Dodać do bazy danych
 

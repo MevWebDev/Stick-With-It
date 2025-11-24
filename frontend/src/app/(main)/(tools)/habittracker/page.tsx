@@ -1,5 +1,5 @@
 import React from "react";
-import HabitTracker from "../../components/tools/HabitTracker";
+import HabitTracker from "@/app/components/HabitTracker/HabitTracker";
 
 export default function HabitTrackerPage() {
   return (

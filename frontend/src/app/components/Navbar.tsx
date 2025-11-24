@@ -2,19 +2,24 @@
 
 import { FaTools, FaUserFriends } from "react-icons/fa";
 import { MdOutlineQueryStats } from "react-icons/md";
-import { useAuth } from "../lib/auth/authContext";
+import { useState, useEffect } from "react";
+import { usePathname } from "next/navigation";
+import ToolsMenu from "./ToolsMenu";
 
 export default function Navbar() {
-  const { user } = useAuth();
+  const [openTools, setOpenTools] = useState(false);
+  const pathname = usePathname();
 
-  console.log(user);
 
-  // if (!user) {
-  //   return null;
-  // }
+  // genialny zapis xd
+  useEffect(() => {
+    setOpenTools(false);
+  }, [pathname]);
+
   return (
+    <>
     <div className="flex justify-evenly items-center gap-6 p-8 text-3xl ">
-      <button>
+      <button onClick={() => setOpenTools(!openTools)}>
         <FaTools />
       </button>
       <button>
@@ -24,5 +29,7 @@ export default function Navbar() {
         <FaUserFriends />
       </button>
     </div>
+    {openTools && <ToolsMenu onClose={() => setOpenTools(false)} />}
+    </>
   );
 }

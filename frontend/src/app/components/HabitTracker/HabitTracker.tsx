@@ -65,7 +65,7 @@ export default function HabitTracker() {
         {/* Div z PLUSEM + */}
         <div
           onClick={() => setIsModalOpen(true)}
-          className="bg-white rounded-2xl border-4 border-gray-700 flex flex-col items-center justify-center h-40 w-40 cursor-pointer hover:bg-gray-100"
+          className="bg-white rounded-2xl border-4 border-gray-300 flex flex-col items-center justify-center h-40 w-40 cursor-pointer hover:bg-gray-100"
         >
           <div className="text-6xl mb-2">
             <FaPlus />

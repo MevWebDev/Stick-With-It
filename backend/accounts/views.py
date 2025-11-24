@@ -8,6 +8,10 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 import json
+from django.utils import timezone
+from datetime import timedelta
+from .models import Challenge, UserStats, DailyChallenge, CompletedChallenge, Badges
+import random
 # REJESTRACJA
 @csrf_exempt
 @require_http_methods(["POST"])
@@ -177,3 +181,328 @@ def refresh_token_view(request):
             'success': False,
             'error': 'Nieprawidłowy lub wygasły refresh token'
         }, status=401)
+# ============================================
+# DAILY CHALLENGE - Losowanie wyzwania na dzień
+# ============================================
+
+@csrf_exempt
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_daily_challenge(request):
+    """Zwraca dzisiejsze wyzwanie lub losuje nowe"""
+    try:
+        user = request.user
+        today = timezone.now().date()
+        
+        # Sprawdź czy user ma już challenge na dziś
+        existing = DailyChallenge.objects.filter(
+            user=user, 
+            assigned_date=today
+        ).select_related('challenge').first()
+        
+        if existing:
+            # Zwróć istniejące
+            return JsonResponse({
+                'success': True,
+                'challenge': {
+                    'id': existing.challenge.id,
+                    'title': existing.challenge.title,
+                    'description': existing.challenge.description,
+                    'category': existing.challenge.category,
+                    'difficulty': existing.challenge.difficulty,
+                    'completed': existing.completed
+                },
+                'assigned_date': existing.assigned_date.isoformat()
+            })
+        
+        # Losuj nowe wyzwanie
+        stats = user.stats
+        blacklist = stats.blacklisted_categories
+        
+        # Pobierz dostępne challenges (wykluczając blacklistowane)
+        available = Challenge.objects.exclude(category__in=blacklist)
+        
+        if not available.exists():
+            return JsonResponse({
+                'success': False,
+                'error': 'Brak dostępnych wyzwań (wszystkie kategorie na blackliście)'
+            }, status=400)
+        
+        # Losuj challenge (na poziomie bazy danych)
+        random_challenge = available.order_by('?').first()
+        
+        # Utwórz DailyChallenge
+        daily = DailyChallenge.objects.create(
+            user=user,
+            challenge=random_challenge
+        )
+        
+        return JsonResponse({
+            'success': True,
+            'challenge': {
+                'id': random_challenge.id,
+                'title': random_challenge.title,
+                'description': random_challenge.description,
+                'category': random_challenge.category,
+                'difficulty': random_challenge.difficulty,
+                'completed': False
+            },
+            'assigned_date': daily.assigned_date.isoformat()
+        }, status=201)
+        
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=500)
+
+
+# ============================================
+# COMPLETE CHALLENGE - Ukończenie wyzwania
+# ============================================
+
+@csrf_exempt
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def complete_challenge(request):
+    """Oznacz dzisiejsze wyzwanie jako ukończone"""
+    try:
+        user = request.user
+        today = timezone.now().date()
+        
+        # Znajdź dzisiejsze wyzwanie
+        daily = DailyChallenge.objects.filter(
+            user=user,
+            assigned_date=today,
+            completed=False
+        ).select_related('challenge').first()
+        
+        if not daily:
+            return JsonResponse({
+                'success': False,
+                'error': 'Brak wyzwania do ukończenia lub już ukończone'
+            }, status=400)
+        
+        challenge = daily.challenge
+        
+        # Oznacz jako ukończone
+        daily.completed = True
+        daily.save()
+        
+        # Dodaj do historii
+        CompletedChallenge.objects.create(
+            user=user,
+            challenge=challenge,
+            points_earned=challenge.difficulty,
+            challenge_category=challenge.category,
+            challenge_difficulty=challenge.difficulty
+        )
+        
+        # Aktualizuj statystyki
+        stats = user.stats
+        stats.points += challenge.difficulty
+        stats.total_completed += 1
+        
+        # Aktualizuj liczniki per difficulty
+        if challenge.difficulty == 1:
+            stats.level1_completed += 1
+        elif challenge.difficulty == 2:
+            stats.level2_completed += 1
+        elif challenge.difficulty == 3:
+            stats.level3_completed += 1
+        
+        # Oblicz streak
+        if stats.last_completed_date:
+            yesterday = today - timedelta(days=1)
+            if stats.last_completed_date == yesterday:
+                # Kontynuacja streaku
+                stats.current_streak += 1
+            elif stats.last_completed_date == today:
+                # Już ukończył coś dzisiaj - nie zmieniaj streaku
+                pass
+            else:
+                # Przerwa - reset streaku
+                stats.current_streak = 1
+        else:
+            # Pierwsze ukończenie
+            stats.current_streak = 1
+        
+        # Aktualizuj longest_streak
+        if stats.current_streak > stats.longest_streak:
+            stats.longest_streak = stats.current_streak
+        
+        stats.last_completed_date = today
+        stats.save()
+        
+        # Sprawdź nowe badges (funkcję napiszemy za chwilę)
+        new_badges = check_and_award_badges(user)
+        
+        return JsonResponse({
+            'success': True,
+            'points_earned': challenge.difficulty,
+            'total_points': stats.points,
+            'current_streak': stats.current_streak,
+            'new_badges': [
+                {
+                    'key': badge.key,
+                    'title': badge.title,
+                    'icon': badge.icon,
+                    'rarity': badge.rarity
+                }
+                for badge in new_badges
+            ]
+        })
+        
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=500)
+
+
+# ============================================
+# USER STATS - Statystyki użytkownika
+# ============================================
+
+@csrf_exempt
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_user_stats(request):
+    """Zwraca statystyki użytkownika"""
+    try:
+        user = request.user
+        stats = user.stats
+        
+        # Policzy badges
+        earned_badges = stats.earned_badges.all()
+        
+        return JsonResponse({
+            'success': True,
+            'stats': {
+                'points': stats.points,
+                'current_streak': stats.current_streak,
+                'longest_streak': stats.longest_streak,
+                'total_completed': stats.total_completed,
+                'level1_completed': stats.level1_completed,
+                'level2_completed': stats.level2_completed,
+                'level3_completed': stats.level3_completed,
+                'blacklisted_categories': stats.blacklisted_categories,
+                'earned_badges_count': earned_badges.count(),
+                'earned_badges': [
+                    {
+                        'key': badge.key,
+                        'title': badge.title,
+                        'description': badge.description,
+                        'icon': badge.icon,
+                        'rarity': badge.rarity
+                    }
+                    for badge in earned_badges
+                ]
+            }
+        })
+        
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=500)
+
+
+# ============================================
+# BLACKLIST - Zarządzanie blacklistą kategorii
+# ============================================
+
+@csrf_exempt
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def manage_blacklist(request):
+    """Dodaj lub usuń kategorię z blacklisty"""
+    try:
+        data = json.loads(request.body)
+        category = data.get('category')
+        action = data.get('action')  # 'add' lub 'remove'
+        
+        if not category or not action:
+            return JsonResponse({
+                'success': False,
+                'error': 'Wymagane pola: category, action (add/remove)'
+            }, status=400)
+        
+        stats = request.user.stats
+        blacklist = stats.blacklisted_categories
+        
+        if action == 'add':
+            if category not in blacklist:
+                blacklist.append(category)
+                stats.blacklisted_categories = blacklist
+                stats.save()
+        elif action == 'remove':
+            if category in blacklist:
+                blacklist.remove(category)
+                stats.blacklisted_categories = blacklist
+                stats.save()
+        else:
+            return JsonResponse({
+                'success': False,
+                'error': 'action musi być "add" lub "remove"'
+            }, status=400)
+        
+        return JsonResponse({
+            'success': True,
+            'blacklisted_categories': stats.blacklisted_categories
+        })
+        
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=500)
+
+
+# ============================================
+# BADGES - Lista wszystkich badges
+# ============================================
+
+@csrf_exempt
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_all_badges(request):
+    """Zwraca wszystkie badges (zdobyte i niezdobyte)"""
+    try:
+        user = request.user
+        all_badges = Badges.objects.all()
+        earned_ids = user.stats.earned_badges.values_list('id', flat=True)
+        
+        badges_data = [
+            {
+                'id': badge.id,
+                'key': badge.key,
+                'title': badge.title,
+                'description': badge.description,
+                'icon': badge.icon,
+                'rarity': badge.rarity,
+                'earned': badge.id in earned_ids
+            }
+            for badge in all_badges
+        ]
+        
+        return JsonResponse({
+            'success': True,
+            'badges': badges_data,
+            'total': len(badges_data),
+            'earned': len(earned_ids)
+        })
+        
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=500)
+
+
+# ============================================
+# HELPER - Sprawdzanie i przyznawanie badges
+# ============================================
+
+def check_and_award_badges(user):
+    """Sprawdza warunki i przyznaje nowe badges"""
+    stats = user.stats
+    new_badges = []
+    
+    # Pobierz badges które user już ma
+    earned_keys = set(stats.earned_badges.values_list('key', flat=True))
+    
+    # Badge: First Steps - pierwsze wyzwanie
+    if stats.total_completed >= 1 and 'first_steps' not in earned_keys:
+        try:
+            badge = Badges.objects.get(key='first_steps')
+            stats.earned_badges.add(badge)
+            new_badges.append(badge)
+        except Badges.DoesNotExist:
+            pass
+    return new_badges
