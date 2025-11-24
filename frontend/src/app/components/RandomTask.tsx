@@ -53,6 +53,23 @@ const getDifficultyLabel = (difficulty: number) => {
   }
 };
 
+const placeHolderChallenge: DailyChallenge = {
+  challenge: {
+    id: 0,
+    title: "Placeholder Challenge",
+    description: "This is a placeholder challenge.",
+    category: "Physical",
+    difficulty: 1,
+
+
+
+  },
+  id:0,
+  assigned_date: "today",
+  completed: false,
+  
+};
+
 export default function RandomTask() {
   const [dailyChallenge, setDailyChallenge] = useState<DailyChallenge | null>(null);
   const [loading, setLoading] = useState(true);
@@ -65,6 +82,7 @@ export default function RandomTask() {
         const data = await challengeService.getDailyChallenge();
         setDailyChallenge(data);
       } catch (error) {
+        setDailyChallenge(placeHolderChallenge);
         console.error("Failed to fetch daily challenge:", error);
       } finally {
         setLoading(false);
