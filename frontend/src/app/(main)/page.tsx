@@ -1,7 +1,8 @@
 "use client";
-import { useAuth } from "./lib/auth/authContext";
+import { useAuth } from "../lib/auth/authContext";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
+import RandomTask from "../components/RandomTask";
 
 export default function Home() {
   const { user, logout } = useAuth();
@@ -23,16 +24,24 @@ export default function Home() {
   }, [user, router]);
 
   return (
-    <div className="flex flex-col items-center justify-center">
-      <h1 className="text-4xl font-bold font-geologica my-2">
-        Hi {capitalizeFirstLetter(user?.username)}! 👋
-      </h1>
+    <div className="flex flex-col items-center justify-center gap-8 py-10">
+      <div className="text-center">
+        <h1 className="text-4xl font-bold font-geologica my-2">
+          Hi {capitalizeFirstLetter(user?.username)}! 👋
+        </h1>
+        <p className="text-gray-500 font-figtree text-lg">
+          Ready for your daily task?
+        </p>
+      </div>
+
+      <RandomTask />
+
       <button
         onClick={async () => {
           await logout();
           router.push("/login");
         }}
-        className="mt-4 px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
+        className="px-6 py-2 bg-red-50 text-red-500 rounded-xl hover:bg-red-100 transition-colors font-medium"
       >
         Logout
       </button>
