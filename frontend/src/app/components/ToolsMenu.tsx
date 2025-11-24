@@ -9,6 +9,7 @@ interface ToolsMenuProps {
 }
 
 const tools = [
+    {name: "Home", icon: <FaHome />, href: "/"},
   { name: "Habit Tracker", icon: <FaTasks />, href: "/habittracker" },
   { name: "Pomodoro", icon: <FaClock />, href: "/pomodoro" },
   // Placeholders for future tools
@@ -30,14 +31,7 @@ export default function ToolsMenu({ onClose }: ToolsMenuProps) {
         ))}
       </div>
 
-      <div className="absolute bottom-10 flex gap-6">
-        <Link
-          href="/"
-          className="p-4 bg-gray-100 hover:cursor-pointer rounded-full text-gray-600 hover:bg-gray-200 transition-colors"
-          title="Home"
-        >
-          <FaHome size={24} />
-        </Link>
+      <div className="absolute bottom-10">
         <button
           onClick={onClose}
           className="p-4 bg-gray-100 hover:cursor-pointer rounded-full text-gray-600 hover:bg-gray-200 transition-colors"
