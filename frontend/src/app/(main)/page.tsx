@@ -24,7 +24,7 @@ export default function Home() {
   }, [user, router]);
 
   return (
-    <div className="flex flex-col items-center justify-center gap-8 py-10">
+    <div className="flex flex-col items-center justify-center gap-8 py-10 px-4">
       <div className="text-center">
         <h1 className="text-4xl font-bold font-geologica my-2">
           Hi {capitalizeFirstLetter(user?.username)}! 👋
@@ -34,7 +34,9 @@ export default function Home() {
         </p>
       </div>
 
-      <RandomTask />
+      <div className="w-full max-w-md">
+        <RandomTask />
+      </div>
 
       <button
         onClick={async () => {

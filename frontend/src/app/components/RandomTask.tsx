@@ -1,7 +1,15 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { FaDumbbell, FaBrain, FaHeart, FaHandHoldingHeart } from "react-icons/fa";
+import {
+  FaDumbbell,
+  FaBrain,
+  FaHeart,
+  FaHandHoldingHeart,
+  FaCheck,
+  FaBan,
+  FaTimes,
+} from "react-icons/fa";
 
 // Define the Task interface
 interface Task {
@@ -24,8 +32,9 @@ const fetchRandomTask = async (): Promise<Task> => {
       resolve({
         id: 1,
         name: "Take a 15-minute Walk",
-        description: "Go outside and take a brisk walk to clear your mind and get some fresh air.",
-        difficulty: "Easy",
+        description:
+          "Go outside and take a brisk walk to clear your mind and get some fresh air.",
+        difficulty: "Hard",
         category: "Physical",
       });
     }, 500);
@@ -35,15 +44,15 @@ const fetchRandomTask = async (): Promise<Task> => {
 const getCategoryIcon = (category: string) => {
   switch (category) {
     case "Physical":
-      return <FaDumbbell className="text-blue-500" />;
+      return <FaDumbbell />;
     case "Mental":
-      return <FaBrain className="text-purple-500" />;
+      return <FaBrain />;
     case "Emotional":
-      return <FaHeart className="text-red-500" />;
+      return <FaHeart />;
     case "Social":
-      return <FaHandHoldingHeart className="text-green-500" />;
+      return <FaHandHoldingHeart />;
     default:
-      return <FaBrain className="text-gray-500" />;
+      return <FaBrain />;
   }
 };
 
@@ -63,6 +72,7 @@ const getDifficultyColor = (difficulty: string) => {
 export default function RandomTask() {
   const [task, setTask] = useState<Task | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     const loadTask = async () => {
@@ -79,51 +89,101 @@ export default function RandomTask() {
     loadTask();
   }, []);
 
+  const handleDone = () => {
+    console.log("Task marked as done");
+    setIsModalOpen(false);
+    // TODO: Call API to mark task as done
+  };
+
+  const handleBlacklist = () => {
+    console.log("Task blacklisted");
+    setIsModalOpen(false);
+    // TODO: Call API to blacklist task
+  };
+
   if (loading) {
     return (
-      <div className="w-full max-w-md p-6 bg-white rounded-3xl border-4 border-gray-100 shadow-sm animate-pulse">
-        <div className="h-6 bg-gray-200 rounded w-1/3 mb-4"></div>
-        <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
-        <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+      <div className="w-full px-4 py-5 rounded-3xl border-2 border-gray-100 animate-pulse flex items-center gap-4 bg-white">
+        <div className="w-14 h-14 bg-gray-200 rounded-full"></div>
+        <div className="h-5 bg-gray-200 rounded w-1/2"></div>
       </div>
     );
   }
 
   if (!task) return null;
 
-  return (
-    <div className="w-full max-w-md bg-white rounded-3xl border-4 border-gray-100 shadow-sm overflow-hidden hover:border-blue-100 transition-colors duration-300">
-      <div className="p-6">
-        <div className="flex justify-between items-start mb-4">
-          <div className="flex items-center gap-2 text-sm font-bold text-gray-400 uppercase tracking-wider font-figtree">
-            {getCategoryIcon(task.category)}
-            <span>{task.category}</span>
-          </div>
-          <span
-            className={`px-3 py-1 rounded-full text-xs font-bold border ${getDifficultyColor(
-              task.difficulty
-            )}`}
-          >
-            {task.difficulty}
-          </span>
-        </div>
+  const colorClasses = getDifficultyColor(task.difficulty);
 
-        <h3 className="text-2xl font-bold text-gray-800 mb-2 font-geologica">
-          {task.name}
-        </h3>
-        <p className="text-gray-600 leading-relaxed font-figtree">
-          {task.description}
-        </p>
+  return (
+    <>
+      {/* Small Component (Trigger) - Mobile First */}
+      <div
+        onClick={() => setIsModalOpen(true)}
+        className={`w-full px-5 py-6 rounded-3xl border-2 cursor-pointer active:scale-95 transition-transform flex items-center gap-4 ${colorClasses}`}
+      >
+        <div className="text-4xl flex-shrink-0">{getCategoryIcon(task.category)}</div>
+        <div className="flex-1 min-w-0">
+          <div className="text-xs font-bold uppercase opacity-60 mb-1 tracking-wide">
+            Daily Challenge
+          </div>
+          <div className="font-bold font-geologica text-xl truncate">{task.name}</div>
+        </div>
       </div>
-      
-      <div className="bg-gray-50 px-6 py-4 border-t border-gray-100 flex justify-between items-center">
-        <span className="text-xs font-semibold text-gray-400 uppercase">
-          Daily Challenge
-        </span>
-        <button className="text-sm font-bold text-blue-600 hover:text-blue-700 transition-colors">
-          Mark as Done
-        </button>
-      </div>
-    </div>
+
+      {/* Modal - Mobile First Full Screen */}
+      {isModalOpen && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center animate-in fade-in duration-200">
+          <div className="bg-white rounded-t-3xl sm:rounded-3xl shadow-xl w-full sm:max-w-lg max-h-[90vh] sm:max-h-[85vh] overflow-hidden relative animate-in slide-in-from-bottom sm:zoom-in-95 duration-300">
+            {/* Close Button */}
+            <button
+              onClick={() => setIsModalOpen(false)}
+              className="absolute top-5 right-5 p-3 text-gray-500 hover:text-gray-700 active:scale-90 transition-all z-10 bg-white/80 rounded-full"
+            >
+              <FaTimes size={22} />
+            </button>
+
+            {/* Scrollable Content */}
+            <div className="overflow-y-auto max-h-[90vh] sm:max-h-[85vh]">
+              {/* Header with Color */}
+              <div className={`p-6 sm:p-8 ${colorClasses}`}>
+                <div className="flex items-center gap-2 text-sm font-bold uppercase tracking-wider mb-3 opacity-80">
+                  <span className="text-xl">{getCategoryIcon(task.category)}</span>
+                  <span>{task.category}</span>
+                </div>
+                <h2 className="text-3xl sm:text-4xl font-bold font-geologica leading-tight pr-8">
+                  {task.name}
+                </h2>
+                <span className="inline-block mt-4 px-4 py-1.5 bg-white/60 rounded-full text-xs font-bold border border-black/5">
+                  {task.difficulty}
+                </span>
+              </div>
+
+              {/* Body */}
+              <div className="p-6 sm:p-8">
+                <p className="text-gray-600 text-lg sm:text-xl leading-relaxed font-figtree mb-8">
+                  {task.description}
+                </p>
+
+                {/* Actions - Mobile Optimized */}
+                <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
+                  <button
+                    onClick={handleDone}
+                    className="w-full sm:flex-1 bg-green-500 text-white py-4 px-6 rounded-2xl font-bold active:scale-95 hover:bg-green-600 transition-all flex items-center justify-center gap-2 shadow-lg shadow-green-200 text-lg"
+                  >
+                    <FaCheck /> Done
+                  </button>
+                  <button
+                    onClick={handleBlacklist}
+                    className="w-full sm:flex-1 bg-gray-100 text-gray-700 py-4 px-6 rounded-2xl font-bold active:scale-95 hover:bg-gray-200 transition-all flex items-center justify-center gap-2 text-lg"
+                  >
+                    <FaBan /> Blacklist
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 }
