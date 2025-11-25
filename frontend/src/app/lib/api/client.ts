@@ -1,7 +1,7 @@
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
 
 export const apiClient = {
-  async post<T>(endpoint: string, data: any, token?: string): Promise<T> {
+  async post<T>(endpoint: string, data: unknown, token?: string): Promise<T> {
     const response = await fetch(`${API_BASE_URL}${endpoint}`, {
       method: "POST",
       headers: {
