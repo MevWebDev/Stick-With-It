@@ -14,15 +14,6 @@ export default function Home() {
     return username.charAt(0).toUpperCase() + username.slice(1);
   };
 
-  useEffect(() => {
-    if (user) {
-      router.push("/");
-    }
-    if (!user) {
-      router.push("/login");
-    }
-  }, [user, router]);
-
   return (
     <div className="flex flex-col items-center justify-center gap-8 py-10 px-4">
       <div className="text-center">
