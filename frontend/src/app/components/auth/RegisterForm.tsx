@@ -53,7 +53,7 @@ export function RegisterForm() {
       await register({ username, email, password });
       router.push("/");
     } catch (err) {
-      console.log(err);
+      
       setError(err instanceof Error ? err.message : "Registration failed");
     }
   };
