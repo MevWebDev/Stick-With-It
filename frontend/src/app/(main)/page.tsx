@@ -3,6 +3,7 @@ import { useAuth } from "../lib/auth/authContext";
 import { useRouter } from "next/navigation";
 // import { useEffect } from "react";
 import RandomTask from "../components/RandomTask";
+import { useEffect } from "react";
 
 export default function Home() {
   const { user, logout } = useAuth();
@@ -14,14 +15,14 @@ export default function Home() {
     return username.charAt(0).toUpperCase() + username.slice(1);
   };
 
-  // useEffect(() => {
-  //   if (user) {
-  //     router.push("/");
-  //   }
-  //   if (!user) {
-  //     router.push("/login");
-  //   }
-  // }, [user, router]);
+  useEffect(() => {
+    if (user) {
+      router.push("/");
+    }
+    if (!user) {
+      router.push("/login");
+    }
+  }, [user, router]);
 
   return (
     <div className="flex flex-col items-center justify-center gap-8 py-10 px-4">
