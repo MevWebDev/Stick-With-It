@@ -12,6 +12,7 @@ import {
 } from "react-icons/fa";
 import { challengeService, type DailyChallenge } from "@/app/lib/challenges/challengeService";
 import { useUserStats } from "../lib/userStats/UserStatsContext";
+import { useAuth } from "../lib/auth/authContext";
 
 const getCategoryIcon = (category: string) => {
   switch (category) {
@@ -61,14 +62,10 @@ const placeHolderChallenge: DailyChallenge = {
     description: "This is a placeholder challenge.",
     category: "Physical",
     difficulty: 1,
-
-
-
+    completed: false,
   },
-  id:0,
   assigned_date: "today",
-  success: false,
-  
+  success: true,
 };
 
 export default function RandomTask() {
@@ -78,12 +75,15 @@ export default function RandomTask() {
   const [actionLoading, setActionLoading] = useState(false);
 
   const { refreshStats } = useUserStats();
+  const { user } = useAuth();
 
   useEffect(() => {
     const loadChallenge = async () => {
       try {
         const data = await challengeService.getDailyChallenge();
         setDailyChallenge(data);
+        
+        console.log(data)
       } catch (error) {
         setDailyChallenge(placeHolderChallenge);
         console.error("Failed to fetch daily challenge:", error);
@@ -92,21 +92,25 @@ export default function RandomTask() {
       }
     };
 
-    loadChallenge();
-  }, []);
+    if (user) {
+      loadChallenge();
+    }
+  }, [user]);
 
   const handleDone = async () => {
-    if (!dailyChallenge || dailyChallenge.success) return;
+    if (!dailyChallenge || dailyChallenge.challenge.completed) return;
     
     setActionLoading(true);
     try {
-      const result = await challengeService.completeChallenge();
-      
+      await challengeService.completeChallenge();
       
       // Update local state to mark as completed
       setDailyChallenge({
         ...dailyChallenge,
-        success: true,
+        challenge: {
+          ...dailyChallenge.challenge,
+          completed: true,
+        },
       });
       
       setIsModalOpen(false);
@@ -154,8 +158,9 @@ export default function RandomTask() {
   }
 
   if (!dailyChallenge) return null;
-
-  const { challenge, success } = dailyChallenge;
+  
+  const { challenge } = dailyChallenge;
+  const completed = challenge.completed;
   const colorClasses = getDifficultyColor(challenge.difficulty);
   
 
@@ -164,12 +169,12 @@ export default function RandomTask() {
       {/* Small Component (Trigger) - Mobile First */}
       <div
         onClick={() => setIsModalOpen(true)}
-        className={`w-full px-5 py-6 rounded-3xl border-2 cursor-pointer active:scale-95 transition-transform flex items-center gap-4 ${colorClasses} ${success ? 'opacity-60' : ''}`}
+        className={`w-full px-5 py-6 rounded-3xl border-2 cursor-pointer active:scale-95 transition-transform flex items-center gap-4 ${colorClasses} ${completed ? 'opacity-60' : ''}`}
       >
         <div className="text-4xl flex-shrink-0">{getCategoryIcon(challenge.category)}</div>
         <div className="flex-1 min-w-0">
           <div className="text-xs font-bold uppercase opacity-60 mb-1 tracking-wide">
-            {success ? "Completed Today!" : "Daily Challenge"}
+            {completed ? "Completed Today!" : "Daily Challenge"}
           </div>
           <div className="font-bold font-geologica text-xl truncate">{challenge.title}</div>
         </div>
@@ -209,7 +214,7 @@ export default function RandomTask() {
                   {challenge.description}
                 </p>
 
-                {success ? (
+                {completed ? (
                   <div className="bg-green-50 border-2 border-green-200 rounded-2xl p-6 text-center">
                     <FaCheck className="text-green-500 text-4xl mx-auto mb-3" />
                     <p className="text-green-700 font-bold text-lg">

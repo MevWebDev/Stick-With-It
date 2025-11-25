@@ -10,6 +10,7 @@ export const apiClient = {
       },
       credentials: "include",
       body: JSON.stringify(data),
+      cache: "no-store",
     });
 
     if (!response.ok) {
@@ -28,6 +29,7 @@ export const apiClient = {
         ...(token && { Authorization: `Bearer ${token}` }),
       },
       credentials: "include",
+      cache: "no-store",
     });
 
     if (!response.ok) {
