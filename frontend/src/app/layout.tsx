@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geologica, Figtree } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "./lib/auth/authContext";
+import { UserStatsProvider } from "./lib/userStats/UserStatsContext";
 
 const geologica = Geologica({
   variable: "--font-geologica",
@@ -40,7 +41,9 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${geologica.variable} ${figtree.variable} antialiased`}>
         <AuthProvider>
-          {children}
+          <UserStatsProvider>
+            {children}
+          </UserStatsProvider>
         </AuthProvider>
       </body>
     </html>

@@ -1,47 +1,20 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { useAuth } from "../lib/auth/authContext";
-import { apiClient } from "../lib/api/client";
-import { authService } from "../lib/auth/authService";
+import { useUserStats } from "../lib/userStats/UserStatsContext";
 import { motion, AnimatePresence } from "framer-motion";
 
 export default function Streak() {
   const { user } = useAuth();
-  const [streak, setStreak] = useState<number | null>(null);
+  const { stats } = useUserStats();
+  
+  const streak = stats?.current_streak ?? 0;
 
-  useEffect(() => {
-    const loadStats = async () => {
-      const token = authService.getAccessToken();
-      try {
-        const data = await apiClient.get<any>(
-          "/api/auth/stats/",
-          token || undefined
-        );
-        if (data?.stats) {
-          // Check for 'streak' or 'current_streak' or 'streak_count'
-          const streakValue =
-            data.stats.streak ??
-            data.stats.current_streak ??
-            data.stats.streak_count ??
-            0;
-          setStreak(streakValue);
-        }
-      } catch (error) {
-        console.error("Failed to fetch streak:", error);
-      }
-    };
-
-    if (user) {
-      loadStats();
-    }
-  }, [user]);
-
-  if (!user || streak === null) return null;
+  if (!user) return null;
 
   return (
     <div className="flex items-center gap-2">
-      <button onClick={() => setStreak((streak || 0) + 1)}>+1</button>
       <div className="flex items-center gap-2 bg-orange-500/10 px-4 py-2 rounded-full border border-orange-500/20">
         <motion.span
           key={streak}

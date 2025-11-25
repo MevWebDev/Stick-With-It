@@ -11,6 +11,7 @@ import {
   FaTimes,
 } from "react-icons/fa";
 import { challengeService, type DailyChallenge } from "@/app/lib/challenges/challengeService";
+import { useUserStats } from "../lib/userStats/UserStatsContext";
 
 const getCategoryIcon = (category: string) => {
   switch (category) {
@@ -76,6 +77,8 @@ export default function RandomTask() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [actionLoading, setActionLoading] = useState(false);
 
+  const { refreshStats } = useUserStats();
+
   useEffect(() => {
     const loadChallenge = async () => {
       try {
@@ -108,6 +111,9 @@ export default function RandomTask() {
       
       setIsModalOpen(false);
       // Optionally show a success message with points earned
+      refreshStats();
+
+      
     } catch (error) {
       console.error("Failed to complete challenge:", error);
       alert("Failed to complete challenge. Please try again.");
