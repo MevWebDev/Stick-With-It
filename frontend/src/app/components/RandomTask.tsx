@@ -67,7 +67,7 @@ const placeHolderChallenge: DailyChallenge = {
   },
   id:0,
   assigned_date: "today",
-  completed: false,
+  success: false,
   
 };
 
@@ -96,7 +96,7 @@ export default function RandomTask() {
   }, []);
 
   const handleDone = async () => {
-    if (!dailyChallenge || dailyChallenge.completed) return;
+    if (!dailyChallenge || dailyChallenge.success) return;
     
     setActionLoading(true);
     try {
@@ -106,7 +106,7 @@ export default function RandomTask() {
       // Update local state to mark as completed
       setDailyChallenge({
         ...dailyChallenge,
-        completed: true,
+        success: true,
       });
       
       setIsModalOpen(false);
@@ -155,20 +155,21 @@ export default function RandomTask() {
 
   if (!dailyChallenge) return null;
 
-  const { challenge, completed } = dailyChallenge;
+  const { challenge, success } = dailyChallenge;
   const colorClasses = getDifficultyColor(challenge.difficulty);
+  console.log("Daily challenge:", dailyChallenge);
 
   return (
     <>
       {/* Small Component (Trigger) - Mobile First */}
       <div
         onClick={() => setIsModalOpen(true)}
-        className={`w-full px-5 py-6 rounded-3xl border-2 cursor-pointer active:scale-95 transition-transform flex items-center gap-4 ${colorClasses} ${completed ? 'opacity-60' : ''}`}
+        className={`w-full px-5 py-6 rounded-3xl border-2 cursor-pointer active:scale-95 transition-transform flex items-center gap-4 ${colorClasses} ${success ? 'opacity-60' : ''}`}
       >
         <div className="text-4xl flex-shrink-0">{getCategoryIcon(challenge.category)}</div>
         <div className="flex-1 min-w-0">
           <div className="text-xs font-bold uppercase opacity-60 mb-1 tracking-wide">
-            {completed ? "Completed Today!" : "Daily Challenge"}
+            {success ? "Completed Today!" : "Daily Challenge"}
           </div>
           <div className="font-bold font-geologica text-xl truncate">{challenge.title}</div>
         </div>
@@ -208,7 +209,7 @@ export default function RandomTask() {
                   {challenge.description}
                 </p>
 
-                {completed ? (
+                {success ? (
                   <div className="bg-green-50 border-2 border-green-200 rounded-2xl p-6 text-center">
                     <FaCheck className="text-green-500 text-4xl mx-auto mb-3" />
                     <p className="text-green-700 font-bold text-lg">
