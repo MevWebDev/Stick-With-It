@@ -1,7 +1,6 @@
 "use client";
 
-import Link from "next/link";
-import { FaTasks, FaClock, FaTimes, FaCalendarAlt, FaStickyNote, FaHome } from "react-icons/fa";
+import { FaTasks, FaClock, FaCalendarAlt, FaStickyNote, FaHome } from "react-icons/fa";
 import { usePathname } from "next/navigation";
 import CustomToolButton from "./CustomToolButton";
 
