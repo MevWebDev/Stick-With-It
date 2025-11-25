@@ -101,7 +101,7 @@ export default function RandomTask() {
     setActionLoading(true);
     try {
       const result = await challengeService.completeChallenge();
-      console.log("Challenge completed!", result);
+      
       
       // Update local state to mark as completed
       setDailyChallenge({
@@ -128,7 +128,7 @@ export default function RandomTask() {
     setActionLoading(true);
     try {
       const result = await challengeService.toggleBlacklist(dailyChallenge.challenge.category);
-      console.log("Category blacklisted:", result);
+      
       
       setIsModalOpen(false);
       // Reload to get a new challenge
@@ -157,7 +157,7 @@ export default function RandomTask() {
 
   const { challenge, success } = dailyChallenge;
   const colorClasses = getDifficultyColor(challenge.difficulty);
-  console.log("Daily challenge:", dailyChallenge);
+  
 
   return (
     <>
