@@ -13,7 +13,7 @@ export interface DailyChallenge {
   id: number;
   challenge: Challenge;
   assigned_date: string;
-  completed: boolean;
+ success: boolean;
 }
 
 export const challengeService = {
