@@ -8,6 +8,11 @@ import {
   FaPlus,
   FaPray,
   FaBed,
+  FaSmile,
+  FaWineGlass,
+  FaCannabis,
+  FaIgloo,
+  FaShower
 } from "react-icons/fa";
 
 //TO BEDZIE POBIERANE Z BAZY
@@ -17,6 +22,11 @@ const allAvailableHabits = [
   { id: 3, name: "Exercise", icon: <FaRunning /> },
   { id: 4, name: "Pray", icon: <FaPray /> },
   { id: 5, name: "Sleep", icon: <FaBed /> },
+  {id:6, name:"No Alcohol", icon: <FaWineGlass />},
+  {id:7, name:"No Weed", icon: <FaCannabis />},
+  {id:8, name:"Igloo", icon: <FaIgloo />}, 
+  {id:9, name:"Smile", icon: <FaSmile />},
+  {id:10, name:"Shower", icon: <FaShower />},
 ];
 
 export default function HabitTracker() {
@@ -28,6 +38,10 @@ export default function HabitTracker() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedHabitId, setSelectedHabitId] = useState<number>(
     allAvailableHabits[0].id
+  );
+
+  const availableHabits = allAvailableHabits.filter(
+    (habit) => !myTrackedHabits.some((h) => h.id === habit.id)
   );
 
   // fejk dodawanie + 1 jak klikniesz
@@ -45,7 +59,7 @@ export default function HabitTracker() {
     if (habitToAdd && !myTrackedHabits.some((h) => h.id === habitToAdd.id)) {
       setMyTrackedHabits([
         ...myTrackedHabits,
-        { ...habitToAdd, streak: 0, id: Date.now() },
+        { ...habitToAdd, streak: 0},
       ]);
     }
     setIsModalOpen(false);
@@ -64,7 +78,12 @@ export default function HabitTracker() {
 
         {/* Div z PLUSEM + */}
         <div
-          onClick={() => setIsModalOpen(true)}
+          onClick={() => {
+            if (availableHabits.length > 0) {
+              setSelectedHabitId(availableHabits[0].id);
+            }
+            setIsModalOpen(true);
+          }}
           className="transition-transform duration-300 bg-white rounded-2xl border-4 border-gray-700 flex flex-col items-center justify-center h-40 w-40 cursor-pointer hover:bg-gray-100 hover:scale-105"
         >
           <div className="text-6xl mb-2">
@@ -82,10 +101,11 @@ export default function HabitTracker() {
           <div className="bg-white p-8 rounded-lg shadow-xl border-2 border-black">
             <h2 className="text-2xl font-geologica font-bold mb-4">Add a New Habit</h2>
             <select
+              value={selectedHabitId}
               onChange={(e) => setSelectedHabitId(Number(e.target.value))}
               className="w-full p-2 border rounded mb-4 border-black "
             >
-              {allAvailableHabits.filter((habit) => !myTrackedHabits.some((h)=> h.id === habit.id)).map((habit) => (
+              {availableHabits.map((habit) => (
                 <option key={habit.id} value={habit.id} className="font-figtree font-semibold rounded-md">
                   {habit.name}
                 </option>
