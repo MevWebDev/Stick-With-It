@@ -1,7 +1,6 @@
 "use client";
 import { useAuth } from "../lib/auth/authContext";
 import { useRouter } from "next/navigation";
-// import { useEffect } from "react";
 import RandomTask from "../components/RandomTask";
 import { useEffect } from "react";
 
@@ -38,6 +37,7 @@ export default function Home() {
       <div className="w-full max-w-md">
         <RandomTask />
       </div>
+      
 
       <button
         onClick={async () => {

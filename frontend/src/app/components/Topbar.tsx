@@ -2,6 +2,7 @@
 
 import { IoIosSettings } from "react-icons/io";
 import { FaUser } from "react-icons/fa";
+import Streak from "./Streak";
 
 export default function Topbar() {
 
@@ -10,6 +11,7 @@ export default function Topbar() {
       <button>
         <FaUser />
       </button>
+      <Streak />
       <button>
         <IoIosSettings />
       </button>
