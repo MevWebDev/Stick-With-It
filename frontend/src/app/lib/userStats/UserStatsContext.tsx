@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
+import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from "react";
 import { useAuth } from "../auth/authContext";
 import { userStatsService, UserStats } from "./userStatsService";
 
@@ -16,6 +16,12 @@ export function UserStatsProvider({ children }: { children: React.ReactNode }) {
   const { user } = useAuth();
   const [stats, setStats] = useState<UserStats | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const hasLoadedRef = useRef(false);
+
+  // Reset loaded state when user changes
+  useEffect(() => {
+    hasLoadedRef.current = false;
+  }, [user]);
 
   const refreshStats = useCallback(async () => {
     if (!user) {
@@ -25,17 +31,18 @@ export function UserStatsProvider({ children }: { children: React.ReactNode }) {
 
     try {
       // Don't set loading to true for background refreshes to avoid flickering
-      // Only set it if we don't have stats yet
-      if (!stats) setIsLoading(true);
+      // Only set it if we haven't loaded stats for this user yet
+      if (!hasLoadedRef.current) setIsLoading(true);
       
       const data = await userStatsService.getStats();
       setStats(data);
+      hasLoadedRef.current = true;
     } catch (error) {
       console.error("Failed to fetch user stats:", error);
     } finally {
       setIsLoading(false);
     }
-  }, [user, stats]);
+  }, [user]);
 
   useEffect(() => {
     refreshStats();

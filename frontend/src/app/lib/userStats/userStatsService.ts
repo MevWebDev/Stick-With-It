@@ -6,7 +6,6 @@ export interface UserStats {
   points: number;
   level: number;
   completed_tasks: number;
-  // Add other stats fields as needed
 }
 
 export const userStatsService = {
