@@ -65,7 +65,7 @@ export default function HabitTracker() {
         {/* Div z PLUSEM + */}
         <div
           onClick={() => setIsModalOpen(true)}
-          className="bg-white rounded-2xl border-4 border-gray-300 flex flex-col items-center justify-center h-40 w-40 cursor-pointer hover:bg-gray-100"
+          className="transition-transform duration-300 bg-white rounded-2xl border-4 border-gray-700 flex flex-col items-center justify-center h-40 w-40 cursor-pointer hover:bg-gray-100 hover:scale-105"
         >
           <div className="text-6xl mb-2">
             <FaPlus />
@@ -78,29 +78,29 @@ export default function HabitTracker() {
 
       {/* Menu do dodawania nawyku */}
       {isModalOpen && (
-        <div className="fixed inset-0 bg-white bg-opacity-50 flex items-center justify-center border-3 border-black rounded-md">
-          <div className="bg-white p-8 rounded-lg shadow-xl">
-            <h2 className="text-2xl font-bold mb-4">Add a New Habit</h2>
+        <div className="fixed inset-0 bg-white bg-opacity-50 flex items-center justify-center">
+          <div className="bg-white p-8 rounded-lg shadow-xl border-2 border-black">
+            <h2 className="text-2xl font-geologica font-bold mb-4">Add a New Habit</h2>
             <select
               onChange={(e) => setSelectedHabitId(Number(e.target.value))}
-              className="w-full p-2 border rounded mb-4"
+              className="w-full p-2 border rounded mb-4 border-black "
             >
-              {allAvailableHabits.map((habit) => (
-                <option key={habit.id} value={habit.id}>
+              {allAvailableHabits.filter((habit) => !myTrackedHabits.some((h)=> h.id === habit.id)).map((habit) => (
+                <option key={habit.id} value={habit.id} className="font-figtree font-semibold rounded-md">
                   {habit.name}
                 </option>
               ))}
             </select>
-            <div className="flex justify-end gap-4">
+            <div className="flex justify-between gap-4">
               <button
                 onClick={() => setIsModalOpen(false)}
-                className="px-4 py-2 bg-gray-300 rounded"
+                className=" px-6 py-2 rounded-xl text-slate-600 font-medium font-figtree hover:bg-slate-200/50 hover:text-slate-800 transition-colors"
               >
                 Cancel
               </button>
               <button
                 onClick={addHabit}
-                className="px-4 py-2 bg-blue-500 text-white rounded"
+                className="px-6 py-2 rounded-xl font-figtree  text-white font-bold shadow-lg bg-teal-400 hover:scale-105 transition-transform  cursor-pointer duration-200"
               >
                 Add
               </button>
@@ -111,3 +111,4 @@ export default function HabitTracker() {
     </div>
   );
 }
+
