@@ -32,8 +32,9 @@ Bazowy URL: `/api/auth/`
 
 | Metoda | Endpoint | Opis | Auth |
 |--------|----------|------|------|
-| `POST` | `/register/` | Rejestracja nowego użytkownika | ❌ |
-| `POST` | `/login/` | Logowanie (zwraca access + refresh token) | ❌ |
+| `POST` | `/register/` | Rejestracja (blokada emaila jako nicku) | ❌ |
+| `POST` | `/check-email/` | Sprawdzenie dostępności emaila | ❌ |
+| `POST` | `/login/` | Logowanie (nick lub email) | ❌ |
 | `POST` | `/logout/` | Wylogowanie (blacklist refresh token) | ❌ |
 | `POST` | `/refresh/` | Odświeżenie access tokena | ❌ |
 | `GET`  | `/me/` | Dane zalogowanego użytkownika | ✅ |
@@ -56,6 +57,11 @@ Bazowy URL: `/api/auth/`
 ---
 
 ## 🛠️ Szczegóły Implementacji
+
+### Walidacja i Logowanie (QoL)
+- **Logowanie:** Użytkownik może zalogować się podając swój **nick** lub **adres email**.
+- **Rejestracja:** System blokuje możliwość ustawienia poprawnego adresu email jako nazwy użytkownika (nicku).
+- **Weryfikacja:** Dostępny endpoint do sprawdzania w czasie rzeczywistym czy email jest zajęty.
 
 ### System Streaku
 - **Zasada:** Ukończenie wyzwania codziennie zwiększa `current_streak`.
