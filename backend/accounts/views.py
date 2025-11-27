@@ -2,6 +2,8 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.contrib.auth.models import User
+from django.core.validators import validate_email
+from django.core.exceptions import ValidationError
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -29,6 +31,16 @@ def register_view(request):
                 'error': 'Wszystkie pola są wymagane'
             }, status=400)
         
+        # Sprawdź czy username nie jest emailem
+        try:
+            validate_email(username)
+            return JsonResponse({
+                'success': False,
+                'error': 'Nazwa użytkownika nie może być adresem email'
+            }, status=400)
+        except ValidationError:
+            pass
+
         # Sprawdź czy user już istnieje
         if User.objects.filter(username=username).exists():
             return JsonResponse({
@@ -72,6 +84,35 @@ def register_view(request):
         }, status=400)
 
 
+# SPRAWDZANIE DOSTĘPNOŚCI EMAILA
+@csrf_exempt
+@require_http_methods(["POST"])
+def check_email_view(request):
+    """Sprawdza czy email jest już zajęty"""
+    try:
+        data = json.loads(request.body)
+        email = data.get('email')
+        
+        if not email:
+            return JsonResponse({
+                'success': False,
+                'error': 'Email jest wymagany'
+            }, status=400)
+            
+        is_taken = User.objects.filter(email=email).exists()
+        
+        return JsonResponse({
+            'success': True,
+            'is_taken': is_taken,
+            'message': 'Email jest zajęty' if is_taken else 'Email jest dostępny'
+        })
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'error': str(e)
+        }, status=400)
+
+
 # LOGOWANIE
 @csrf_exempt
 @require_http_methods(["POST"])
@@ -82,6 +123,12 @@ def login_view(request):
         username = data.get('username')
         password = data.get('password')
         
+        # Obsługa logowania przez email
+        if username and '@' in username:
+            user_obj = User.objects.filter(email=username).first()
+            if user_obj:
+                username = user_obj.username
+
         # Sprawdź czy dane są poprawne
         user = authenticate(request, username=username, password=password)
         

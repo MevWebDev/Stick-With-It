@@ -192,6 +192,27 @@ class RegisterViewTestCase(TestCase):
         user = User.objects.get(username='testuser')
         self.assertTrue(user.check_password('securepassword123'))
 
+    def test_register_with_email_as_username_returns_400(self):
+        invalid_data = self.valid_data.copy()
+        invalid_data['username'] = 'email@as.username.com'
+        response = self.client.post(
+            self.url,
+            data=json.dumps(invalid_data),
+            content_type='application/json'
+        )
+        self.assertEqual(response.status_code, 400)
+
+    def test_register_with_email_as_username_returns_error_message(self):
+        invalid_data = self.valid_data.copy()
+        invalid_data['username'] = 'email@as.username.com'
+        response = self.client.post(
+            self.url,
+            data=json.dumps(invalid_data),
+            content_type='application/json'
+        )
+        data = response.json()
+        self.assertEqual(data['error'], 'Nazwa użytkownika nie może być adresem email')
+
 
 class LoginViewTestCase(TestCase):
     """Tests for user login endpoint"""
@@ -348,6 +369,45 @@ class LoginViewTestCase(TestCase):
             content_type='application/json'
         )
         self.assertEqual(response.status_code, 401)
+
+    def test_login_with_email_returns_200(self):
+        credentials = {
+            'username': 'test@example.com',
+            'password': 'securepassword123'
+        }
+        response = self.client.post(
+            self.url,
+            data=json.dumps(credentials),
+            content_type='application/json'
+        )
+        self.assertEqual(response.status_code, 200)
+
+    def test_login_with_email_returns_success_true(self):
+        credentials = {
+            'username': 'test@example.com',
+            'password': 'securepassword123'
+        }
+        response = self.client.post(
+            self.url,
+            data=json.dumps(credentials),
+            content_type='application/json'
+        )
+        data = response.json()
+        self.assertTrue(data['success'])
+
+    def test_login_with_email_returns_user_data(self):
+        credentials = {
+            'username': 'test@example.com',
+            'password': 'securepassword123'
+        }
+        response = self.client.post(
+            self.url,
+            data=json.dumps(credentials),
+            content_type='application/json'
+        )
+        data = response.json()
+        self.assertEqual(data['user']['username'], 'testuser')
+        self.assertEqual(data['user']['email'], 'test@example.com')
 
 
 class LogoutViewTestCase(TestCase):
@@ -615,6 +675,57 @@ class RefreshTokenViewTestCase(TestCase):
             content_type='application/json'
         )
         self.assertEqual(response.status_code, 400)
+
+
+class CheckEmailViewTestCase(TestCase):
+    """Tests for check email endpoint"""
+    
+    def setUp(self):
+        self.client = Client()
+        self.url = reverse('check_email')
+        self.user = User.objects.create_user(
+            username='testuser',
+            email='taken@example.com',
+            password='password'
+        )
+    
+    def test_check_email_with_available_email(self):
+        response = self.client.post(
+            self.url,
+            data=json.dumps({'email': 'available@example.com'}),
+            content_type='application/json'
+        )
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertTrue(data['success'])
+        self.assertFalse(data['is_taken'])
+        self.assertEqual(data['message'], 'Email jest dostępny')
+
+    def test_check_email_with_taken_email(self):
+        response = self.client.post(
+            self.url,
+            data=json.dumps({'email': 'taken@example.com'}),
+            content_type='application/json'
+        )
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertTrue(data['success'])
+        self.assertTrue(data['is_taken'])
+        self.assertEqual(data['message'], 'Email jest zajęty')
+
+    def test_check_email_without_email_returns_400(self):
+        response = self.client.post(
+            self.url,
+            data=json.dumps({}),
+            content_type='application/json'
+        )
+        self.assertEqual(response.status_code, 400)
+        data = response.json()
+        self.assertEqual(data['error'], 'Email jest wymagany')
+
+    def test_check_email_with_get_method_returns_405(self):
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 405)
 
 
 class ChallengeModelTestCase(TestCase):
