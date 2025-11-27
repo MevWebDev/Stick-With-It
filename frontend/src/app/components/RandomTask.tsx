@@ -11,6 +11,8 @@ import {
   FaTimes,
 } from "react-icons/fa";
 import { challengeService, type DailyChallenge } from "@/app/lib/challenges/challengeService";
+import { useUserStats } from "../lib/userStats/UserStatsContext";
+import { useAuth } from "../lib/auth/authContext";
 
 const getCategoryIcon = (category: string) => {
   switch (category) {
@@ -53,43 +55,69 @@ const getDifficultyLabel = (difficulty: number) => {
   }
 };
 
+const placeHolderChallenge: DailyChallenge = {
+  challenge: {
+    id: 0,
+    title: "Placeholder Challenge",
+    description: "This is a placeholder challenge.",
+    category: "Physical",
+    difficulty: 1,
+    completed: false,
+  },
+  assigned_date: "today",
+  success: true,
+};
+
 export default function RandomTask() {
   const [dailyChallenge, setDailyChallenge] = useState<DailyChallenge | null>(null);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [actionLoading, setActionLoading] = useState(false);
 
+  const { refreshStats } = useUserStats();
+  const { user } = useAuth();
+
   useEffect(() => {
     const loadChallenge = async () => {
       try {
         const data = await challengeService.getDailyChallenge();
         setDailyChallenge(data);
+        
+        console.log(data)
       } catch (error) {
+        setDailyChallenge(placeHolderChallenge);
         console.error("Failed to fetch daily challenge:", error);
       } finally {
         setLoading(false);
       }
     };
 
-    loadChallenge();
-  }, []);
+    if (user) {
+      loadChallenge();
+    }
+  }, [user]);
 
   const handleDone = async () => {
-    if (!dailyChallenge || dailyChallenge.completed) return;
+    if (!dailyChallenge || dailyChallenge.challenge.completed) return;
     
     setActionLoading(true);
     try {
-      const result = await challengeService.completeChallenge();
-      console.log("Challenge completed!", result);
+      await challengeService.completeChallenge();
       
       // Update local state to mark as completed
       setDailyChallenge({
         ...dailyChallenge,
-        completed: true,
+        challenge: {
+          ...dailyChallenge.challenge,
+          completed: true,
+        },
       });
       
       setIsModalOpen(false);
       // Optionally show a success message with points earned
+      refreshStats();
+
+      
     } catch (error) {
       console.error("Failed to complete challenge:", error);
       alert("Failed to complete challenge. Please try again.");
@@ -104,7 +132,7 @@ export default function RandomTask() {
     setActionLoading(true);
     try {
       const result = await challengeService.toggleBlacklist(dailyChallenge.challenge.category);
-      console.log("Category blacklisted:", result);
+      
       
       setIsModalOpen(false);
       // Reload to get a new challenge
@@ -130,9 +158,11 @@ export default function RandomTask() {
   }
 
   if (!dailyChallenge) return null;
-
-  const { challenge, completed } = dailyChallenge;
+  
+  const { challenge } = dailyChallenge;
+  const completed = challenge.completed;
   const colorClasses = getDifficultyColor(challenge.difficulty);
+  
 
   return (
     <>

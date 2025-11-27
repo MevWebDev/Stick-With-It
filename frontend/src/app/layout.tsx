@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geologica, Figtree } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "./lib/auth/authContext";
+import { UserStatsProvider } from "./lib/userStats/UserStatsContext";
 
 const geologica = Geologica({
   variable: "--font-geologica",
@@ -17,6 +18,18 @@ const figtree = Figtree({
 export const metadata: Metadata = {
   title: "Stick With It!!!",
   description: "self-care app",
+  manifest: "/manifest.json",
+  themeColor: "#ffffff",
+  viewport: "minimum-scale=1, initial-scale=1, width=device-width, shrink-to-fit=no, user-scalable=no, viewport-fit=cover",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "Stick With It!!!",
+  },
+  icons: {
+    icon: "/icon-192x192.png",
+    apple: "/icon-192x192.png",
+  },
 };
 
 export default function RootLayout({
@@ -28,7 +41,9 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${geologica.variable} ${figtree.variable} antialiased`}>
         <AuthProvider>
-          {children}
+          <UserStatsProvider>
+            {children}
+          </UserStatsProvider>
         </AuthProvider>
       </body>
     </html>
