@@ -40,7 +40,7 @@ export function LoginForm() {
         <p className="text-xl my-3">Welcome back!</p>
         <input
           id="username"
-          placeholder="Username"
+          placeholder="Username or email"
           type="text"
           value={username}
           onChange={(e) => setUsername(e.target.value)}
