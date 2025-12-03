@@ -21,6 +21,32 @@ export interface CheckEmailResponse {
   message: string;
 }
 
+export interface UserStats {
+  points: number;
+  current_streak: number;
+  longest_streak: number;
+  total_completed: number;
+  level1_completed: number;
+  level2_completed: number;
+  level3_completed: number;
+  blacklisted_categories: string[];
+  earned_badges_count: number;
+  earned_badges: string[];
+}
+
+export interface StatsResponse {
+  success: boolean;
+  stats: UserStats;
+}
+
+export interface Badge {
+  key: string;
+  title: string;
+  description: string;
+  icon: string;
+  rarity: string;
+}
+
 export interface LoginCredentials {
   username: string;
   password: string;

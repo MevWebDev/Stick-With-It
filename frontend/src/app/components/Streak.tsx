@@ -3,14 +3,11 @@
 import React from "react";
 import { useUserStats } from "../lib/userStats/UserStatsContext";
 import { motion, AnimatePresence } from "framer-motion";
-
+import { FaFire } from "react-icons/fa";
 export default function Streak() {
-
   const { stats } = useUserStats();
-  
+
   const streak = stats?.current_streak ?? 0;
-
-
 
   return (
     <div className="flex items-center gap-2">
@@ -24,7 +21,7 @@ export default function Streak() {
           role="img"
           aria-label="fire"
         >
-          🔥
+          <FaFire className="text-orange-500" />
         </motion.span>
         <AnimatePresence mode="wait">
           <motion.span
