@@ -12,6 +12,7 @@ from rest_framework.permissions import IsAuthenticated
 import json
 from django.utils import timezone
 from datetime import timedelta
+from django.db import IntegrityError
 from .models import Challenge, UserStats, DailyChallenge, CompletedChallenge, Badges
 import random
 # REJESTRACJA
@@ -278,24 +279,49 @@ def get_daily_challenge(request):
         # Losuj challenge (na poziomie bazy danych)
         random_challenge = available.order_by('?').first()
         
-        # Utwórz DailyChallenge
-        daily = DailyChallenge.objects.create(
-            user=user,
-            challenge=random_challenge
-        )
-        
-        return JsonResponse({
-            'success': True,
-            'challenge': {
-                'id': random_challenge.id,
-                'title': random_challenge.title,
-                'description': random_challenge.description,
-                'category': random_challenge.category,
-                'difficulty': random_challenge.difficulty,
-                'completed': False
-            },
-            'assigned_date': daily.assigned_date.isoformat()
-        }, status=201)
+        try:
+            # Utwórz DailyChallenge
+            daily = DailyChallenge.objects.create(
+                user=user,
+                challenge=random_challenge
+            )
+            
+            return JsonResponse({
+                'success': True,
+                'challenge': {
+                    'id': random_challenge.id,
+                    'title': random_challenge.title,
+                    'description': random_challenge.description,
+                    'category': random_challenge.category,
+                    'difficulty': random_challenge.difficulty,
+                    'completed': False
+                },
+                'assigned_date': daily.assigned_date.isoformat()
+            }, status=201)
+
+        except IntegrityError:
+            # Race condition: challenge was created by another request in the meantime
+            existing = DailyChallenge.objects.filter(
+                user=user, 
+                assigned_date=today
+            ).select_related('challenge').first()
+            
+            if existing:
+                return JsonResponse({
+                    'success': True,
+                    'challenge': {
+                        'id': existing.challenge.id,
+                        'title': existing.challenge.title,
+                        'description': existing.challenge.description,
+                        'category': existing.challenge.category,
+                        'difficulty': existing.challenge.difficulty,
+                        'completed': existing.completed
+                    },
+                    'assigned_date': existing.assigned_date.isoformat()
+                })
+            else:
+                # Should not happen if IntegrityError was due to unique constraint
+                raise
         
     except Exception as e:
         return JsonResponse({'success': False, 'error': str(e)}, status=500)
