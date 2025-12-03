@@ -15,6 +15,12 @@ export interface AuthResponse {
   tokens: AuthTokens;
 }
 
+export interface CheckEmailResponse {
+  success: boolean;
+  is_taken: boolean;
+  message: string;
+}
+
 export interface LoginCredentials {
   username: string;
   password: string;

@@ -1,6 +1,7 @@
 import { apiClient } from "../api/client";
 import type {
   AuthResponse,
+  CheckEmailResponse,
   LoginCredentials,
   RegisterCredentials,
   User,
@@ -16,6 +17,15 @@ export const authService = {
       credentials
     );
     this.setTokens(response.tokens.access, response.tokens.refresh);
+    return response;
+  },
+
+  async checkEmail(email: String): Promise<CheckEmailResponse> {
+    const response = await apiClient.post<CheckEmailResponse>(
+      "/api/auth/check-email/",
+      { email }
+    );
+
     return response;
   },
 
