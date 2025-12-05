@@ -1,12 +1,33 @@
 "use client";
 import React from "react";
+import {
+  FaTint,
+  FaRunning,
+  FaBook,
+  FaPray,
+  FaBed,
+  FaWineGlass,
+  FaCannabis,
+  FaIgloo,
+  FaShower,
+  FaSmile,
+  FaQuestion
+} from "react-icons/fa";
+import { Habit } from "../../lib/habits/habitService";
 
-export type Habit = {
-  id: number;
-  name: string;
-  streak: number;
-  icon?: React.ReactNode;
+const ICON_MAP: Record<string, React.ReactNode> = {
+  "drink-2l": <FaTint />,
+  "read": <FaBook />,
+  "exercise": <FaRunning />,
+  "pray": <FaPray />,
+  "sleep": <FaBed />,
+  "no-alcohol": <FaWineGlass />,
+  "no-weed": <FaCannabis />,
+  "igloo": <FaIgloo />,
+  "smile": <FaSmile />,
+  "shower": <FaShower />,
 };
+
 export default function HabitCard({
   habit,
   onHabitClick,
@@ -14,8 +35,8 @@ export default function HabitCard({
   habit: Habit;
   onHabitClick: (id: number) => void;
 }) {
- //logika czy clicked tutaj potem dodac na podstawie bazy
-  const isActive = (habit.id === 2) ? true : false ; 
+  const isActive = habit.completed_today;
+  const icon = ICON_MAP[habit.icon_slug] || <FaQuestion />;
 
   return (
     <div
@@ -48,11 +69,11 @@ export default function HabitCard({
                : "bg-gray-100 border-gray-200 text-gray-500"    
             }
         `}>
-          {habit.streak}
+          {habit.current_streak}
         </div>
         
         <div className={`text-4xl mb-2 transition-colors duration-300 ${isActive ? "text-orange-500" : "text-slate-800"}`}>
-            {habit.icon}
+            {icon}
         </div>
         
         <div className={`text-sm font-bold font-figtree text-center transition-colors duration-300 ${isActive ? "text-slate-900" : "text-slate-600"}`}>

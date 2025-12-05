@@ -41,7 +41,32 @@ completion_date (Date)
 Constraint: Unikalność pary (user_habit_id, completion_date) – nie można zaliczyć tego samego nawyku 2 razy w jeden dzień.
 
 3. Endpointy API (REST)
-A. Pobierz Dashboard (Główny widok)
+A. Pobierz Listę Wszystkich Nawyków (Słownik)
+Zwraca globalną listę wszystkich nawyków, które użytkownik może dodać do swojego dashboardu.
+
+Metoda: GET
+
+URL: /api/habits
+
+Nagłówki: Authorization: Bearer <token>
+
+Response JSON:
+```json
+[
+  {
+    "id": 1,
+    "name": "Pij wodę",
+    "icon_slug": "droplet"
+  },
+  {
+    "id": 2,
+    "name": "Bieganie",
+    "icon_slug": "run"
+  }
+]
+```
+
+B. Pobierz Dashboard (Główny widok)
 Zwraca listę subskrybowanych nawyków wraz ze stanem na dzisiaj.
 
 Metoda: GET
@@ -82,7 +107,7 @@ JSON
     "completedToday": false
   }
 ]
-B. Zaznacz jako Zrobione (Check)
+C. Zaznacz jako Zrobione (Check)
 Użytkownik klika w szary kafelek.
 
 Metoda: POST
@@ -109,7 +134,7 @@ Meta Update: Zaktualizuj w user_habits: last_completion_date = TODAY.
 
 Zwróć nowy stan (nowy streak).
 
-C. Cofnij Zaznaczenie (Uncheck)
+D. Cofnij Zaznaczenie (Uncheck)
 Użytkownik klika w świecący kafelek (anuluje).
 
 Metoda: DELETE
@@ -128,7 +153,7 @@ Zaktualizuj user_habits.last_completion_date na datę znalezioną wyżej (lub NU
 
 Zaktualizuj current_streak (zmniejsz o 1 lub przelicz na podstawie nowej daty).
 
-D. Dodaj Nowy Nawyk (Subskrypcja)
+E. Dodaj Nowy Nawyk (Subskrypcja)
 Użytkownik wybiera nawyk z listy, żeby dodać go do dashboardu.
 
 Metoda: POST
