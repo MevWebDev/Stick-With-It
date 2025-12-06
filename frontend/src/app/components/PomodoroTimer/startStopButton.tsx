@@ -13,7 +13,7 @@ export default function StartStopButton({
     <>
       {timerStatus === "running" && (
         <button
-          className="text-3xl mt-[3vh] font-semibold tracking-wide rounded-lg text-[#bf2424] hover:text-[#9c1e1e]"
+          className="text-3xl mt-[3vh] font-semibold tracking-wide rounded-lg text-[#bf2424] hover:text-[#9c1e1e] text-shadow-lg"
           onClick={onStop}
         >
           Pause
@@ -22,7 +22,7 @@ export default function StartStopButton({
 
       {timerStatus === "idle" && (
         <button
-          className="text-3xl font-semibold tracking-wide rounded-lg text-[#677381] hover:text-black"
+          className="text-3xl font-semibold tracking-wide rounded-lg text-gray-600 hover:text-black text-shadow-lg"
           onClick={onStart}
         >
           Start!
@@ -32,7 +32,7 @@ export default function StartStopButton({
       {timerStatus === "paused" && (
         <div className="mt-[1vh] flex flex-col">
           <button
-            className="text-3xl font-semibold tracking-wide rounded-lg text-[#677381] hover:text-black"
+            className="text-3xl font-semibold tracking-wide rounded-lg text-[#677381] hover:text-black text-shadow-lg"
             onClick={onStart}
           >
             Resume

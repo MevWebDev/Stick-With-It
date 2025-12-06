@@ -1,25 +1,69 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
-import FocusTime from "./focusTime";
-import BreakTime from "./breakTime";
+import { usePathname } from "next/navigation";
+import SessionTimePopup from "./sessionTimePopup";
 import StartStopButton from "./startStopButton";
 import EndSessionPopup from "./endSessionPopup";
 
-export default function PomodoroTimer() {
-  const [focusTime, setFocusTime] = useState(25 * 60);
-  const [breakTime, setBreakTime] = useState(5 * 60);
-  const [timeLeft, setTimeLeft] = useState(focusTime);
-  const intervalRef = useRef<number | null>(null);
+const getStorageValue = (key: string, defaultValue: number): number => {
+  if (typeof window === "undefined") return defaultValue;
+  const val = localStorage.getItem(key);
+  return val ? Number(val) : defaultValue;
+};
 
-  const [popUp, setPopup] = useState<
-    "focusTime" | "breakTime" | "ended" | null
-  >(null);
-  const [mode, setMode] = useState<"focus" | "break">("focus");
-  const [timerStatus, setTimerStatus] = useState<"idle" | "running" | "paused">(
-    "idle"
+export default function PomodoroTimer() {
+  const pathname = usePathname();
+
+  const [focusTime, setFocusTime] = useState(() =>
+    getStorageValue("pomodoroFocusTime", 25 * 60)
   );
 
-  //function to format running time
+  const [breakTime, setBreakTime] = useState(() =>
+    getStorageValue("pomodoroBreakTime", 5 * 60)
+  );
+
+  const [mode, setMode] = useState<"focus" | "break">(() => {
+    if (typeof window === "undefined") return "focus";
+    return localStorage.getItem("pomodoroMode") === "break" ? "break" : "focus";
+  });
+
+  const [timerStatus, setTimerStatus] = useState<"idle" | "running" | "paused">(
+    () => {
+      if (typeof window === "undefined") return "idle";
+      const status = localStorage.getItem("pomodoroStatus");
+      return status === "running" || status === "paused"
+        ? (status as "running" | "paused")
+        : "idle";
+    }
+  );
+
+  const [pausedTime, setPausedTime] = useState<number | null>(
+    () => getStorageValue("pomodoroPausedTime", 0) || null
+  );
+
+  const [endTimestamp, setEndTimestamp] = useState<number | null>(
+    () => getStorageValue("pomodoroEndTimestamp", 0) || null
+  );
+
+  const [timeLeft, setTimeLeft] = useState(() => {
+    if (typeof window === "undefined") return 25 * 60;
+    const savedStatus = localStorage.getItem("pomodoroStatus");
+    const savedPausedTime = localStorage.getItem("pomodoroPausedTime");
+
+    if (savedStatus === "paused" && savedPausedTime) {
+      return Number(savedPausedTime);
+    }
+
+    const ts = localStorage.getItem("pomodoroEndTimestamp");
+    if (ts) {
+      return Math.max(0, Math.floor((Number(ts) - Date.now()) / 1000));
+    }
+    return 25 * 60;
+  });
+
+  const intervalRef = useRef<number | null>(null);
+  const [popUp, setPopup] = useState<"sessionTime" | "ended" | null>(null);
+
   const formatTime = (seconds: number) => {
     const m = Math.floor(seconds / 60)
       .toString()
@@ -29,114 +73,152 @@ export default function PomodoroTimer() {
   };
 
   useEffect(() => {
-    if (timerStatus !== "running") {
+    if (typeof window === "undefined") return;
+    localStorage.setItem("pomodoroFocusTime", String(focusTime));
+    localStorage.setItem("pomodoroBreakTime", String(breakTime));
+
+    if (endTimestamp !== null) {
+      localStorage.setItem("pomodoroEndTimestamp", String(endTimestamp));
+    } else {
+      localStorage.removeItem("pomodoroEndTimestamp");
+    }
+
+    if (pausedTime !== null) {
+      localStorage.setItem("pomodoroPausedTime", String(pausedTime));
+    } else {
+      localStorage.removeItem("pomodoroPausedTime");
+    }
+
+    localStorage.setItem("pomodoroMode", mode);
+    localStorage.setItem("pomodoroStatus", timerStatus);
+  }, [focusTime, breakTime, endTimestamp, mode, timerStatus, pausedTime]);
+
+  useEffect(() => {
+    const clear = () => {
       if (intervalRef.current) clearInterval(intervalRef.current);
       intervalRef.current = null;
+    };
+
+    if (timerStatus !== "running") {
+      clear();
       return;
     }
 
-    intervalRef.current = window.setInterval(() => {
-      setTimeLeft((t) => t - 1);
-    }, 1000);
+    const tick = () => {
+      if (!endTimestamp) return;
+      const diff = Math.max(0, Math.floor((endTimestamp - Date.now()) / 1000));
+      setTimeLeft(diff);
+    };
+
+    tick();
+    intervalRef.current = window.setInterval(tick, 1000);
 
     return () => {
-      if (intervalRef.current) clearInterval(intervalRef.current);
+      clear();
     };
-  }, [timerStatus]);
+  }, [timerStatus, endTimestamp]);
 
   useEffect(() => {
     if (timerStatus !== "running" || timeLeft !== 0) return;
 
+    if (pathname !== "/pomodoro") {
+      console.log("Pomodoro timer finished!");
+    }
+
     if (mode === "focus") {
       setMode("break");
+      setEndTimestamp(Date.now() + breakTime * 1000);
       setTimeLeft(breakTime);
     } else {
       setTimerStatus("idle");
       setPopup("ended");
       setMode("focus");
+      setEndTimestamp(null);
       setTimeLeft(focusTime);
     }
-  }, [timeLeft]);
+  }, [timeLeft, pathname, breakTime, focusTime, mode, timerStatus]);
 
   useEffect(() => {
-    if (timerStatus === "running") return;
+    if (timerStatus === "running" || timerStatus === "paused") return;
 
     setTimeLeft(mode === "focus" ? focusTime : breakTime);
-  }, [focusTime, breakTime, mode]);
+    setEndTimestamp(null);
+  }, [focusTime, breakTime, mode, timerStatus]);
 
-  // function to display current mode
   const getStatusMessage = () => {
-    if (timerStatus === "idle") return "‎"; //empty sign
+    if (timerStatus === "idle") return `Break: ${formatTime(breakTime)}`;
     if (timerStatus === "paused") return "Paused";
-
     if (timerStatus === "running" && mode === "focus") return "Focus Mode";
-
-    if (timerStatus === "running" && mode === "break") return "Break Mode";
-
-    return "";
+    return "Break Mode";
   };
 
   return (
-    <div className="space-y-3 flex flex-col items-center">
-      <h1 className="text-4xl font-bold rounded-md mb-10 text-center">
+    <div className="space-y-4 flex flex-col items-center">
+      <h1 className="text-4xl font-bold mb-6 text-center">
         Pomodoro <br /> Timer
       </h1>
 
-      <p className="text-center text-xl">{getStatusMessage()}</p>
+      <p className="text-center text-base font-semibold tracking-wider opacity-70 text-shadow-lg">
+        {getStatusMessage()}
+      </p>
 
-      <div className="w-55 h-55 mt-[2vh] flex flex-col items-center justify-center rounded-full bg-[#EBEDEF] border-5 border-[#5E5E5E]">
-        <h3 className="text-5xl font-semibold tracking-[0.1em] text-[#677381]">
+      <div className="w-60 h-60 flex flex-col items-center justify-center rounded-full border-5 border-gray-800 bg-gray-100">
+        <h3 className="text-6xl font-semibold tracking-[0.1em] text-[#677381]">
           {formatTime(timeLeft)}
         </h3>
       </div>
 
       {timerStatus === "idle" && (
-        <div className="flex flex-col mt-[2vh]">
-          <p className="text-lg text-[#5E5E5E] m-0">
-            Break Time: {Math.floor(breakTime / 60)}:00
-          </p>
-          <button
-            className="text-xl py-2 font-medium text-[#677381] hover:text-black"
-            onClick={() => setPopup("breakTime")}
-          >
-            Break Time
-          </button>
-
-          <button
-            className="text-xl font-medium text-[#677381] hover:text-black"
-            onClick={() => setPopup("focusTime")}
-          >
-            Focus Time
-          </button>
-        </div>
+        <button
+          className="mt-2 px-6 py-2 text-base font-semibold text-[#677381] hover:text-black"
+          onClick={() => setPopup("sessionTime")}
+        >
+          Set Session Time
+        </button>
       )}
 
       <StartStopButton
-        timerStatus={timerStatus}
-        onStart={() => setTimerStatus("running")}
-        onStop={() => setTimerStatus("paused")}
+        timerStatus={timerStatus as "running" | "paused" | "idle"}
+        onStart={() => {
+          if (timerStatus === "paused" && pausedTime !== null) {
+            setTimerStatus("running" as "running");
+            setEndTimestamp(Date.now() + pausedTime * 1000);
+            setPausedTime(null);
+          } else {
+            setTimerStatus("running" as "running");
+            setEndTimestamp(
+              Date.now() + (mode === "focus" ? focusTime : breakTime) * 1000
+            );
+          }
+        }}
+        onStop={() => {
+          setTimerStatus("paused" as "paused");
+          setPausedTime(timeLeft);
+          setEndTimestamp(null);
+        }}
         onReset={() => {
-          setTimerStatus("idle");
+          setTimerStatus("idle" as "idle");
           setMode("focus");
           setFocusTime(focusTime);
           setBreakTime(breakTime);
           setTimeLeft(focusTime);
+          setEndTimestamp(null);
+          setPausedTime(null);
         }}
       />
 
-      {popUp === "focusTime" && (
-        <FocusTime
+      {popUp === "sessionTime" && (
+        <SessionTimePopup
           onClose={() => setPopup(null)}
-          onSetTime={(newTime) => setFocusTime(newTime * 60)}
-          currentTime={Math.floor(focusTime / 60)}
-        />
-      )}
-
-      {popUp === "breakTime" && (
-        <BreakTime
-          onClose={() => setPopup(null)}
-          onSetTime={(newTime) => setBreakTime(newTime * 60)}
-          currentTime={Math.floor(breakTime / 60)}
+          onSetTimes={(newFocus, newBreak) => {
+            setFocusTime(newFocus * 60);
+            setBreakTime(newBreak * 60);
+            if (timerStatus === "idle") {
+              setTimeLeft(mode === "focus" ? newFocus * 60 : newBreak * 60);
+            }
+          }}
+          currentFocus={Math.floor(focusTime / 60)}
+          currentBreak={Math.floor(breakTime / 60)}
         />
       )}
 
@@ -144,12 +226,12 @@ export default function PomodoroTimer() {
         <EndSessionPopup
           onContinue={() => {
             setPopup(null);
-            setTimerStatus("running");
+            setTimerStatus("running" as "running");
             setMode("focus");
           }}
           onClose={() => {
             setPopup(null);
-            setTimerStatus("idle");
+            setTimerStatus("idle" as "idle");
             setMode("focus");
           }}
         />
