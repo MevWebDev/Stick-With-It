@@ -117,15 +117,25 @@ def check_habit(request, id):
                 })
             
             # 2. Zaktualizuj streak
-            if habit.last_completion_date == yesterday:
-                habit.current_streak += 1
-            elif habit.last_completion_date == today:
-                # Nie powinno się zdarzyć, jeśli created jest True, ale dla bezpieczeństwa
-                pass 
-            else:
-                # Streak przerwany lub nowy
-                habit.current_streak = 1
+            # Pobierz wszystkie daty ukończeń w kolejności malejącej
+            completion_dates = list(HabitCompletion.objects.filter(
+                habit=habit
+            ).values_list('completion_date', flat=True).order_by('-completion_date'))
             
+            # Oblicz streak od dzisiaj wstecz
+            streak = 1  # Dzisiaj
+            current_date = today
+            
+            for i in range(1, len(completion_dates)):
+                expected_date = current_date - timedelta(days=1)
+                if completion_dates[i] == expected_date:
+                    streak += 1
+                    current_date = expected_date
+                else:
+                    # Przerwa w serii
+                    break
+            
+            habit.current_streak = streak
             habit.last_completion_date = today
             habit.last_completion_at = timezone.now()
             habit.save()
