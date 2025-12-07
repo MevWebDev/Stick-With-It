@@ -2,6 +2,8 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.contrib.auth.models import User
+from django.core.validators import validate_email
+from django.core.exceptions import ValidationError
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -10,6 +12,7 @@ from rest_framework.permissions import IsAuthenticated
 import json
 from django.utils import timezone
 from datetime import timedelta
+from django.db import IntegrityError
 from .models import Challenge, UserStats, DailyChallenge, CompletedChallenge, Badges
 import random
 # REJESTRACJA
@@ -29,6 +32,16 @@ def register_view(request):
                 'error': 'Wszystkie pola są wymagane'
             }, status=400)
         
+        # Sprawdź czy username nie jest emailem
+        try:
+            validate_email(username)
+            return JsonResponse({
+                'success': False,
+                'error': 'Nazwa użytkownika nie może być adresem email'
+            }, status=400)
+        except ValidationError:
+            pass
+
         # Sprawdź czy user już istnieje
         if User.objects.filter(username=username).exists():
             return JsonResponse({
@@ -72,6 +85,35 @@ def register_view(request):
         }, status=400)
 
 
+# SPRAWDZANIE DOSTĘPNOŚCI EMAILA
+@csrf_exempt
+@require_http_methods(["POST"])
+def check_email_view(request):
+    """Sprawdza czy email jest już zajęty"""
+    try:
+        data = json.loads(request.body)
+        email = data.get('email')
+        
+        if not email:
+            return JsonResponse({
+                'success': False,
+                'error': 'Email jest wymagany'
+            }, status=400)
+            
+        is_taken = User.objects.filter(email=email).exists()
+        
+        return JsonResponse({
+            'success': True,
+            'is_taken': is_taken,
+            'message': 'Email jest zajęty' if is_taken else 'Email jest dostępny'
+        })
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'error': str(e)
+        }, status=400)
+
+
 # LOGOWANIE
 @csrf_exempt
 @require_http_methods(["POST"])
@@ -82,6 +124,12 @@ def login_view(request):
         username = data.get('username')
         password = data.get('password')
         
+        # Obsługa logowania przez email
+        if username and '@' in username:
+            user_obj = User.objects.filter(email=username).first()
+            if user_obj:
+                username = user_obj.username
+
         # Sprawdź czy dane są poprawne
         user = authenticate(request, username=username, password=password)
         
@@ -231,24 +279,49 @@ def get_daily_challenge(request):
         # Losuj challenge (na poziomie bazy danych)
         random_challenge = available.order_by('?').first()
         
-        # Utwórz DailyChallenge
-        daily = DailyChallenge.objects.create(
-            user=user,
-            challenge=random_challenge
-        )
-        
-        return JsonResponse({
-            'success': True,
-            'challenge': {
-                'id': random_challenge.id,
-                'title': random_challenge.title,
-                'description': random_challenge.description,
-                'category': random_challenge.category,
-                'difficulty': random_challenge.difficulty,
-                'completed': False
-            },
-            'assigned_date': daily.assigned_date.isoformat()
-        }, status=201)
+        try:
+            # Utwórz DailyChallenge
+            daily = DailyChallenge.objects.create(
+                user=user,
+                challenge=random_challenge
+            )
+            
+            return JsonResponse({
+                'success': True,
+                'challenge': {
+                    'id': random_challenge.id,
+                    'title': random_challenge.title,
+                    'description': random_challenge.description,
+                    'category': random_challenge.category,
+                    'difficulty': random_challenge.difficulty,
+                    'completed': False
+                },
+                'assigned_date': daily.assigned_date.isoformat()
+            }, status=201)
+
+        except IntegrityError:
+            # Race condition: challenge was created by another request in the meantime
+            existing = DailyChallenge.objects.filter(
+                user=user, 
+                assigned_date=today
+            ).select_related('challenge').first()
+            
+            if existing:
+                return JsonResponse({
+                    'success': True,
+                    'challenge': {
+                        'id': existing.challenge.id,
+                        'title': existing.challenge.title,
+                        'description': existing.challenge.description,
+                        'category': existing.challenge.category,
+                        'difficulty': existing.challenge.difficulty,
+                        'completed': existing.completed
+                    },
+                    'assigned_date': existing.assigned_date.isoformat()
+                })
+            else:
+                # Should not happen if IntegrityError was due to unique constraint
+                raise
         
     except Exception as e:
         return JsonResponse({'success': False, 'error': str(e)}, status=500)

@@ -9,21 +9,6 @@ docker compose up --build
 ```
 
 Serwer dostępny pod: `http://127.0.0.1:8000`
-
-### 🌱 Seeding Bazy Danych (Wypełnianie danymi)
-
-Aby wypełnić bazę danych przykładowymi wyzwaniami (Health, Productivity, Education, Mindfulness), użyj komendy:
-
-```bash
-# Jeśli używasz Dockera:
-docker compose exec backend python manage.py seed_challenges
-
-# Jeśli uruchamiasz lokalnie:
-python3 manage.py seed_challenges
-```
-
----
-
 ## 📚 Dokumentacja API
 
 Bazowy URL: `/api/auth/`
@@ -32,8 +17,9 @@ Bazowy URL: `/api/auth/`
 
 | Metoda | Endpoint | Opis | Auth |
 |--------|----------|------|------|
-| `POST` | `/register/` | Rejestracja nowego użytkownika | ❌ |
-| `POST` | `/login/` | Logowanie (zwraca access + refresh token) | ❌ |
+| `POST` | `/register/` | Rejestracja (blokada emaila jako nicku) | ❌ |
+| `POST` | `/check-email/` | Sprawdzenie dostępności emaila | ❌ |
+| `POST` | `/login/` | Logowanie (nick lub email) | ❌ |
 | `POST` | `/logout/` | Wylogowanie (blacklist refresh token) | ❌ |
 | `POST` | `/refresh/` | Odświeżenie access tokena | ❌ |
 | `GET`  | `/me/` | Dane zalogowanego użytkownika | ✅ |
@@ -46,6 +32,17 @@ Bazowy URL: `/api/auth/`
 | `POST` | `/complete-challenge/` | Oznacz dzisiejsze wyzwanie jako ukończone | ✅ |
 | `POST` | `/blacklist/` | Dodaj/usuń kategorię z blacklisty | ✅ |
 
+### ✅ Nawyki (Habits)
+Szczegóły nawyków znajdują się w osobnym README, w dedykowanym mu folderze habits/
+
+| Metoda | Endpoint | Opis | Auth |
+|--------|----------|------|------|
+| `GET`  | `/habits` | Lista wszystkich dostępnych nawyków | ✅ |
+| `GET`  | `/my-habits` | Lista subskrybowanych nawyków użytkownika | ✅ |
+| `POST` | `/my-habits/{id}/check` | Oznacz nawyk jako wykonany dzisiaj | ✅ |
+| `DELETE` | `/my-habits/{id}/check` | Cofnij wykonanie nawyku dzisiaj | ✅ |
+| `POST` | `/habits/subscribe` | Zasubskrybuj nowy nawyk | ✅ |
+
 ### 🏆 Statystyki i Odznaki
 
 | Metoda | Endpoint | Opis | Auth |
@@ -56,6 +53,11 @@ Bazowy URL: `/api/auth/`
 ---
 
 ## 🛠️ Szczegóły Implementacji
+
+### Walidacja i Logowanie (QoL)
+- **Logowanie:** Użytkownik może zalogować się podając swój **nick** lub **adres email**.
+- **Rejestracja:** System blokuje możliwość ustawienia poprawnego adresu email jako nazwy użytkownika (nicku).
+- **Weryfikacja:** Dostępny endpoint do sprawdzania w czasie rzeczywistym czy email jest zajęty.
 
 ### System Streaku
 - **Zasada:** Ukończenie wyzwania codziennie zwiększa `current_streak`.
@@ -93,9 +95,24 @@ Przypisanie wyzwania do użytkownika na dany dzień.
 Definicje odznak.
 - `key`, `title`, `description`, `icon`, `rarity`
 
+### `Habit` (App: habits)
+Słownik dostępnych nawyków.
+- `name`, `icon_slug`, `metadata`
+
+### `UserHabit` (App: habits)
+Subskrypcja użytkownika do nawyku.
+- `user`, `habit`, `current_streak`, `last_completion_date`
+
+### `HabitCompletion` (App: habits)
+Logi wykonania nawyku.
+- `user_habit`, `completion_date`
+
 ---
 
 ## ⚠️ Status Projektu (TODO)
+
+### 🚧 Do Zrobienia
+- [ ] **Migracja z SQLite na PostgreSQL**: Obecnie projekt używa SQLite. Dla lepszej obsługi współbieżności (szczególnie klauzule `ON CONFLICT` i blokowanie na poziomie wiersza), musimy zmigrować do PostgreSQL. Jest to kluczowe dla skalowania funkcji śledzenia nawyków przy wielu użytkownikach.
 
 ### ✅ Zakończone
 - [x] Pełna autentykacja JWT (Register, Login, Logout, Refresh)

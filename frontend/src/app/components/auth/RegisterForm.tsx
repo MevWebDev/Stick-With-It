@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useAuth } from "../../lib/auth/authContext";
 import { useRouter } from "next/navigation";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
+import { authService } from "@/app/lib/auth/authService";
 
 export function RegisterForm() {
   const [email, setEmail] = useState("");
@@ -15,6 +16,7 @@ export function RegisterForm() {
   const [error, setError] = useState("");
   const [step, setStep] = useState<1 | 2>(1); // Step 1: email & passwords, Step 2: username
   const { register, isLoading, user } = useAuth();
+
   const router = useRouter();
 
   useEffect(() => {
@@ -23,9 +25,20 @@ export function RegisterForm() {
     }
   }, [user, router]);
 
-  const handleFirstStep = (e: React.FormEvent) => {
+  const handleFirstStep = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+
+    try {
+      const response = await authService.checkEmail(email);
+      if (response.is_taken) {
+        setError("Email is already taken");
+        return;
+      }
+    } catch (error) {
+      setError("Email check failed");
+      return;
+    }
 
     if (password !== confirmPassword) {
       setError("Passwords do not match");
@@ -51,9 +64,8 @@ export function RegisterForm() {
 
     try {
       await register({ username, email, password });
-      router.push("/dashboard");
+      router.push("/");
     } catch (err) {
-      console.log(err);
       setError(err instanceof Error ? err.message : "Registration failed");
     }
   };

@@ -1,9 +1,13 @@
 import { apiClient } from "../api/client";
-import type {
+import {
   AuthResponse,
+  CheckEmailResponse,
   LoginCredentials,
   RegisterCredentials,
   User,
+  UserStats,
+  StatsResponse,
+  Badge,
 } from "./types";
 
 const TOKEN_KEY = "access_token";
@@ -15,7 +19,18 @@ export const authService = {
       "/api/auth/register/",
       credentials
     );
-    this.setTokens(response.tokens.access, response.tokens.refresh);
+    if (response.tokens) {
+      this.setTokens(response.tokens.access, response.tokens.refresh);
+    }
+    return response;
+  },
+
+  async checkEmail(email: string): Promise<CheckEmailResponse> {
+    const response = await apiClient.post<CheckEmailResponse>(
+      "/api/auth/check-email/",
+      { email }
+    );
+
     return response;
   },
 
@@ -24,7 +39,9 @@ export const authService = {
       "/api/auth/login/",
       credentials
     );
-    this.setTokens(response.tokens.access, response.tokens.refresh);
+    if (response.tokens) {
+      this.setTokens(response.tokens.access, response.tokens.refresh);
+    }
     return response;
   },
 
@@ -38,6 +55,20 @@ export const authService = {
       }
     }
     this.clearTokens();
+  },
+
+  async getStats(): Promise<UserStats> {
+    const token = this.getAccessToken();
+    const response = await apiClient.get<StatsResponse>(
+      "/api/auth/stats/",
+      token || undefined
+    );
+    return response.stats;
+  },
+
+  async getBadges(): Promise<Badge[]> {
+    const token = this.getAccessToken();
+    return apiClient.get<Badge[]>("/api/auth/badges/", token || undefined);
   },
 
   async getCurrentUser(): Promise<User> {
@@ -60,24 +91,36 @@ export const authService = {
   },
 
   setTokens(accessToken: string, refreshToken: string): void {
-    localStorage.setItem(TOKEN_KEY, accessToken);
-    localStorage.setItem(REFRESH_TOKEN_KEY, refreshToken);
+    if (typeof window !== "undefined") {
+      localStorage.setItem(TOKEN_KEY, accessToken);
+      localStorage.setItem(REFRESH_TOKEN_KEY, refreshToken);
+    }
   },
 
   setAccessToken(accessToken: string): void {
-    localStorage.setItem(TOKEN_KEY, accessToken);
+    if (typeof window !== "undefined") {
+      localStorage.setItem(TOKEN_KEY, accessToken);
+    }
   },
 
   getAccessToken(): string | null {
-    return localStorage.getItem(TOKEN_KEY);
+    if (typeof window !== "undefined") {
+      return localStorage.getItem(TOKEN_KEY);
+    }
+    return null;
   },
 
   getRefreshToken(): string | null {
-    return localStorage.getItem(REFRESH_TOKEN_KEY);
+    if (typeof window !== "undefined") {
+      return localStorage.getItem(REFRESH_TOKEN_KEY);
+    }
+    return null;
   },
 
   clearTokens(): void {
-    localStorage.removeItem(TOKEN_KEY);
-    localStorage.removeItem(REFRESH_TOKEN_KEY);
+    if (typeof window !== "undefined") {
+      localStorage.removeItem(TOKEN_KEY);
+      localStorage.removeItem(REFRESH_TOKEN_KEY);
+    }
   },
 };

@@ -8,6 +8,7 @@ import ToolsMenu from "./ToolsMenu";
 
 export default function Navbar() {
   const [openTools, setOpenTools] = useState(false);
+  const closeToolsMenu = () => setOpenTools(false);
   const pathname = usePathname();
 
 
@@ -15,6 +16,7 @@ export default function Navbar() {
   useEffect(() => {
     setOpenTools(false);
   }, [pathname]);
+  
 
   return (
     <>
@@ -28,8 +30,8 @@ export default function Navbar() {
       <button>
         <FaUserFriends />
       </button>
-    </div>
-    {openTools && <ToolsMenu onClose={() => setOpenTools(false)} />}
+    </div>  
+    {openTools && <ToolsMenu onClose={closeToolsMenu} />}
     </>
   );
 }
