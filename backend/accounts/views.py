@@ -134,6 +134,9 @@ def login_view(request):
         user = authenticate(request, username=username, password=password)
         
         if user is not None:
+            # Tymczasowa naprawa streaków przy logowaniu
+            recalculate_streak(user)
+
             # Wygeneruj tokeny JWT
             refresh = RefreshToken.for_user(user)
             
@@ -580,3 +583,61 @@ def check_and_award_badges(user):
         except Badges.DoesNotExist:
             pass
     return new_badges
+
+def recalculate_streak(user):
+    """
+    Tymczasowa funkcja do naprawy streaków na podstawie historii CompletedChallenge.
+    """
+    try:
+        # Pobierz wszystkie daty ukończenia (unikalne dni)
+        completions = CompletedChallenge.objects.filter(user=user).order_by('-completed_date')
+        
+        if not completions.exists():
+            user.stats.current_streak = 0
+            user.stats.save()
+            return
+
+        # Konwersja na unikalne daty, sortowanie malejąco
+        dates = sorted(list(set(c.completed_date.date() for c in completions)), reverse=True)
+        
+        if not dates:
+            return
+
+        today = timezone.now().date()
+        yesterday = today - timedelta(days=1)
+        last_date = dates[0]
+
+        # Jeśli ostatnie ukończenie było dawniej niż wczoraj, streak przepadł
+        if last_date < yesterday:
+            user.stats.current_streak = 0
+            user.stats.save()
+            return
+
+        # Oblicz streak
+        streak = 1
+        current_check = last_date
+        
+        for date in dates[1:]:
+            if date == current_check - timedelta(days=1):
+                streak += 1
+                current_check = date
+            else:
+                break
+        
+        # Aktualizuj statystyki
+        user.stats.current_streak = streak
+        
+        # Aktualizuj longest_streak jeśli trzeba
+        if streak > user.stats.longest_streak:
+            user.stats.longest_streak = streak
+            
+        # Upewnij się, że last_completed_date jest poprawna (ostatnia z historii)
+        # Znajdź dokładny czas ostatniego ukończenia dla tej daty
+        last_completion_obj = completions.filter(completed_date__date=last_date).first()
+        if last_completion_obj:
+             user.stats.last_completed_date = last_completion_obj.completed_date
+
+        user.stats.save()
+        
+    except Exception as e:
+        print(f"Error recalculating streak for user {user.username}: {e}")
