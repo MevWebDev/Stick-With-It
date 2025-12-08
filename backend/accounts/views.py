@@ -383,11 +383,12 @@ def complete_challenge(request):
         
         # Oblicz streak
         if stats.last_completed_date:
+            last_date = stats.last_completed_date.date()
             yesterday = today - timedelta(days=1)
-            if stats.last_completed_date == yesterday:
+            if last_date == yesterday:
                 # Kontynuacja streaku
                 stats.current_streak += 1
-            elif stats.last_completed_date == today:
+            elif last_date == today:
                 # Już ukończył coś dzisiaj - nie zmieniaj streaku
                 pass
             else:
@@ -401,7 +402,7 @@ def complete_challenge(request):
         if stats.current_streak > stats.longest_streak:
             stats.longest_streak = stats.current_streak
         
-        stats.last_completed_date = today
+        stats.last_completed_date = timezone.now()
         stats.save()
         
         # Sprawdź nowe badges (funkcję napiszemy za chwilę)
