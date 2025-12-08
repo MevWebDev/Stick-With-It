@@ -27,8 +27,29 @@ class UserStats(models.Model):
     total_completed = models.IntegerField(default=0)
     earned_badges = models.ManyToManyField('Badges', blank=True, related_name='users_earned')
     
+    # Leveling System
+    level = models.IntegerField(default=1)
+    current_exp = models.IntegerField(default=0)
+    total_exp = models.IntegerField(default=0)
+
     def __str__(self):
-        return f"{self.user.username} - {self.points} pts (Streak: {self.current_streak})"
+        return f"{self.user.username} - Lvl {self.level} ({self.points} pts)"
+
+class XpLog(models.Model):
+    """Log of XP gains to enforce daily limits"""
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='xp_logs')
+    date = models.DateField(auto_now_add=True)
+    source = models.CharField(max_length=50)  # 'habit', 'pomodoro', 'challenge'
+    amount = models.IntegerField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        indexes = [
+            models.Index(fields=['user', 'date', 'source']),
+        ]
+
+    def __str__(self):
+        return f"{self.user.username} - {self.amount} XP ({self.source})"
 
 class DailyChallenge(models.Model):
     user = models.ForeignKey(User,on_delete=models.CASCADE)

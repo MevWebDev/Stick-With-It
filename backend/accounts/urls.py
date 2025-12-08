@@ -11,6 +11,7 @@ urlpatterns = [
     path("daily-challenge/", views.get_daily_challenge, name="daily_challenge"),
     path('complete-challenge/', views.complete_challenge, name='complete_challenge'),
     path('stats/', views.get_user_stats, name='user_stats'),
+    path('pomodoro/complete/', views.complete_pomodoro, name='complete_pomodoro'),
     path('blacklist/', views.manage_blacklist, name='manage_blacklist'),
     path('badges/', views.get_all_badges, name='all_badges'),
 ]
