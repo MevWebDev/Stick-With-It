@@ -1,6 +1,13 @@
 "use client";
 
-import { FaTasks, FaClock, FaCalendarAlt, FaStickyNote, FaHome } from "react-icons/fa";
+import {
+  FaTasks,
+  FaClock,
+  FaCalendarAlt,
+  FaStickyNote,
+  FaHome,
+} from "react-icons/fa";
+import { IoMdClose } from "react-icons/io";
 import { usePathname } from "next/navigation";
 import CustomToolButton from "./CustomToolButton";
 
@@ -9,7 +16,7 @@ interface ToolsMenuProps {
 }
 
 const tools = [
-    {name: "Home", icon: <FaHome />, href: "/"},
+  { name: "Home", icon: <FaHome />, href: "/" },
   { name: "Habit Tracker", icon: <FaTasks />, href: "/habittracker" },
   { name: "Pomodoro", icon: <FaClock />, href: "/pomodoro" },
   // Placeholders for future tools
@@ -39,8 +46,12 @@ export default function ToolsMenu({ onClose }: ToolsMenuProps) {
           />
         ))}
       </div>
-
+      <button
+        onClick={onClose}
+        className="absolute bottom-16 left-1/2 transform -translate-x-1/2 p-4 rounded-full bg-white shadow-lg border border-gray-100 hover:bg-gray-50 hover:scale-110 transition-all duration-200 group"
+      >
+        <IoMdClose className="text-2xl text-gray-600 group-hover:text-gray-900" />
+      </button>
     </div>
   );
 }
-   
