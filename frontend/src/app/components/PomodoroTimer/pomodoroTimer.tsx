@@ -211,10 +211,14 @@ export default function PomodoroTimer() {
         <SessionTimePopup
           onClose={() => setPopup(null)}
           onSetTimes={(newFocus, newBreak) => {
-            setFocusTime(newFocus * 60);
-            setBreakTime(newBreak * 60);
+            setFocusTime(Math.round(newFocus * 60));
+            setBreakTime(Math.round(newBreak * 60));
             if (timerStatus === "idle") {
-              setTimeLeft(mode === "focus" ? newFocus * 60 : newBreak * 60);
+              setTimeLeft(
+                mode === "focus"
+                  ? Math.round(newFocus * 60)
+                  : Math.round(newBreak * 60)
+              );
             }
           }}
           currentFocus={Math.floor(focusTime / 60)}
