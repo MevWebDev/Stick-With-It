@@ -118,7 +118,7 @@ Zwraca XP obliczone z uwzględnieniem mnożnika.
 ```json
 {
     "success": true,
-    "xp_earned": 42,    // Np. 40 base * 1.05 streak
+    "xp_earned": 42,
     "level_info": { ... }
 }
 ```
