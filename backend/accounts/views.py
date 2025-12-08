@@ -14,6 +14,7 @@ from django.utils import timezone
 from datetime import timedelta
 from django.db import IntegrityError
 from .models import Challenge, UserStats, DailyChallenge, CompletedChallenge, Badges
+from .services import XpService
 import random
 # REJESTRACJA
 @csrf_exempt
@@ -404,14 +405,27 @@ def complete_challenge(request):
         stats.last_completed_date = today
         stats.save()
         
+        # Calculate and Award XP
+        # Base XP: Easy=20, Medium=40, Hard=80
+        base_xp_map = {1: 20, 2: 40, 3: 80}
+        base_xp = base_xp_map.get(challenge.difficulty, 20)
+        
+        # Multiplier: 1 + (streak * 0.01) -> e.g. streak 5 = 1.05x
+        multiplier = 1 + (stats.current_streak * 0.01)
+        xp_amount = int(base_xp * multiplier)
+        
+        xp_result = XpService.award_xp(user, xp_amount, 'challenge')
+        
         # Sprawdź nowe badges (funkcję napiszemy za chwilę)
         new_badges = check_and_award_badges(user)
         
         return JsonResponse({
             'success': True,
-            'points_earned': challenge.difficulty,
+            'points_earned': challenge.difficulty, # Legacy
+            'xp_earned': xp_amount,
             'total_points': stats.points,
             'current_streak': stats.current_streak,
+            'level_info': xp_result,
             'new_badges': [
                 {
                     'key': badge.key,
@@ -443,10 +457,16 @@ def get_user_stats(request):
         # Policzy badges
         earned_badges = stats.earned_badges.all()
         
+        xp_needed = XpService.get_xp_required_for_next_level(stats.level)
+        
         return JsonResponse({
             'success': True,
             'stats': {
                 'points': stats.points,
+                'level': stats.level,
+                'current_exp': stats.current_exp,
+                'exp_to_next_level': xp_needed,
+                'total_exp': stats.total_exp,
                 'current_streak': stats.current_streak,
                 'longest_streak': stats.longest_streak,
                 'total_completed': stats.total_completed,
@@ -552,6 +572,30 @@ def get_all_badges(request):
             'badges': badges_data,
             'total': len(badges_data),
             'earned': len(earned_ids)
+        })
+        
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=500)
+
+
+# ============================================
+# POMODORO - Ukończenie sesji
+# ============================================
+
+@csrf_exempt
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def complete_pomodoro(request):
+    """Zapisuje ukończoną sesję pomodoro i przyznaje XP"""
+    try:
+        user = request.user
+        
+        xp_result = XpService.award_xp(user, 10, 'pomodoro')
+        
+        return JsonResponse({
+            'success': True,
+            'xp_earned': xp_result['earned'],
+            'level_info': xp_result
         })
         
     except Exception as e:
