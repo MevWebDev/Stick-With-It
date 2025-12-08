@@ -10,6 +10,7 @@ import pytz
 
 from .models import Habit, HabitCompletion
 from .serializers import HabitSerializer
+from accounts.services import XpService
 
 def get_user_date(request):
     """
@@ -140,10 +141,15 @@ def check_habit(request, id):
             habit.last_completion_at = timezone.now()
             habit.save()
             
+            # Award XP
+            xp_result = XpService.award_xp(request.user, 10, 'habit')
+            
             return Response({
                 'success': True,
                 'streak': habit.current_streak,
-                'completed_today': True
+                'completed_today': True,
+                'xp_earned': xp_result['earned'],
+                'level_info': xp_result
             })
             
     except Exception as e:
