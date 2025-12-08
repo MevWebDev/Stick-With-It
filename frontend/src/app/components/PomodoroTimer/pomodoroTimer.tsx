@@ -226,13 +226,19 @@ export default function PomodoroTimer() {
         <EndSessionPopup
           onContinue={() => {
             setPopup(null);
-            setTimerStatus("running" as "running");
             setMode("focus");
+            setTimerStatus("running");
+            setEndTimestamp(Date.now() + focusTime * 1000);
+            setTimeLeft(focusTime);
+            setPausedTime(null);
           }}
           onClose={() => {
             setPopup(null);
-            setTimerStatus("idle" as "idle");
             setMode("focus");
+            setTimerStatus("idle");
+            setTimeLeft(focusTime);
+            setEndTimestamp(null);
+            setPausedTime(null);
           }}
         />
       )}
