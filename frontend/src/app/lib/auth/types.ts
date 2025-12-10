@@ -62,6 +62,27 @@ export interface RegisterCredentials {
   password: string;
 }
 
+export interface ChangePasswordCredentials {
+  current_password: string;
+  new_password: string;
+}
+
+export interface ChangeEmailCredentials {
+  new_email: string;
+  password: string;
+}
+
+export interface ChangeUsernameCredentials {
+  new_username: string;
+  password: string;
+}
+
+export interface ChangeResponse {
+  success: boolean;
+  message: string;
+  errors?: Record<string, string[]>;
+}
+
 export interface AuthContextType {
   user: User | null;
   isLoading: boolean;

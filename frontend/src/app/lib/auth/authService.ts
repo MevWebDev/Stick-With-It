@@ -8,6 +8,10 @@ import {
   UserStats,
   StatsResponse,
   Badge,
+  ChangePasswordCredentials,
+  ChangeEmailCredentials,
+  ChangeUsernameCredentials,
+  ChangeResponse,
 } from "./types";
 
 const TOKEN_KEY = "access_token";
@@ -43,6 +47,39 @@ export const authService = {
       this.setTokens(response.tokens.access, response.tokens.refresh);
     }
     return response;
+  },
+
+  async changePassword(
+    credentials: ChangePasswordCredentials
+  ): Promise<ChangeResponse> {
+    const token = this.getAccessToken();
+    return apiClient.post<ChangeResponse>(
+      "/api/auth/change-password/",
+      credentials,
+      token || undefined
+    );
+  },
+
+  async changeEmail(
+    credentials: ChangeEmailCredentials
+  ): Promise<ChangeResponse> {
+    const token = this.getAccessToken();
+    return apiClient.post<ChangeResponse>(
+      "/api/auth/change-email/",
+      credentials,
+      token || undefined
+    );
+  },
+
+  async changeUsername(
+    credentials: ChangeUsernameCredentials
+  ): Promise<ChangeResponse> {
+    const token = this.getAccessToken();
+    return apiClient.post<ChangeResponse>(
+      "/api/auth/change-username/",
+      credentials,
+      token || undefined
+    );
   },
 
   async logout(): Promise<void> {

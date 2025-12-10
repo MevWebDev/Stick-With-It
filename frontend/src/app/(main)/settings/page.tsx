@@ -1,8 +1,14 @@
 "use client";
 import { useAuth } from "@/app/lib/auth/authContext";
+import { authService } from "@/app/lib/auth/authService";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import ChangeSettingPopup from "@/app/components/ChangeSettingPopup";
+import {
+  ChangeEmailCredentials,
+  ChangePasswordCredentials,
+  ChangeUsernameCredentials,
+} from "@/app/lib/auth/types";
 import {
   FaUser,
   FaLock,
@@ -51,10 +57,41 @@ function SettingsPage() {
       {openPopup && (
         <ChangeSettingPopup
           setting={setting}
-          onSubmit={(value) => {
-            console.log(`New ${setting}:`, value);
-            closePopup();
-            // TODO: Add API call here
+          onSubmit={async (value) => {
+            try {
+              let response;
+              if (setting === "password") {
+                response = await authService.changePassword(
+                  value as ChangePasswordCredentials
+                );
+              } else if (setting === "email") {
+                response = await authService.changeEmail(
+                  value as ChangeEmailCredentials
+                );
+              } else if (setting === "username") {
+                response = await authService.changeUsername(
+                  value as ChangeUsernameCredentials
+                );
+              } else if (setting === "avatar") {
+                closePopup();
+                return;
+              }
+
+              if (response && response.success) {
+                closePopup();
+                if (setting !== "password") {
+                  window.location.reload();
+                }
+              } else if (response) {
+                // Handle error without toast (maybe console or simple alert if needed, but keeping it clean as per user edit)
+                console.error(
+                  "Failed to update setting:",
+                  response.errors || response.message
+                );
+              }
+            } catch (error: unknown) {
+              console.error(error);
+            }
           }}
           onClose={closePopup}
         />

@@ -3,9 +3,21 @@
 import Image from "next/image";
 import { useState, useRef } from "react";
 
+import {
+  ChangeEmailCredentials,
+  ChangePasswordCredentials,
+  ChangeUsernameCredentials,
+} from "@/app/lib/auth/types";
+
 interface ChangeSettingPopupProps {
   setting: string;
-  onSubmit: (value: string | File) => void;
+  onSubmit: (
+    value:
+      | File
+      | ChangeEmailCredentials
+      | ChangePasswordCredentials
+      | ChangeUsernameCredentials
+  ) => void;
   onClose: () => void;
 }
 
@@ -14,8 +26,10 @@ function ChangeSettingPopup({
   onSubmit,
   onClose,
 }: ChangeSettingPopupProps) {
+  const [step, setStep] = useState(1);
   const [value, setValue] = useState("");
   const [confirmValue, setConfirmValue] = useState("");
+  const [currentPassword, setCurrentPassword] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [error, setError] = useState("");
@@ -34,7 +48,7 @@ function ChangeSettingPopup({
     }
   };
 
-  const handleSubmit = () => {
+  const handleNextStep = () => {
     setError("");
 
     if (setting === "email") {
@@ -43,7 +57,6 @@ function ChangeSettingPopup({
         setError("Please enter a valid email address");
         return;
       }
-      onSubmit(value);
     } else if (setting === "password") {
       if (value.length < 6) {
         setError("Password must be at least 6 characters long");
@@ -53,24 +66,76 @@ function ChangeSettingPopup({
         setError("Passwords do not match");
         return;
       }
-      onSubmit(value);
     } else if (setting === "avatar") {
       if (!file) {
         setError("Please select an image");
         return;
       }
+      // Avatar might not need a second step for password, typically
+      // But if user wants to change generic two step "smth then password"
+      // we assume password confirmation is needed for these sensitive changes.
+      // However, for avatar usually it's just upload.
+      // The current implementation for avatar just submits the file.
+      // Let's keep it 1 step for avatar unless backend enforces password.
       onSubmit(file);
+      return;
     } else {
       // Username and others
       if (!value.trim()) {
         setError(`Please enter a valid ${setting}`);
         return;
       }
-      onSubmit(value);
+    }
+    setStep(2);
+  };
+
+  const handleSubmit = () => {
+    setError("");
+    if (!currentPassword) {
+      setError("Please enter your current password");
+      return;
+    }
+
+    if (setting === "email") {
+      onSubmit({
+        new_email: value,
+        password: currentPassword,
+      } as ChangeEmailCredentials);
+    } else if (setting === "password") {
+      onSubmit({
+        current_password: currentPassword,
+        new_password: value,
+      } as ChangePasswordCredentials);
+    } else {
+      onSubmit({ [`new_${setting}`]: value, password: currentPassword } as any); // Cast to any because shape is dynamic but compatible with specific change methods in usage
     }
   };
 
   const renderInputs = () => {
+    const commonInputProps = {
+      className:
+        "w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-secondary)]",
+    };
+
+    if (step === 2) {
+      return (
+        <div className="w-full mb-4">
+          <p className="text-sm text-gray-600 mb-2">
+            Please enter your current password to confirm changes.
+          </p>
+          <input
+            type="password"
+            value={currentPassword}
+            onChange={(e) => setCurrentPassword(e.target.value)}
+            placeholder="Current password"
+            className={commonInputProps.className}
+            onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
+            autoFocus
+          />
+        </div>
+      );
+    }
+
     switch (setting) {
       case "password":
         return (
@@ -80,15 +145,15 @@ function ChangeSettingPopup({
               value={value}
               onChange={(e) => setValue(e.target.value)}
               placeholder="New password"
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-secondary)]"
+              className={commonInputProps.className}
             />
             <input
               type="password"
               value={confirmValue}
               onChange={(e) => setConfirmValue(e.target.value)}
               placeholder="Confirm new password"
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-secondary)]"
-              onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
+              className={commonInputProps.className}
+              onKeyDown={(e) => e.key === "Enter" && handleNextStep()}
             />
           </div>
         );
@@ -125,25 +190,29 @@ function ChangeSettingPopup({
         );
       case "email":
         return (
-          <input
-            type="email"
-            value={value}
-            onChange={(e) => setValue(e.target.value)}
-            placeholder="Enter new email"
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-secondary)] mb-4"
-            onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
-          />
+          <div className="w-full mb-4">
+            <input
+              type="email"
+              value={value}
+              onChange={(e) => setValue(e.target.value)}
+              placeholder="Enter new email"
+              className={commonInputProps.className}
+              onKeyDown={(e) => e.key === "Enter" && handleNextStep()}
+            />
+          </div>
         );
       default:
         return (
-          <input
-            type="text"
-            value={value}
-            onChange={(e) => setValue(e.target.value)}
-            placeholder={`Enter new ${setting}`}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-secondary)] mb-4"
-            onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
-          />
+          <div className="w-full mb-4">
+            <input
+              type="text"
+              value={value}
+              onChange={(e) => setValue(e.target.value)}
+              placeholder={`Enter new ${setting}`}
+              className={commonInputProps.className}
+              onKeyDown={(e) => e.key === "Enter" && handleNextStep()}
+            />
+          </div>
         );
     }
   };
@@ -173,12 +242,23 @@ function ChangeSettingPopup({
           >
             Cancel
           </button>
-          <button
-            onClick={handleSubmit}
-            className="flex-1 px-4 py-2 bg-[var(--color-secondary)] text-white rounded-lg hover:opacity-90 transition-opacity font-medium"
-          >
-            Save
-          </button>
+          {setting !== "avatar" ? (
+            <button
+              onClick={step === 1 ? handleNextStep : handleSubmit}
+              className="flex-1 px-4 py-2 bg-[var(--color-secondary)] text-white rounded-lg hover:opacity-90 transition-opacity font-medium"
+            >
+              {step === 1 ? "Next" : "Save"}
+            </button>
+          ) : (
+            <button
+              onClick={() => {
+                if (file) onSubmit(file);
+              }}
+              className="flex-1 px-4 py-2 bg-[var(--color-secondary)] text-white rounded-lg hover:opacity-90 transition-opacity font-medium"
+            >
+              Save
+            </button>
+          )}
         </div>
       </div>
     </div>
