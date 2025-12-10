@@ -3,7 +3,8 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "../../lib/auth/authContext";
 import { useRouter } from "next/navigation";
-import { FaEye, FaEyeSlash } from "react-icons/fa";
+import { FaEye, FaEyeSlash, FaUser, FaLock } from "react-icons/fa";
+import { motion } from "framer-motion";
 
 export function LoginForm() {
   const [username, setUsername] = useState("");
@@ -32,51 +33,104 @@ export function LoginForm() {
   };
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="space-y-4  flex flex-col w-xs mx-auto "
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+      className="w-full max-w-md mx-auto"
     >
-      <div>
-        <p className="text-xl my-3">Welcome back!</p>
-        <input
-          id="username"
-          placeholder="Username or email"
-          type="text"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
-          required
-          className="mt-1 block w-full rounded-xl border px-3 py-2"
-        />
+      <div className="bg-white rounded-3xl shadow-xl p-8 border border-gray-100">
+        <div className="text-center mb-8">
+          <h2 className="text-3xl font-bold font-geologica text-gray-900 mb-2">
+            Welcome Back
+          </h2>
+          <p className="text-gray-500 font-figtree">
+            Please enter your details to sign in
+          </p>
+        </div>
+
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="space-y-4">
+            <div className="relative group">
+              <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                <FaUser className="text-gray-400 group-focus-within:text-[var(--color-secondary)] transition-colors" />
+              </div>
+              <input
+                id="username"
+                placeholder="Username or email"
+                type="text"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                required
+                className="block w-full pl-11 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-[var(--color-secondary)] focus:border-transparent transition-all font-figtree"
+              />
+            </div>
+
+            <div className="relative group">
+              <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                <FaLock className="text-gray-400 group-focus-within:text-[var(--color-secondary)] transition-colors" />
+              </div>
+              <input
+                id="password"
+                type={showPassword ? "text" : "password"}
+                placeholder="Password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                className="block w-full pl-11 pr-11 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-[var(--color-secondary)] focus:border-transparent transition-all font-figtree"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-0 inset-y-0 pr-4 flex items-center text-gray-400 hover:text-gray-600 cursor-pointer transition-colors"
+              >
+                {showPassword ? <FaEyeSlash /> : <FaEye />}
+              </button>
+            </div>
+          </div>
+
+          <AnimatePresence>
+            {error && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: "auto" }}
+                exit={{ opacity: 0, height: 0 }}
+                className="text-red-500 text-sm text-center font-medium bg-red-50 p-2 rounded-lg"
+              >
+                {error}
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          <button
+            type="submit"
+            disabled={isLoading}
+            className="w-full bg-[var(--color-primary)] text-white font-bold text-lg py-3.5 rounded-xl hover:bg-[var(--color-primary-dark)] active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed transition-all shadow-lg shadow-[var(--color-primary)]/20"
+          >
+            {isLoading ? (
+              <span className="flex items-center justify-center gap-2">
+                <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                Logging in...
+              </span>
+            ) : (
+              "Sign In"
+            )}
+          </button>
+        </form>
       </div>
 
-      <div className="relative">
-        <input
-          id="password"
-          type={showPassword ? "text" : "password"}
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-          className="mt-1 block w-full rounded-xl border px-3 py-2 pr-10"
-        />
+      <p className="text-center mt-6 text-gray-500 font-figtree">
+        Don't have an account?{" "}
         <button
-          type="button"
-          onClick={() => setShowPassword(!showPassword)}
-          className="absolute right-3 top-1/2 -translate-y-1/2 "
+          onClick={() => router.push("/register")}
+          className="text-[var(--color-secondary)] font-bold hover:underline"
         >
-          {showPassword ? <FaEyeSlash /> : <FaEye />}
+          Sign up
         </button>
-      </div>
-
-      {error && <p className="text-red-500 text-sm">{error}</p>}
-
-      <button
-        type="submit"
-        disabled={isLoading}
-        className="w-full bg-primary font-bold text-xl py-2 rounded-xl hover:bg-primary-dark disabled:opacity-50 transition-colors"
-      >
-        {isLoading ? "Logging in..." : "Login"}
-      </button>
-    </form>
+      </p>
+    </motion.div>
   );
 }
+
+// Helper to handle AnimatePresence import which might be missing in top imports
+import { AnimatePresence } from "framer-motion";
