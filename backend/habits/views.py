@@ -67,6 +67,7 @@ def habits_list_create(request):
         # Create new habit
         name = request.data.get('name')
         icon_slug = request.data.get('icon_slug')
+        is_custom = request.data.get('is_custom', False)
         
         if not name or not icon_slug:
             return Response({'error': 'name and icon_slug are required'}, status=status.HTTP_400_BAD_REQUEST)
@@ -75,7 +76,8 @@ def habits_list_create(request):
             habit = Habit.objects.create(
                 user=request.user,
                 name=name,
-                icon_slug=icon_slug
+                icon_slug=icon_slug,
+                is_custom=is_custom
             )
             serializer = HabitSerializer(habit)
             return Response(serializer.data, status=status.HTTP_201_CREATED)

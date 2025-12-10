@@ -5,6 +5,7 @@ class Habit(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='habits')
     name = models.CharField(max_length=255)
     icon_slug = models.CharField(max_length=100)
+    is_custom = models.BooleanField(default=False)
     
     # Streak tracking fields (moved from UserHabit)
     current_streak = models.IntegerField(default=0)
