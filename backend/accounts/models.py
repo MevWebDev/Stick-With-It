@@ -15,6 +15,13 @@ class Challenge(models.Model):
 
 class UserStats(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='stats')
+    avatar = models.ImageField(
+        upload_to='avatars/%Y/%m/',
+        null=True,
+        blank=True,
+        max_length=500,
+        help_text='User profile avatar (optional)'
+    )
     points = models.IntegerField(default=0)
     current_streak = models.IntegerField(default=0)
     longest_streak = models.IntegerField(default=0)

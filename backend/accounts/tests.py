@@ -1241,3 +1241,245 @@ class PasswordResetViewTestCase(TestCase):
         self.assertEqual(response.status_code, 400)
         response_data = response.json()
         self.assertFalse(response_data['success'])
+
+
+# ============================================
+# TESTY DLA AVATARA
+# ============================================
+
+class AvatarUploadViewTestCase(TestCase):
+    """Tests for avatar upload and management endpoints"""
+    
+    def setUp(self):
+        self.client = Client()
+        self.user = User.objects.create_user(
+            username='testuser',
+            email='test@example.com',
+            password='password123'
+        )
+        refresh = RefreshToken.for_user(self.user)
+        self.access_token = str(refresh.access_token)
+        self.upload_url = reverse('upload_avatar')
+        self.delete_url = reverse('delete_avatar')
+        
+    def create_test_image(self, size=(200, 200), format='JPEG', color='red'):
+        """Helper method to create test image"""
+        from PIL import Image
+        from io import BytesIO
+        
+        file = BytesIO()
+        image = Image.new('RGB', size, color)
+        image.save(file, format)
+        file.seek(0)
+        file.name = f'test.{format.lower()}'
+        return file
+    
+    def test_upload_avatar_success(self):
+        """Test uploadowania poprawnego avatara"""
+        image = self.create_test_image()
+        response = self.client.post(
+            self.upload_url,
+            {'avatar': image},
+            HTTP_AUTHORIZATION=f'Bearer {self.access_token}'
+        )
+        self.assertEqual(response.status_code, 200)
+        response_data = response.json()
+        self.assertTrue(response_data['success'])
+        self.assertIn('avatar_url', response_data)
+        
+        # Sprawdź czy avatar został zapisany
+        self.user.stats.refresh_from_db()
+        self.assertIsNotNone(self.user.stats.avatar)
+    
+    def test_upload_avatar_replaces_old(self):
+        """Test że nowy avatar zastępuje stary"""
+        # Upload pierwszego avatara
+        image1 = self.create_test_image(color='red')
+        self.client.post(
+            self.upload_url,
+            {'avatar': image1},
+            HTTP_AUTHORIZATION=f'Bearer {self.access_token}'
+        )
+        
+        self.user.stats.refresh_from_db()
+        old_avatar_name = self.user.stats.avatar.name
+        
+        # Upload drugiego avatara
+        image2 = self.create_test_image(color='blue')
+        response = self.client.post(
+            self.upload_url,
+            {'avatar': image2},
+            HTTP_AUTHORIZATION=f'Bearer {self.access_token}'
+        )
+        
+        self.assertEqual(response.status_code, 200)
+        self.user.stats.refresh_from_db()
+        new_avatar_name = self.user.stats.avatar.name
+        
+        # Sprawdź że nazwa się zmieniła
+        self.assertNotEqual(old_avatar_name, new_avatar_name)
+    
+    def test_upload_avatar_too_large(self):
+        """Test uploadowania zbyt dużego pliku (>2MB)"""
+        # Stwórz duży obraz (około 3MB)
+        image = self.create_test_image(size=(3000, 3000))
+        
+        # Sprawdź czy faktycznie jest większy niż 2MB
+        image.seek(0, 2)  # Przesuń do końca
+        file_size = image.tell()
+        image.seek(0)
+        
+        # Jeśli plik jest mniejszy niż 2MB, zwiększ rozmiar
+        if file_size < 2 * 1024 * 1024:
+            image = self.create_test_image(size=(4000, 4000))
+        
+        response = self.client.post(
+            self.upload_url,
+            {'avatar': image},
+            HTTP_AUTHORIZATION=f'Bearer {self.access_token}'
+        )
+        self.assertEqual(response.status_code, 400)
+        response_data = response.json()
+        self.assertFalse(response_data['success'])
+    
+    def test_upload_avatar_wrong_format(self):
+        """Test uploadowania pliku w niewłaściwym formacie"""
+        from io import BytesIO
+        
+        # Stwórz plik tekstowy zamiast obrazu
+        file = BytesIO(b'This is not an image')
+        file.name = 'test.txt'
+        
+        response = self.client.post(
+            self.upload_url,
+            {'avatar': file},
+            HTTP_AUTHORIZATION=f'Bearer {self.access_token}'
+        )
+        self.assertEqual(response.status_code, 400)
+        response_data = response.json()
+        self.assertFalse(response_data['success'])
+    
+    def test_upload_avatar_too_small(self):
+        """Test uploadowania zbyt małego obrazu (<100x100)"""
+        image = self.create_test_image(size=(50, 50))
+        response = self.client.post(
+            self.upload_url,
+            {'avatar': image},
+            HTTP_AUTHORIZATION=f'Bearer {self.access_token}'
+        )
+        self.assertEqual(response.status_code, 400)
+        response_data = response.json()
+        self.assertFalse(response_data['success'])
+    
+    def test_upload_avatar_unauthorized(self):
+        """Test uploadowania avatara bez tokena"""
+        image = self.create_test_image()
+        response = self.client.post(
+            self.upload_url,
+            {'avatar': image}
+        )
+        self.assertEqual(response.status_code, 401)
+    
+    def test_delete_avatar_success(self):
+        """Test usuwania avatara"""
+        # Najpierw upload avatara
+        image = self.create_test_image()
+        self.client.post(
+            self.upload_url,
+            {'avatar': image},
+            HTTP_AUTHORIZATION=f'Bearer {self.access_token}'
+        )
+        
+        # Sprawdź że avatar istnieje
+        self.user.stats.refresh_from_db()
+        self.assertIsNotNone(self.user.stats.avatar)
+        
+        # Usuń avatar
+        response = self.client.delete(
+            self.delete_url,
+            HTTP_AUTHORIZATION=f'Bearer {self.access_token}'
+        )
+        self.assertEqual(response.status_code, 200)
+        response_data = response.json()
+        self.assertTrue(response_data['success'])
+        
+        # Sprawdź że avatar został usunięty
+        self.user.stats.refresh_from_db()
+        self.assertFalse(self.user.stats.avatar)
+    
+    def test_delete_avatar_no_avatar(self):
+        """Test usuwania avatara gdy użytkownik go nie ma"""
+        response = self.client.delete(
+            self.delete_url,
+            HTTP_AUTHORIZATION=f'Bearer {self.access_token}'
+        )
+        self.assertEqual(response.status_code, 400)
+        response_data = response.json()
+        self.assertFalse(response_data['success'])
+    
+    def test_delete_avatar_unauthorized(self):
+        """Test usuwania avatara bez tokena"""
+        response = self.client.delete(self.delete_url)
+        self.assertEqual(response.status_code, 401)
+    
+    def test_user_info_includes_avatar_url(self):
+        """Test że endpoint /me/ zwraca avatar_url"""
+        # Upload avatara
+        image = self.create_test_image()
+        self.client.post(
+            self.upload_url,
+            {'avatar': image},
+            HTTP_AUTHORIZATION=f'Bearer {self.access_token}'
+        )
+        
+        # Pobierz info o użytkowniku
+        me_url = reverse('user_info')
+        response = self.client.get(
+            me_url,
+            HTTP_AUTHORIZATION=f'Bearer {self.access_token}'
+        )
+        
+        self.assertEqual(response.status_code, 200)
+        response_data = response.json()
+        self.assertIn('avatar_url', response_data)
+        self.assertIsNotNone(response_data['avatar_url'])
+        self.assertIn('/media/', response_data['avatar_url'])
+    
+    def test_user_info_no_avatar(self):
+        """Test że endpoint /me/ zwraca null gdy brak avatara"""
+        me_url = reverse('user_info')
+        response = self.client.get(
+            me_url,
+            HTTP_AUTHORIZATION=f'Bearer {self.access_token}'
+        )
+        
+        self.assertEqual(response.status_code, 200)
+        response_data = response.json()
+        self.assertIn('avatar_url', response_data)
+        self.assertIsNone(response_data['avatar_url'])
+    
+    def test_upload_png_with_transparency(self):
+        """Test uploadowania PNG z przezroczystością (konwersja do JPEG)"""
+        from PIL import Image
+        from io import BytesIO
+        
+        # Stwórz PNG z przezroczystością
+        file = BytesIO()
+        image = Image.new('RGBA', (200, 200), (255, 0, 0, 128))  # Czerwony z alpha
+        image.save(file, 'PNG')
+        file.seek(0)
+        file.name = 'test.png'
+        
+        response = self.client.post(
+            self.upload_url,
+            {'avatar': file},
+            HTTP_AUTHORIZATION=f'Bearer {self.access_token}'
+        )
+        
+        self.assertEqual(response.status_code, 200)
+        response_data = response.json()
+        self.assertTrue(response_data['success'])
+        
+        # Sprawdź że plik został zapisany jako JPEG
+        self.user.stats.refresh_from_db()
+        self.assertTrue(self.user.stats.avatar.name.endswith('.jpg'))

@@ -34,6 +34,13 @@ Bazowy URL: `/api/auth/`
 | `POST` | `/password-reset/request/` | Żądanie resetu hasła (wysyła email z tokenem) | ❌ | ❌ |
 | `POST` | `/password-reset/confirm/` | Potwierdzenie resetu hasła (z tokenem z emaila) | ❌ | ❌ |
 
+### 🖼️ Zarządzanie Avatarem
+
+| Metoda | Endpoint | Opis | Auth |
+|--------|----------|------|------|
+| `POST` | `/avatar/upload/` | Upload/aktualizacja avatara (max 2MB, JPG/PNG/GIF/WebP) | ✅ |
+| `DELETE` | `/avatar/delete/` | Usunięcie avatara | ✅ |
+
 ### 🎯 Wyzwania (Challenges)
 
 | Metoda | Endpoint | Opis | Auth |
@@ -209,6 +216,97 @@ Szczegóły nawyków znajdują się w osobnym README, w dedykowanym mu folderze 
 ```
 
 **Uwaga:** Token resetu hasła jest ważny przez 1 godzinę od wygenerowania.
+
+---
+
+### 6. Upload Avatara
+**Endpoint:** `POST /api/auth/avatar/upload/`  
+**Wymaga:** JWT Token + Multipart Form Data  
+**Content-Type:** `multipart/form-data`
+
+**Walidacja:**
+- Max rozmiar: **2MB**
+- Formaty: **JPEG, PNG, GIF, WebP**
+- Min wymiary: **100x100 px**
+- Max wymiary: **4000x4000 px**
+- Automatyczna kompresja do **800x800 px** (zachowuje proporcje)
+- Konwersja do **JPEG** (quality 85%)
+
+**Request (Form Data):**
+```
+avatar: [plik obrazu]
+```
+
+**Odpowiedź (sukces):**
+```json
+{
+  "success": true,
+  "message": "Avatar uploaded successfully",
+  "avatar_url": "http://127.0.0.1:8000/media/avatars/2025/12/1_1702234567.jpg"
+}
+```
+
+**Odpowiedź (błąd - zbyt duży plik):**
+```json
+{
+  "success": false,
+  "errors": {
+    "avatar": ["Avatar file size cannot exceed 2MB. Current size: 3.45MB"]
+  }
+}
+```
+
+**Odpowiedź (błąd - zły format):**
+```json
+{
+  "success": false,
+  "errors": {
+    "avatar": ["Unsupported file type: application/pdf. Allowed: JPEG, PNG, GIF, WebP"]
+  }
+}
+```
+
+**Uwaga:** Upload nowego avatara automatycznie usuwa poprzedni.
+
+---
+
+### 7. Usunięcie Avatara
+**Endpoint:** `DELETE /api/auth/avatar/delete/`  
+**Wymaga:** JWT Token
+
+**Odpowiedź (sukces):**
+```json
+{
+  "success": true,
+  "message": "Avatar deleted successfully"
+}
+```
+
+**Odpowiedź (błąd - brak avatara):**
+```json
+{
+  "success": false,
+  "error": "No avatar to delete"
+}
+```
+
+---
+
+### 8. Informacje o Użytkowniku (z avatarem)
+**Endpoint:** `GET /api/auth/me/`  
+**Wymaga:** JWT Token
+
+**Odpowiedź:**
+```json
+{
+  "id": 1,
+  "username": "johndoe",
+  "email": "john@example.com",
+  "avatar_url": "http://127.0.0.1:8000/media/avatars/2025/12/1_1702234567.jpg"
+}
+```
+
+**Uwaga:** Jeśli użytkownik nie ma avatara, `avatar_url` będzie `null`. Frontend może wtedy wyświetlić inicjały użytkownika.
 | `GET`  | `/badges/` | Lista wszystkich odznak (zdobyte/niezdobyte) | ✅ |
 
 ---
@@ -243,6 +341,7 @@ Wyzwania dostępne w systemie.
 
 ### `UserStats`
 Statystyki użytkownika (OneToOne z User).
+- `avatar` - ImageField (opcjonalne, max 2MB, auto-resize do 800x800)
 - `points`, `current_streak`, `longest_streak`
 - `total_completed`, `level1_completed`, `level2_completed`, `level3_completed`
 - `blacklisted_categories` (JSON)
@@ -289,6 +388,7 @@ Logi wykonania nawyku.
 - [x] **Zmiana emaila** - endpoint z walidacją hasła
 - [x] **Zmiana nazwy użytkownika** - endpoint z walidacją hasła
 - [x] **Reset hasła przez email** - system tokenów i wysyłka emaili
+- [x] **System avatarów** - upload, usuwanie, walidacja (rozmiar, format, wymiary), auto-kompresja
 
 ### 🟡 Do zrobienia (Next Steps)
 - [ ] **Walidacja:** Sprawdzanie czy kategoria istnieje przy dodawaniu do blacklisty

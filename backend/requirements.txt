@@ -5,3 +5,4 @@ django-cors-headers>=4.3.0
 gunicorn>=21.0.0
 pytz
 coverage>=7.0.0
+Pillow>=10.0.0

@@ -1,1 +1,8 @@
 *.sqlite3
+
+# Media files (user uploads)
+media/
+!media/.gitkeep
+!media/avatars/
+media/avatars/*
+!media/avatars/.gitkeep

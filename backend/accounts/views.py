@@ -7,8 +7,9 @@ from django.core.exceptions import ValidationError
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 from rest_framework_simplejwt.tokens import RefreshToken
-from rest_framework.decorators import api_view, permission_classes
+from rest_framework.decorators import api_view, permission_classes, parser_classes
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework import status
 from rest_framework.response import Response
 import json
@@ -29,6 +30,11 @@ import secrets
 from django.core.mail import send_mail
 from django.conf import settings
 from django.core.cache import cache
+from PIL import Image
+from io import BytesIO
+from django.core.files.uploadedfile import InMemoryUploadedFile
+import sys
+import os
 # REJESTRACJA
 @csrf_exempt
 @require_http_methods(["POST"])
@@ -208,10 +214,17 @@ def logout_view(request):
 def user_info(request):
     """Zwraca info o zalogowanym użytkowniku"""
     user = request.user
+    
+    # Avatar URL
+    avatar_url = None
+    if hasattr(user, 'stats') and user.stats.avatar:
+        avatar_url = request.build_absolute_uri(user.stats.avatar.url)
+    
     return JsonResponse({
         'id': user.id,
         'username': user.username,
-        'email': user.email
+        'email': user.email,
+        'avatar_url': avatar_url
     })
 
 
@@ -632,6 +645,115 @@ def complete_pomodoro(request):
         
     except Exception as e:
         return JsonResponse({'success': False, 'error': str(e)}, status=500)
+
+
+# ============================================
+# AVATAR - Upload
+# ============================================
+
+@csrf_exempt
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+@parser_classes([MultiPartParser, FormParser])
+def upload_avatar(request):
+    """Upload or update user avatar"""
+    try:
+        from .serializers import AvatarUploadSerializer
+        
+        serializer = AvatarUploadSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response({
+                'success': False,
+                'errors': serializer.errors
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+        avatar_file = serializer.validated_data['avatar']
+        stats = request.user.stats
+        
+        # Delete old avatar if exists
+        if stats.avatar:
+            old_path = stats.avatar.path
+            if os.path.isfile(old_path):
+                os.remove(old_path)
+        
+        # Open and process image
+        img = Image.open(avatar_file)
+        
+        # Convert to RGB if necessary (for PNG with transparency)
+        if img.mode in ('RGBA', 'LA', 'P'):
+            background = Image.new('RGB', img.size, (255, 255, 255))
+            if img.mode == 'P':
+                img = img.convert('RGBA')
+            if img.mode in ('RGBA', 'LA'):
+                background.paste(img, mask=img.split()[-1])
+            else:
+                background.paste(img)
+            img = background
+        
+        # Resize to max 800x800 (maintain aspect ratio)
+        max_size = (800, 800)
+        img.thumbnail(max_size, Image.Resampling.LANCZOS)
+        
+        # Save to BytesIO
+        output = BytesIO()
+        img.save(output, format='JPEG', quality=85, optimize=True)
+        output.seek(0)
+        
+        # Create new file
+        filename = f"{request.user.id}_{timezone.now().timestamp():.0f}.jpg"
+        stats.avatar = InMemoryUploadedFile(
+            output,
+            'ImageField',
+            filename,
+            'image/jpeg',
+            sys.getsizeof(output),
+            None
+        )
+        stats.save()
+        
+        return Response({
+            'success': True,
+            'message': 'Avatar uploaded successfully',
+            'avatar_url': request.build_absolute_uri(stats.avatar.url)
+        }, status=status.HTTP_200_OK)
+        
+    except Exception as e:
+        return Response({
+            'success': False,
+            'error': str(e)
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+# ============================================
+# AVATAR - Delete
+# ============================================
+
+@csrf_exempt
+@api_view(['DELETE'])
+@permission_classes([IsAuthenticated])
+def delete_avatar(request):
+    """Delete user avatar"""
+    try:
+        stats = request.user.stats
+        if stats.avatar:
+            avatar_path = stats.avatar.path
+            if os.path.isfile(avatar_path):
+                os.remove(avatar_path)
+            stats.avatar = None
+            stats.save()
+            return Response({
+                'success': True,
+                'message': 'Avatar deleted successfully'
+            }, status=status.HTTP_200_OK)
+        return Response({
+            'success': False,
+            'error': 'No avatar to delete'
+        }, status=status.HTTP_400_BAD_REQUEST)
+    except Exception as e:
+        return Response({
+            'success': False,
+            'error': str(e)
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 # ============================================

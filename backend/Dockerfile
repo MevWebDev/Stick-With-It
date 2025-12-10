@@ -17,8 +17,11 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Kopiujemy całą aplikację
 COPY . .
 
-# Tworzymy katalog dla bazy danych SQLite (jeśli używasz SQLite)
-RUN mkdir -p /app/data
+# Tworzymy katalogi dla bazy danych i media
+RUN mkdir -p /app/data /app/media/avatars
+
+# Ustawiamy uprawnienia
+RUN chmod -R 755 /app/media
 
 # Eksponujemy port 8000
 EXPOSE 8000

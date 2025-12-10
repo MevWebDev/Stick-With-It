@@ -18,6 +18,10 @@ urlpatterns = [
     path("password-reset/request/", views.request_password_reset, name="request_password_reset"),
     path("password-reset/confirm/", views.confirm_password_reset, name="confirm_password_reset"),
     
+    # Avatar management
+    path("avatar/upload/", views.upload_avatar, name="upload_avatar"),
+    path("avatar/delete/", views.delete_avatar, name="delete_avatar"),
+    
     # Daily challenges i statystyki
     path("daily-challenge/", views.get_daily_challenge, name="daily_challenge"),
     path('complete-challenge/', views.complete_challenge, name='complete_challenge'),

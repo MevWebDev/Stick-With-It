@@ -3,6 +3,8 @@ from django.contrib.auth.models import User
 from django.contrib.auth import authenticate
 from django.core.validators import validate_email
 from django.core.exceptions import ValidationError as DjangoValidationError
+import os
+from PIL import Image
 
 
 class ChangePasswordSerializer(serializers.Serializer):
@@ -115,4 +117,63 @@ class ConfirmPasswordResetSerializer(serializers.Serializer):
         """Walidacja nowego hasła"""
         if len(value) < 8:
             raise serializers.ValidationError("Hasło musi mieć minimum 8 znaków")
+        return value
+
+
+class AvatarUploadSerializer(serializers.Serializer):
+    """Serializer for avatar upload with validation"""
+    avatar = serializers.ImageField(
+        max_length=None,
+        allow_empty_file=False,
+        use_url=True,
+        required=True
+    )
+    
+    def validate_avatar(self, value):
+        # File size validation (2MB max)
+        MAX_SIZE = 2 * 1024 * 1024
+        if value.size > MAX_SIZE:
+            raise serializers.ValidationError(
+                f"Avatar file size cannot exceed 2MB. Current size: {value.size / (1024*1024):.2f}MB"
+            )
+        
+        # File type validation
+        allowed_types = ['image/jpeg', 'image/png', 'image/gif', 'image/webp']
+        if value.content_type not in allowed_types:
+            raise serializers.ValidationError(
+                f"Unsupported file type: {value.content_type}. Allowed: JPEG, PNG, GIF, WebP"
+            )
+        
+        # Extension check
+        allowed_extensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp']
+        ext = os.path.splitext(value.name)[1].lower()
+        if ext not in allowed_extensions:
+            raise serializers.ValidationError(f"Unsupported file extension: {ext}")
+        
+        # Verify it's actually an image and check dimensions
+        try:
+            img = Image.open(value)
+            img.verify()
+            
+            # Re-open for dimension check (verify closes file)
+            value.seek(0)
+            img = Image.open(value)
+            
+            width, height = img.size
+            MAX_DIM = (4000, 4000)
+            MIN_DIM = (100, 100)
+            
+            if width > MAX_DIM[0] or height > MAX_DIM[1]:
+                raise serializers.ValidationError(
+                    f"Image dimensions {width}x{height} exceed maximum {MAX_DIM[0]}x{MAX_DIM[1]}"
+                )
+            if width < MIN_DIM[0] or height < MIN_DIM[1]:
+                raise serializers.ValidationError(
+                    f"Image dimensions {width}x{height} below minimum {MIN_DIM[0]}x{MIN_DIM[1]}"
+                )
+        except Exception as e:
+            raise serializers.ValidationError(f"Invalid image file: {str(e)}")
+        
+        # Reset file pointer
+        value.seek(0)
         return value
