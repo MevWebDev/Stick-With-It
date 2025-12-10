@@ -8,6 +8,17 @@ urlpatterns = [
     path("logout/", views.logout_view, name="logout"),
     path("me/", views.user_info, name="user_info"),
     path("refresh/", views.refresh_token_view, name="refresh_token"),
+    
+    # Zmiana danych użytkownika (wymaga hasła)
+    path("change-password/", views.change_password, name="change_password"),
+    path("change-email/", views.change_email, name="change_email"),
+    path("change-username/", views.change_username, name="change_username"),
+    
+    # Reset hasła przez email
+    path("password-reset/request/", views.request_password_reset, name="request_password_reset"),
+    path("password-reset/confirm/", views.confirm_password_reset, name="confirm_password_reset"),
+    
+    # Daily challenges i statystyki
     path("daily-challenge/", views.get_daily_challenge, name="daily_challenge"),
     path('complete-challenge/', views.complete_challenge, name='complete_challenge'),
     path('stats/', views.get_user_stats, name='user_stats'),

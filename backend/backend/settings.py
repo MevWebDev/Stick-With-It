@@ -151,3 +151,19 @@ SIMPLE_JWT = {
     'ROTATE_REFRESH_TOKENS': True,
     'BLACKLIST_AFTER_ROTATION': True,
 }
+
+# Email Configuration (Development - console backend)
+# W produkcji należy skonfigurować prawdziwy SMTP
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+DEFAULT_FROM_EMAIL = 'noreply@habittracker.local'
+
+# URL frontendu dla linków w emailach
+FRONTEND_URL = 'http://localhost:3000'
+
+# Cache Configuration (dla tokenów resetu hasła)
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'unique-snowflake',
+    }
+}

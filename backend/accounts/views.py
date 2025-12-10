@@ -9,13 +9,26 @@ from django.views.decorators.http import require_http_methods
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
+from rest_framework import status
+from rest_framework.response import Response
 import json
 from django.utils import timezone
 from datetime import timedelta
 from django.db import IntegrityError
 from .models import Challenge, UserStats, DailyChallenge, CompletedChallenge, Badges
 from .services import XpService
+from .serializers import (
+    ChangePasswordSerializer,
+    ChangeEmailSerializer,
+    ChangeUsernameSerializer,
+    RequestPasswordResetSerializer,
+    ConfirmPasswordResetSerializer
+)
 import random
+import secrets
+from django.core.mail import send_mail
+from django.conf import settings
+from django.core.cache import cache
 # REJESTRACJA
 @csrf_exempt
 @require_http_methods(["POST"])
@@ -642,3 +655,195 @@ def check_and_award_badges(user):
         except Badges.DoesNotExist:
             pass
     return new_badges
+
+
+# ============================================
+# ZMIANA HASŁA
+# ============================================
+
+@csrf_exempt
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def change_password(request):
+    """Zmienia hasło użytkownika - wymaga potwierdzenia obecnym hasłem"""
+    serializer = ChangePasswordSerializer(
+        data=request.data,
+        context={'request': request}
+    )
+    
+    if serializer.is_valid():
+        user = request.user
+        user.set_password(serializer.validated_data['new_password'])
+        user.save()
+        
+        return Response({
+            'success': True,
+            'message': 'Hasło zostało zmienione pomyślnie'
+        }, status=status.HTTP_200_OK)
+    
+    return Response({
+        'success': False,
+        'errors': serializer.errors
+    }, status=status.HTTP_400_BAD_REQUEST)
+
+
+# ============================================
+# ZMIANA EMAILA
+# ============================================
+
+@csrf_exempt
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def change_email(request):
+    """Zmienia email użytkownika - wymaga potwierdzenia hasłem"""
+    serializer = ChangeEmailSerializer(
+        data=request.data,
+        context={'request': request}
+    )
+    
+    if serializer.is_valid():
+        user = request.user
+        user.email = serializer.validated_data['new_email']
+        user.save()
+        
+        return Response({
+            'success': True,
+            'message': 'Email został zmieniony pomyślnie',
+            'new_email': user.email
+        }, status=status.HTTP_200_OK)
+    
+    return Response({
+        'success': False,
+        'errors': serializer.errors
+    }, status=status.HTTP_400_BAD_REQUEST)
+
+
+# ============================================
+# ZMIANA NAZWY UŻYTKOWNIKA
+# ============================================
+
+@csrf_exempt
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def change_username(request):
+    """Zmienia nazwę użytkownika - wymaga potwierdzenia hasłem"""
+    serializer = ChangeUsernameSerializer(
+        data=request.data,
+        context={'request': request}
+    )
+    
+    if serializer.is_valid():
+        user = request.user
+        user.username = serializer.validated_data['new_username']
+        user.save()
+        
+        return Response({
+            'success': True,
+            'message': 'Nazwa użytkownika została zmieniona pomyślnie',
+            'new_username': user.username
+        }, status=status.HTTP_200_OK)
+    
+    return Response({
+        'success': False,
+        'errors': serializer.errors
+    }, status=status.HTTP_400_BAD_REQUEST)
+
+
+# ============================================
+# RESET HASŁA - ŻĄDANIE
+# ============================================
+
+@csrf_exempt
+@api_view(['POST'])
+def request_password_reset(request):
+    """Wysyła email z linkiem do resetu hasła"""
+    serializer = RequestPasswordResetSerializer(data=request.data)
+    
+    if serializer.is_valid():
+        email = serializer.validated_data['email']
+        
+        try:
+            user = User.objects.get(email=email)
+            
+            # Wygeneruj token resetu (64 znaki hex)
+            reset_token = secrets.token_urlsafe(32)
+            
+            # Zapisz token w cache na 1 godzinę
+            cache_key = f'password_reset_{reset_token}'
+            cache.set(cache_key, user.id, timeout=3600)
+            
+            # Przygotuj link resetu
+            reset_url = f"{settings.FRONTEND_URL}/reset-password?token={reset_token}"
+            
+            # Wyślij email
+            send_mail(
+                subject='Reset hasła - Habit Tracker',
+                message=f'Kliknij w link aby zresetować hasło:\n\n{reset_url}\n\nLink jest ważny przez 1 godzinę.',
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                recipient_list=[email],
+                fail_silently=False,
+            )
+            
+        except User.DoesNotExist:
+            # Dla bezpieczeństwa nie ujawniamy czy email istnieje
+            pass
+        
+        # Zawsze zwracaj sukces (nie ujawniaj czy email istnieje)
+        return Response({
+            'success': True,
+            'message': 'Jeśli podany email istnieje w systemie, wysłaliśmy link do resetu hasła'
+        }, status=status.HTTP_200_OK)
+    
+    return Response({
+        'success': False,
+        'errors': serializer.errors
+    }, status=status.HTTP_400_BAD_REQUEST)
+
+
+# ============================================
+# RESET HASŁA - POTWIERDZENIE
+# ============================================
+
+@csrf_exempt
+@api_view(['POST'])
+def confirm_password_reset(request):
+    """Resetuje hasło używając tokena z emaila"""
+    serializer = ConfirmPasswordResetSerializer(data=request.data)
+    
+    if serializer.is_valid():
+        token = serializer.validated_data['token']
+        new_password = serializer.validated_data['new_password']
+        
+        # Sprawdź token w cache
+        cache_key = f'password_reset_{token}'
+        user_id = cache.get(cache_key)
+        
+        if user_id is None:
+            return Response({
+                'success': False,
+                'error': 'Nieprawidłowy lub wygasły token resetu hasła'
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+        try:
+            user = User.objects.get(id=user_id)
+            user.set_password(new_password)
+            user.save()
+            
+            # Usuń token z cache
+            cache.delete(cache_key)
+            
+            return Response({
+                'success': True,
+                'message': 'Hasło zostało zresetowane pomyślnie'
+            }, status=status.HTTP_200_OK)
+            
+        except User.DoesNotExist:
+            return Response({
+                'success': False,
+                'error': 'Użytkownik nie istnieje'
+            }, status=status.HTTP_400_BAD_REQUEST)
+    
+    return Response({
+        'success': False,
+        'errors': serializer.errors
+    }, status=status.HTTP_400_BAD_REQUEST)

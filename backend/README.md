@@ -24,6 +24,16 @@ Bazowy URL: `/api/auth/`
 | `POST` | `/refresh/` | Odświeżenie access tokena | ❌ |
 | `GET`  | `/me/` | Dane zalogowanego użytkownika | ✅ |
 
+### 🔑 Zarządzanie Kontem (wymaga hasła)
+
+| Metoda | Endpoint | Opis | Auth | Wymaga Hasła |
+|--------|----------|------|------|--------------|
+| `POST` | `/change-password/` | Zmiana hasła (wymaga obecnego hasła) | ✅ | ✅ |
+| `POST` | `/change-email/` | Zmiana adresu email (wymaga hasła) | ✅ | ✅ |
+| `POST` | `/change-username/` | Zmiana nazwy użytkownika (wymaga hasła) | ✅ | ✅ |
+| `POST` | `/password-reset/request/` | Żądanie resetu hasła (wysyła email z tokenem) | ❌ | ❌ |
+| `POST` | `/password-reset/confirm/` | Potwierdzenie resetu hasła (z tokenem z emaila) | ❌ | ❌ |
+
 ### 🎯 Wyzwania (Challenges)
 
 | Metoda | Endpoint | Opis | Auth |
@@ -48,6 +58,157 @@ Szczegóły nawyków znajdują się w osobnym README, w dedykowanym mu folderze 
 | Metoda | Endpoint | Opis | Auth |
 |--------|----------|------|------|
 | `GET`  | `/stats/` | Statystyki użytkownika (punkty, streak) | ✅ |
+| `GET`  | `/badges/` | Lista wszystkich odznak (zdobyte/niezdobyte) | ✅ |
+
+---
+
+## 📖 Przykłady Użycia Nowych Endpointów
+
+### 1. Zmiana Hasła
+**Endpoint:** `POST /api/auth/change-password/`  
+**Wymaga:** JWT Token + Aktualne hasło
+
+```json
+{
+  "current_password": "stareHaslo123",
+  "new_password": "noweHaslo456"
+}
+```
+
+**Odpowiedź (sukces):**
+```json
+{
+  "success": true,
+  "message": "Hasło zostało zmienione pomyślnie"
+}
+```
+
+**Odpowiedź (błąd):**
+```json
+{
+  "success": false,
+  "errors": {
+    "current_password": ["Nieprawidłowe obecne hasło"]
+  }
+}
+```
+
+---
+
+### 2. Zmiana Emaila
+**Endpoint:** `POST /api/auth/change-email/`  
+**Wymaga:** JWT Token + Hasło
+
+```json
+{
+  "new_email": "nowy@email.com",
+  "password": "mojeHaslo123"
+}
+```
+
+**Odpowiedź (sukces):**
+```json
+{
+  "success": true,
+  "message": "Email został zmieniony pomyślnie",
+  "new_email": "nowy@email.com"
+}
+```
+
+**Odpowiedź (błąd - email zajęty):**
+```json
+{
+  "success": false,
+  "errors": {
+    "new_email": ["Ten adres email jest już zajęty"]
+  }
+}
+```
+
+---
+
+### 3. Zmiana Nazwy Użytkownika
+**Endpoint:** `POST /api/auth/change-username/`  
+**Wymaga:** JWT Token + Hasło
+
+```json
+{
+  "new_username": "nowaNazwa",
+  "password": "mojeHaslo123"
+}
+```
+
+**Odpowiedź (sukces):**
+```json
+{
+  "success": true,
+  "message": "Nazwa użytkownika została zmieniona pomyślnie",
+  "new_username": "nowaNazwa"
+}
+```
+
+**Odpowiedź (błąd - nazwa zajęta):**
+```json
+{
+  "success": false,
+  "errors": {
+    "new_username": ["Ta nazwa użytkownika jest już zajęta"]
+  }
+}
+```
+
+---
+
+### 4. Reset Hasła - Żądanie (Wysyłka Emaila)
+**Endpoint:** `POST /api/auth/password-reset/request/`  
+**Wymaga:** Nic (endpoint publiczny)
+
+```json
+{
+  "email": "user@example.com"
+}
+```
+
+**Odpowiedź (zawsze sukces - bezpieczeństwo):**
+```json
+{
+  "success": true,
+  "message": "Jeśli podany email istnieje w systemie, wysłaliśmy link do resetu hasła"
+}
+```
+
+**Uwaga:** Dla bezpieczeństwa endpoint zawsze zwraca sukces, nawet jeśli email nie istnieje w systemie. To zapobiega sprawdzaniu czy dany email jest zarejestrowany.
+
+---
+
+### 5. Reset Hasła - Potwierdzenie (Z Tokenem)
+**Endpoint:** `POST /api/auth/password-reset/confirm/`  
+**Wymaga:** Token z emaila
+
+```json
+{
+  "token": "abc123xyz789_token_z_emaila",
+  "new_password": "noweSuperbezpieczneHaslo123"
+}
+```
+
+**Odpowiedź (sukces):**
+```json
+{
+  "success": true,
+  "message": "Hasło zostało zresetowane pomyślnie"
+}
+```
+
+**Odpowiedź (błąd - wygasły token):**
+```json
+{
+  "success": false,
+  "error": "Nieprawidłowy lub wygasły token resetu hasła"
+}
+```
+
+**Uwaga:** Token resetu hasła jest ważny przez 1 godzinę od wygenerowania.
 | `GET`  | `/badges/` | Lista wszystkich odznak (zdobyte/niezdobyte) | ✅ |
 
 ---
@@ -124,15 +285,19 @@ Logi wykonania nawyku.
 - [x] Panel Administratora (Django Admin)
 - [x] Optymalizacja zapytań do bazy (`select_related`, `order_by("?")`)
 - [x] Seed Data: Skrypt do automatycznego wypełniania bazy przykładowymi wyzwaniami (`seed_challenges`)
+- [x] **Zmiana hasła** - endpoint z walidacją obecnego hasła
+- [x] **Zmiana emaila** - endpoint z walidacją hasła
+- [x] **Zmiana nazwy użytkownika** - endpoint z walidacją hasła
+- [x] **Reset hasła przez email** - system tokenów i wysyłka emaili
 
 ### 🟡 Do zrobienia (Next Steps)
 - [ ] **Walidacja:** Sprawdzanie czy kategoria istnieje przy dodawaniu do blacklisty
 - [ ] **Limity:** Zwiększenie limitów znaków dla tytułów wyzwań (obecnie 20 znaków)
 - [ ] **Historia:** Endpoint `/challenge-history/` (ostatnie 20 wyzwań)
 - [ ] **Testy:** Rozszerzenie testów jednostkowych o nowe funkcjonalności challenges
+- [ ] **Konfiguracja email:** Ustawienie SMTP w production dla wysyłki emaili resetujących hasło
 
 ### 🔜 Roadmap
-- [ ] Reset hasła (email)
 - [ ] Weryfikacja adresu email
 - [ ] Migracja na PostgreSQL (produkcja)
 - [ ] Powiadomienia WebSocket o zdobytych odznakach
