@@ -6,5 +6,5 @@ class HabitSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = Habit
-        fields = ['id', 'name', 'icon_slug', 'current_streak', 'last_completion_date', 'last_completion_at', 'created_at', 'updated_at', 'completed_today']
+        fields = ['id', 'name', 'icon_slug', 'is_custom', 'current_streak', 'last_completion_date', 'last_completion_at', 'created_at', 'updated_at', 'completed_today']
         read_only_fields = ['current_streak', 'last_completion_date', 'last_completion_at', 'completed_today', 'created_at', 'updated_at']
