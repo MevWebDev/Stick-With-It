@@ -23,6 +23,10 @@ export interface CheckEmailResponse {
 
 export interface UserStats {
   points: number;
+  level: number;
+  current_exp: number;
+  exp_to_next_level: number;
+  total_exp: number;
   current_streak: number;
   longest_streak: number;
   total_completed: number;
