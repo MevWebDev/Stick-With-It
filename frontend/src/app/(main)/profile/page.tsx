@@ -4,16 +4,9 @@ import { useAuth } from "../../lib/auth/authContext";
 import { authService } from "../../lib/auth/authService";
 import { useEffect, useState } from "react";
 import { UserStats, Badge } from "../../lib/auth/types";
-import {
-  FaCog,
-  FaFire,
-  FaStar,
-  FaTrophy,
-  FaMedal,
-  FaKey,
-} from "react-icons/fa";
-import { IoIosArrowBack, IoMdClose } from "react-icons/io";
-import { SlBadge } from "react-icons/sl";
+import { FaFire, FaStar, FaMedal } from "react-icons/fa";
+import { IoMdClose } from "react-icons/io";
+
 import { AnimatePresence, motion } from "framer-motion";
 
 export default function ProfilePage() {
@@ -44,16 +37,21 @@ export default function ProfilePage() {
     fetchData();
   }, [user]);
 
-  if (!user) {
+  if (!user || loading) {
     return <div>Loading...</div>;
   }
 
-  // Calculate Level and EXP
-  const points = stats?.points || 0;
-  const level = Math.floor(points / 100) + 1;
-  const currentExp = points % 100;
-  const maxExp = 100;
-  const expPercentage = (currentExp / maxExp) * 100;
+  // Get values with safe defaults
+  const level = stats?.level || 1;
+  const currentExp = stats?.current_exp || 0;
+  const expToNextLevel = stats?.exp_to_next_level || 100;
+  const totalExp = stats?.total_exp || 0;
+  const longestStreak = stats?.longest_streak || 0;
+  const earnedBadgesCount = stats?.earned_badges?.length || 0;
+
+  // Calculate percentage safely
+  const expPercentage =
+    expToNextLevel > 0 ? Math.min((currentExp / expToNextLevel) * 100, 100) : 0;
 
   return (
     <div className=" pb-20 relative">
@@ -72,18 +70,23 @@ export default function ProfilePage() {
             LEVEL {level}
           </p>
 
-          {/* EXP Bar */}
-          <div className="w-full max-w-[200px] space-y-1">
+          {/* EXP Bar - Animated */}
+          <div className="w-full max-w-[280px] space-y-1">
             <div className="flex justify-between text-xs text-gray-500 font-medium">
               <span>{currentExp} XP</span>
-              <span>{maxExp} XP</span>
+              <span>{expToNextLevel} XP</span>
             </div>
-            <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
-              <div
-                className="h-full bg-[var(--color-secondary)] rounded-full transition-all duration-500"
-                style={{ width: `${expPercentage}%` }}
+            <div className="h-3 bg-gray-200 rounded-full overflow-hidden shadow-inner">
+              <motion.div
+                className="h-full bg-gradient-to-r from-[var(--color-secondary)] to-[var(--color-primary)] rounded-full"
+                initial={{ width: 0 }}
+                animate={{ width: `${expPercentage}%` }}
+                transition={{ duration: 1, ease: "easeOut" }}
               />
             </div>
+            <p className="text-xs text-center text-gray-400 font-medium">
+              {expToNextLevel - currentExp} XP to next level
+            </p>
           </div>
         </div>
 
@@ -91,18 +94,18 @@ export default function ProfilePage() {
         <div className="grid grid-cols-3 gap-3 mb-8">
           <StatCard
             icon={<FaFire className="text-orange-500" />}
-            value={stats?.longest_streak}
+            value={longestStreak}
             label="Longest Streak"
           />
           <StatCard
             icon={<FaStar className="text-yellow-500" />}
-            value={stats?.points}
+            value={totalExp}
             label="Total Exp"
           />
           <StatCard
             icon={<FaMedal className="text-blue-500" />}
-            value={stats?.earned_badges_count}
-            label="Badges earned"
+            value={earnedBadgesCount}
+            label="Badges Earned"
           />
         </div>
 
@@ -249,47 +252,6 @@ function StatCard({
       <span className="text-[10px] text-gray-500 uppercase font-bold tracking-wide">
         {label}
       </span>
-    </div>
-  );
-}
-
-function AchievementCard({
-  icon,
-  title,
-  description,
-  current = 0,
-  total,
-}: {
-  icon: React.ReactNode;
-  title: string;
-  description: string;
-  current?: number;
-  total: number;
-}) {
-  const percentage = Math.min((current / total) * 100, 100);
-
-  return (
-    <div className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex items-center gap-4">
-      <div className="w-12 h-12 bg-gray-50 rounded-xl flex items-center justify-center text-xl flex-shrink-0">
-        {icon}
-      </div>
-      <div className="flex-1 min-w-0">
-        <div className="flex justify-between items-start mb-1">
-          <div>
-            <h4 className="font-bold text-gray-900 text-sm">{title}</h4>
-            <p className="text-xs text-gray-500 truncate">{description}</p>
-          </div>
-          <span className="text-xs font-bold text-gray-500">
-            {current}/{total}
-          </span>
-        </div>
-        <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
-          <div
-            className="h-full bg-[var(--color-secondary)] rounded-full transition-all duration-500"
-            style={{ width: `${percentage}%` }}
-          />
-        </div>
-      </div>
     </div>
   );
 }

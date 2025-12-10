@@ -3,8 +3,9 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "../../lib/auth/authContext";
 import { useRouter } from "next/navigation";
-import { FaEye, FaEyeSlash } from "react-icons/fa";
+import { FaEye, FaEyeSlash, FaEnvelope, FaLock, FaUser } from "react-icons/fa";
 import { authService } from "@/app/lib/auth/authService";
+import { motion, AnimatePresence } from "framer-motion";
 
 export function RegisterForm() {
   const [email, setEmail] = useState("");
@@ -36,7 +37,7 @@ export function RegisterForm() {
         return;
       }
     } catch (error) {
-      setError("Email check failed");
+      setError(`${error}`);
       return;
     }
 
@@ -70,103 +71,217 @@ export function RegisterForm() {
     }
   };
 
+  const variants = {
+    enter: (direction: number) => ({
+      x: direction > 0 ? 50 : -50,
+      opacity: 0,
+    }),
+    center: {
+      x: 0,
+      opacity: 1,
+    },
+    exit: (direction: number) => ({
+      x: direction < 0 ? 50 : -50,
+      opacity: 0,
+    }),
+  };
+
   return (
-    <>
-      {step === 1 ? (
-        <form
-          onSubmit={handleFirstStep}
-          className="space-y-4  flex flex-col w-xs mx-auto "
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+      className="w-full max-w-md mx-auto"
+    >
+      <div className="bg-white rounded-3xl shadow-xl p-8 border border-gray-100 overflow-hidden relative min-h-[500px] flex flex-col justify-center">
+        <div className="text-center mb-8">
+          <h2 className="text-3xl font-bold font-geologica text-gray-900 mb-2">
+            Create Account
+          </h2>
+          <p className="text-gray-500 font-figtree">
+            {step === 1 ? "Start your journey today" : "One last thing!"}
+          </p>
+        </div>
+
+        <div className="relative">
+          <AnimatePresence mode="wait" custom={step}>
+            {step === 1 ? (
+              <motion.form
+                key="step1"
+                custom={1}
+                variants={variants}
+                initial="enter"
+                animate="center"
+                exit="exit"
+                transition={{ duration: 0.3 }}
+                onSubmit={handleFirstStep}
+                className="space-y-5"
+              >
+                <div className="space-y-4">
+                  <div className="relative group">
+                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                      <FaEnvelope className="text-gray-400 group-focus-within:text-[var(--color-secondary)] transition-colors" />
+                    </div>
+                    <input
+                      id="email"
+                      type="email"
+                      placeholder="Email address"
+                      autoComplete="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      required
+                      className="block w-full pl-11 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-[var(--color-secondary)] focus:border-transparent transition-all font-figtree"
+                    />
+                  </div>
+
+                  <div className="relative group">
+                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                      <FaLock className="text-gray-400 group-focus-within:text-[var(--color-secondary)] transition-colors" />
+                    </div>
+                    <input
+                      id="password"
+                      type={showPassword ? "text" : "password"}
+                      placeholder="Password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      required
+                      className="block w-full pl-11 pr-11 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-[var(--color-secondary)] focus:border-transparent transition-all font-figtree"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-0 inset-y-0 pr-4 flex items-center text-gray-400 hover:text-gray-600 cursor-pointer transition-colors"
+                    >
+                      {showPassword ? <FaEyeSlash /> : <FaEye />}
+                    </button>
+                  </div>
+
+                  <div className="relative group">
+                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                      <FaLock className="text-gray-400 group-focus-within:text-[var(--color-secondary)] transition-colors" />
+                    </div>
+                    <input
+                      id="confirmPassword"
+                      type={showConfirmPassword ? "text" : "password"}
+                      placeholder="Confirm Password"
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      required
+                      className="block w-full pl-11 pr-11 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-[var(--color-secondary)] focus:border-transparent transition-all font-figtree"
+                    />
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setShowConfirmPassword(!showConfirmPassword)
+                      }
+                      className="absolute right-0 inset-y-0 pr-4 flex items-center text-gray-400 hover:text-gray-600 cursor-pointer transition-colors"
+                    >
+                      {showConfirmPassword ? <FaEyeSlash /> : <FaEye />}
+                    </button>
+                  </div>
+                </div>
+
+                {error && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: "auto" }}
+                    className="text-red-500 text-sm text-center font-medium bg-red-50 p-2 rounded-lg"
+                  >
+                    {error}
+                  </motion.div>
+                )}
+
+                <button
+                  type="submit"
+                  className="w-full bg-[var(--color-primary)] text-white font-bold text-lg py-3.5 rounded-xl hover:bg-[var(--color-primary-dark)] active:scale-[0.98] transition-all shadow-lg shadow-[var(--color-primary)]/20"
+                >
+                  Continue
+                </button>
+              </motion.form>
+            ) : (
+              <motion.form
+                key="step2"
+                custom={2}
+                variants={variants}
+                initial="enter"
+                animate="center"
+                exit="exit"
+                transition={{ duration: 0.3 }}
+                onSubmit={handleSubmit}
+                className="space-y-6"
+              >
+                <div className="space-y-4">
+                  <div className="text-center pb-2">
+                    <p className="font-figtree text-gray-600">
+                      How should we call you?
+                    </p>
+                  </div>
+
+                  <div className="relative group">
+                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                      <FaUser className="text-gray-400 group-focus-within:text-[var(--color-secondary)] transition-colors" />
+                    </div>
+                    <input
+                      id="username"
+                      type="text"
+                      placeholder="Username"
+                      value={username}
+                      onChange={(e) => setUsername(e.target.value)}
+                      required
+                      autoFocus
+                      className="block w-full pl-11 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-[var(--color-secondary)] focus:border-transparent transition-all font-figtree"
+                    />
+                  </div>
+                </div>
+
+                {error && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: "auto" }}
+                    className="text-red-500 text-sm text-center font-medium bg-red-50 p-2 rounded-lg"
+                  >
+                    {error}
+                  </motion.div>
+                )}
+
+                <div className="flex gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setStep(1)}
+                    className="flex-1 bg-gray-100 text-gray-600 font-bold text-lg py-3.5 rounded-xl hover:bg-gray-200 active:scale-[0.98] transition-all"
+                  >
+                    Back
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={isLoading}
+                    className="flex-[2] bg-[var(--color-primary)] text-white font-bold text-lg py-3.5 rounded-xl hover:bg-[var(--color-primary-dark)] active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed transition-all shadow-lg shadow-[var(--color-primary)]/20"
+                  >
+                    {isLoading ? (
+                      <span className="flex items-center justify-center gap-2">
+                        <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                        Creating...
+                      </span>
+                    ) : (
+                      "Create Account"
+                    )}
+                  </button>
+                </div>
+              </motion.form>
+            )}
+          </AnimatePresence>
+        </div>
+      </div>
+
+      <p className="text-center mt-6 text-gray-500 font-figtree">
+        Already have an account?{" "}
+        <button
+          onClick={() => router.push("/login")}
+          className="text-[var(--color-secondary)] font-bold hover:underline"
         >
-          <p className="text-xl my-3">Get started and create accounts</p>
-          <div>
-            <input
-              id="email"
-              type="email"
-              placeholder="Email"
-              autoComplete="off"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              className="mt-1 block w-full rounded-xl border px-3 py-2"
-            />
-          </div>
-
-          <div className="relative">
-            <input
-              id="password"
-              type={showPassword ? "text" : "password"}
-              placeholder="Password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              className="mt-1 block w-full rounded-xl border px-3 py-2 pr-10"
-            />
-            <button
-              type="button"
-              onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 "
-            >
-              {showPassword ? <FaEyeSlash /> : <FaEye />}
-            </button>
-          </div>
-
-          <div className="relative">
-            <input
-              id="confirmPassword"
-              type={showConfirmPassword ? "text" : "password"}
-              placeholder="Confirm Password"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              required
-              className="mt-1 block w-full rounded-xl border px-3 py-2 pr-10"
-            />
-            <button
-              type="button"
-              onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-              className="absolute right-3 top-1/2 -translate-y-1/2"
-            >
-              {showConfirmPassword ? <FaEyeSlash /> : <FaEye />}
-            </button>
-          </div>
-
-          {error && <p className="text-error text-sm">{error}</p>}
-
-          <button
-            type="submit"
-            className="w-full text-xl font-bold bg-primary   rounded-xl hover:bg-primary-dark transition-colors"
-          >
-            Sign up
-          </button>
-        </form>
-      ) : (
-        <form
-          onSubmit={handleSubmit}
-          className="space-y-4 w-full flex flex-col gap-4 max-w-md"
-        >
-          <p className="text-xl">How should we call you?</p>
-          <div>
-            <input
-              id="username"
-              type="text"
-              placeholder="Username"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              required
-              className="mt-1 block w-full rounded-xl border px-3 py-2"
-            />
-          </div>
-
-          {error && <p className="text-error text-sm">{error}</p>}
-
-          <button
-            type="submit"
-            disabled={isLoading}
-            className="w-full bg-primary font-bold text-xl py-2 rounded-xl hover:bg-primary-dark disabled:opacity-50 transition-colors"
-          >
-            {isLoading ? "Creating account..." : "Create Account"}
-          </button>
-        </form>
-      )}
-    </>
+          Sign in
+        </button>
+      </p>
+    </motion.div>
   );
 }

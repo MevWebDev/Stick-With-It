@@ -15,11 +15,15 @@ export default function Topbar() {
           router.push("/profile");
         }}
       >
-        <FaUser />
+        <FaUser size={24} />
       </button>
       <Streak />
-      <button onClick={() => {}}>
-        <IoIosSettings />
+      <button
+        onClick={() => {
+          router.push("/settings");
+        }}
+      >
+        <IoIosSettings size={28} />
       </button>
     </div>
   );

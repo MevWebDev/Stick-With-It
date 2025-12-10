@@ -23,6 +23,10 @@ export interface CheckEmailResponse {
 
 export interface UserStats {
   points: number;
+  level: number;
+  current_exp: number;
+  exp_to_next_level: number;
+  total_exp: number;
   current_streak: number;
   longest_streak: number;
   total_completed: number;
@@ -56,6 +60,27 @@ export interface RegisterCredentials {
   username: string;
   email: string;
   password: string;
+}
+
+export interface ChangePasswordCredentials {
+  current_password: string;
+  new_password: string;
+}
+
+export interface ChangeEmailCredentials {
+  new_email: string;
+  password: string;
+}
+
+export interface ChangeUsernameCredentials {
+  new_username: string;
+  password: string;
+}
+
+export interface ChangeResponse {
+  success: boolean;
+  message: string;
+  errors?: Record<string, string[]>;
 }
 
 export interface AuthContextType {

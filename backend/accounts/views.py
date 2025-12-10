@@ -9,12 +9,26 @@ from django.views.decorators.http import require_http_methods
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
+from rest_framework import status
+from rest_framework.response import Response
 import json
 from django.utils import timezone
 from datetime import timedelta
 from django.db import IntegrityError
 from .models import Challenge, UserStats, DailyChallenge, CompletedChallenge, Badges
+from .services import XpService
+from .serializers import (
+    ChangePasswordSerializer,
+    ChangeEmailSerializer,
+    ChangeUsernameSerializer,
+    RequestPasswordResetSerializer,
+    ConfirmPasswordResetSerializer
+)
 import random
+import secrets
+from django.core.mail import send_mail
+from django.conf import settings
+from django.core.cache import cache
 # REJESTRACJA
 @csrf_exempt
 @require_http_methods(["POST"])
@@ -383,11 +397,16 @@ def complete_challenge(request):
         
         # Oblicz streak
         if stats.last_completed_date:
+            # Konwertuj na date jeśli to datetime
+            last_date = stats.last_completed_date
+            if hasattr(last_date, 'date'):
+                last_date = last_date.date()
+            
             yesterday = today - timedelta(days=1)
-            if stats.last_completed_date == yesterday:
+            if last_date == yesterday:
                 # Kontynuacja streaku
                 stats.current_streak += 1
-            elif stats.last_completed_date == today:
+            elif last_date == today:
                 # Już ukończył coś dzisiaj - nie zmieniaj streaku
                 pass
             else:
@@ -404,14 +423,27 @@ def complete_challenge(request):
         stats.last_completed_date = today
         stats.save()
         
+        # Calculate and Award XP
+        # Base XP: Easy=20, Medium=40, Hard=80
+        base_xp_map = {1: 20, 2: 40, 3: 80}
+        base_xp = base_xp_map.get(challenge.difficulty, 20)
+        
+        # Multiplier: 1 + (streak * 0.01) -> e.g. streak 5 = 1.05x
+        multiplier = 1 + (stats.current_streak * 0.01)
+        xp_amount = int(base_xp * multiplier)
+        
+        xp_result = XpService.award_xp(user, xp_amount, 'challenge')
+        
         # Sprawdź nowe badges (funkcję napiszemy za chwilę)
         new_badges = check_and_award_badges(user)
         
         return JsonResponse({
             'success': True,
-            'points_earned': challenge.difficulty,
+            'points_earned': challenge.difficulty, # Legacy
+            'xp_earned': xp_amount,
             'total_points': stats.points,
             'current_streak': stats.current_streak,
+            'level_info': xp_result,
             'new_badges': [
                 {
                     'key': badge.key,
@@ -440,13 +472,33 @@ def get_user_stats(request):
         user = request.user
         stats = user.stats
         
+        # Lazy reset - wyzeruj Daily Challenge streak jeśli minął więcej niż 1 dzień
+        today = timezone.now().date()
+        yesterday = today - timedelta(days=1)
+        
+        if stats.last_completed_date:
+            # Konwertuj na date jeśli to datetime
+            last_date = stats.last_completed_date
+            if hasattr(last_date, 'date'):
+                last_date = last_date.date()
+            
+            if last_date < yesterday:
+                stats.current_streak = 0
+                stats.save(update_fields=['current_streak'])
+        
         # Policzy badges
         earned_badges = stats.earned_badges.all()
+        
+        xp_needed = XpService.get_xp_required_for_next_level(stats.level)
         
         return JsonResponse({
             'success': True,
             'stats': {
                 'points': stats.points,
+                'level': stats.level,
+                'current_exp': stats.current_exp,
+                'exp_to_next_level': xp_needed,
+                'total_exp': stats.total_exp,
                 'current_streak': stats.current_streak,
                 'longest_streak': stats.longest_streak,
                 'total_completed': stats.total_completed,
@@ -559,6 +611,30 @@ def get_all_badges(request):
 
 
 # ============================================
+# POMODORO - Ukończenie sesji
+# ============================================
+
+@csrf_exempt
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def complete_pomodoro(request):
+    """Zapisuje ukończoną sesję pomodoro i przyznaje XP"""
+    try:
+        user = request.user
+        
+        xp_result = XpService.award_xp(user, 10, 'pomodoro')
+        
+        return JsonResponse({
+            'success': True,
+            'xp_earned': xp_result['earned'],
+            'level_info': xp_result
+        })
+        
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=500)
+
+
+# ============================================
 # HELPER - Sprawdzanie i przyznawanie badges
 # ============================================
 
@@ -579,3 +655,195 @@ def check_and_award_badges(user):
         except Badges.DoesNotExist:
             pass
     return new_badges
+
+
+# ============================================
+# ZMIANA HASŁA
+# ============================================
+
+@csrf_exempt
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def change_password(request):
+    """Zmienia hasło użytkownika - wymaga potwierdzenia obecnym hasłem"""
+    serializer = ChangePasswordSerializer(
+        data=request.data,
+        context={'request': request}
+    )
+    
+    if serializer.is_valid():
+        user = request.user
+        user.set_password(serializer.validated_data['new_password'])
+        user.save()
+        
+        return Response({
+            'success': True,
+            'message': 'Hasło zostało zmienione pomyślnie'
+        }, status=status.HTTP_200_OK)
+    
+    return Response({
+        'success': False,
+        'errors': serializer.errors
+    }, status=status.HTTP_400_BAD_REQUEST)
+
+
+# ============================================
+# ZMIANA EMAILA
+# ============================================
+
+@csrf_exempt
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def change_email(request):
+    """Zmienia email użytkownika - wymaga potwierdzenia hasłem"""
+    serializer = ChangeEmailSerializer(
+        data=request.data,
+        context={'request': request}
+    )
+    
+    if serializer.is_valid():
+        user = request.user
+        user.email = serializer.validated_data['new_email']
+        user.save()
+        
+        return Response({
+            'success': True,
+            'message': 'Email został zmieniony pomyślnie',
+            'new_email': user.email
+        }, status=status.HTTP_200_OK)
+    
+    return Response({
+        'success': False,
+        'errors': serializer.errors
+    }, status=status.HTTP_400_BAD_REQUEST)
+
+
+# ============================================
+# ZMIANA NAZWY UŻYTKOWNIKA
+# ============================================
+
+@csrf_exempt
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def change_username(request):
+    """Zmienia nazwę użytkownika - wymaga potwierdzenia hasłem"""
+    serializer = ChangeUsernameSerializer(
+        data=request.data,
+        context={'request': request}
+    )
+    
+    if serializer.is_valid():
+        user = request.user
+        user.username = serializer.validated_data['new_username']
+        user.save()
+        
+        return Response({
+            'success': True,
+            'message': 'Nazwa użytkownika została zmieniona pomyślnie',
+            'new_username': user.username
+        }, status=status.HTTP_200_OK)
+    
+    return Response({
+        'success': False,
+        'errors': serializer.errors
+    }, status=status.HTTP_400_BAD_REQUEST)
+
+
+# ============================================
+# RESET HASŁA - ŻĄDANIE
+# ============================================
+
+@csrf_exempt
+@api_view(['POST'])
+def request_password_reset(request):
+    """Wysyła email z linkiem do resetu hasła"""
+    serializer = RequestPasswordResetSerializer(data=request.data)
+    
+    if serializer.is_valid():
+        email = serializer.validated_data['email']
+        
+        try:
+            user = User.objects.get(email=email)
+            
+            # Wygeneruj token resetu (64 znaki hex)
+            reset_token = secrets.token_urlsafe(32)
+            
+            # Zapisz token w cache na 1 godzinę
+            cache_key = f'password_reset_{reset_token}'
+            cache.set(cache_key, user.id, timeout=3600)
+            
+            # Przygotuj link resetu
+            reset_url = f"{settings.FRONTEND_URL}/reset-password?token={reset_token}"
+            
+            # Wyślij email
+            send_mail(
+                subject='Reset hasła - Habit Tracker',
+                message=f'Kliknij w link aby zresetować hasło:\n\n{reset_url}\n\nLink jest ważny przez 1 godzinę.',
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                recipient_list=[email],
+                fail_silently=False,
+            )
+            
+        except User.DoesNotExist:
+            # Dla bezpieczeństwa nie ujawniamy czy email istnieje
+            pass
+        
+        # Zawsze zwracaj sukces (nie ujawniaj czy email istnieje)
+        return Response({
+            'success': True,
+            'message': 'Jeśli podany email istnieje w systemie, wysłaliśmy link do resetu hasła'
+        }, status=status.HTTP_200_OK)
+    
+    return Response({
+        'success': False,
+        'errors': serializer.errors
+    }, status=status.HTTP_400_BAD_REQUEST)
+
+
+# ============================================
+# RESET HASŁA - POTWIERDZENIE
+# ============================================
+
+@csrf_exempt
+@api_view(['POST'])
+def confirm_password_reset(request):
+    """Resetuje hasło używając tokena z emaila"""
+    serializer = ConfirmPasswordResetSerializer(data=request.data)
+    
+    if serializer.is_valid():
+        token = serializer.validated_data['token']
+        new_password = serializer.validated_data['new_password']
+        
+        # Sprawdź token w cache
+        cache_key = f'password_reset_{token}'
+        user_id = cache.get(cache_key)
+        
+        if user_id is None:
+            return Response({
+                'success': False,
+                'error': 'Nieprawidłowy lub wygasły token resetu hasła'
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+        try:
+            user = User.objects.get(id=user_id)
+            user.set_password(new_password)
+            user.save()
+            
+            # Usuń token z cache
+            cache.delete(cache_key)
+            
+            return Response({
+                'success': True,
+                'message': 'Hasło zostało zresetowane pomyślnie'
+            }, status=status.HTTP_200_OK)
+            
+        except User.DoesNotExist:
+            return Response({
+                'success': False,
+                'error': 'Użytkownik nie istnieje'
+            }, status=status.HTTP_400_BAD_REQUEST)
+    
+    return Response({
+        'success': False,
+        'errors': serializer.errors
+    }, status=status.HTTP_400_BAD_REQUEST)
