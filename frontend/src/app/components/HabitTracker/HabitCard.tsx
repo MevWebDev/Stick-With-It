@@ -11,7 +11,8 @@ import {
   FaIgloo,
   FaShower,
   FaSmile,
-  FaQuestion
+  FaQuestion,
+  FaAngellist
 } from "react-icons/fa";
 import { Habit } from "../../lib/habits/habitService";
 
@@ -26,6 +27,7 @@ const ICON_MAP: Record<string, React.ReactNode> = {
   "igloo": <FaIgloo />,
   "smile": <FaSmile />,
   "shower": <FaShower />,
+  "angelist": <FaAngellist />,
 };
 
 export default function HabitCard({
@@ -47,20 +49,30 @@ export default function HabitCard({
         cursor-pointer 
         transition-all duration-500 ease-in-out
         hover:scale-105 hover:-translate-y-2
-        
-        ${isActive ? "bg-gradient-to-br from-yellow-400 to-red-500" : "bg-gray-300"}
+        bg-gray-300
       `}
     >
       
+      {/* 1. THE BORDER GRADIENT */}
+      <div className={`
+        absolute inset-0 rounded-2xl 
+        bg-gradient-to-br from-yellow-400 to-red-500 
+        transition-opacity ease-out
+        duration-1000 group-hover:duration-200 
+        ${isActive ? "opacity-100" : "opacity-0 group-hover:opacity-100"}
+      `}></div>
+
+      {/* 2. THE BACKGROUND BLUR (GLOW) */}
       <div className={`
         absolute top-0 left-0 w-full h-full 
         bg-gradient-to-br from-yellow-400 to-red-500 
         blur-xl -z-10 rounded-2xl
-        transition-opacity duration-500
-        ${isActive ? "opacity-70" : "opacity-0"} 
+        transition-opacity ease-out
+        duration-1000 group-hover:duration-200
+        ${isActive ? "opacity-70" : "opacity-0 group-hover:opacity-50"} 
       `}></div>
 
-      <div className="w-full h-full bg-white rounded-xl flex flex-col items-center justify-center z-10">
+      <div className="relative w-full h-full bg-white rounded-xl flex flex-col items-center justify-center z-10">
       
         <div className={`
             rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold border mb-2 font-figtree transition-colors duration-300
