@@ -759,7 +759,7 @@ class UserStatsModelTestCase(TestCase):
         self.assertEqual(self.stats.current_streak, 0)
 
     def test_user_stats_str(self):
-        self.assertEqual(str(self.stats), "statuser - 0 pts (Streak: 0)")
+        self.assertEqual(str(self.stats), "statuser - Lvl 1 (0 pts, Streak: 0)")
 
 
 class DailyChallengeViewTestCase(TestCase):
