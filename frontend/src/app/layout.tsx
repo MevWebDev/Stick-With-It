@@ -3,6 +3,7 @@ import { Geologica, Figtree } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "./lib/auth/authContext";
 import { UserStatsProvider } from "./lib/userStats/UserStatsContext";
+import { ToastProvider } from "./lib/toast/ToastContext";
 
 const geologica = Geologica({
   variable: "--font-geologica",
@@ -20,7 +21,8 @@ export const metadata: Metadata = {
   description: "self-care app",
   manifest: "/manifest.json",
   themeColor: "#ffffff",
-  viewport: "minimum-scale=1, initial-scale=1, width=device-width, shrink-to-fit=no, user-scalable=no, viewport-fit=cover",
+  viewport:
+    "minimum-scale=1, initial-scale=1, width=device-width, shrink-to-fit=no, user-scalable=no, viewport-fit=cover",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
@@ -42,7 +44,7 @@ export default function RootLayout({
       <body className={`${geologica.variable} ${figtree.variable} antialiased`}>
         <AuthProvider>
           <UserStatsProvider>
-            {children}
+            <ToastProvider>{children}</ToastProvider>
           </UserStatsProvider>
         </AuthProvider>
       </body>
