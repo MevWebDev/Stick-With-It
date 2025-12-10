@@ -384,11 +384,16 @@ def complete_challenge(request):
         
         # Oblicz streak
         if stats.last_completed_date:
+            # Konwertuj na date jeśli to datetime
+            last_date = stats.last_completed_date
+            if hasattr(last_date, 'date'):
+                last_date = last_date.date()
+            
             yesterday = today - timedelta(days=1)
-            if stats.last_completed_date == yesterday:
+            if last_date == yesterday:
                 # Kontynuacja streaku
                 stats.current_streak += 1
-            elif stats.last_completed_date == today:
+            elif last_date == today:
                 # Już ukończył coś dzisiaj - nie zmieniaj streaku
                 pass
             else:
@@ -453,6 +458,20 @@ def get_user_stats(request):
     try:
         user = request.user
         stats = user.stats
+        
+        # Lazy reset - wyzeruj Daily Challenge streak jeśli minął więcej niż 1 dzień
+        today = timezone.now().date()
+        yesterday = today - timedelta(days=1)
+        
+        if stats.last_completed_date:
+            # Konwertuj na date jeśli to datetime
+            last_date = stats.last_completed_date
+            if hasattr(last_date, 'date'):
+                last_date = last_date.date()
+            
+            if last_date < yesterday:
+                stats.current_streak = 0
+                stats.save(update_fields=['current_streak'])
         
         # Policzy badges
         earned_badges = stats.earned_badges.all()

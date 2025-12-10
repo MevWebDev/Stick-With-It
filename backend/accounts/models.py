@@ -33,7 +33,7 @@ class UserStats(models.Model):
     total_exp = models.IntegerField(default=0)
 
     def __str__(self):
-        return f"{self.user.username} - Lvl {self.level} ({self.points} pts)"
+        return f"{self.user.username} - Lvl {self.level} ({self.points} pts, Streak: {self.current_streak})"
 
 class XpLog(models.Model):
     """Log of XP gains to enforce daily limits"""
