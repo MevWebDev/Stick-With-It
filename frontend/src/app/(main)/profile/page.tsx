@@ -37,7 +37,7 @@ export default function ProfilePage() {
     fetchData();
   }, [user]);
 
-  if (!user) {
+  if (!user || loading) {
     return <div>Loading...</div>;
   }
 
@@ -252,47 +252,6 @@ function StatCard({
       <span className="text-[10px] text-gray-500 uppercase font-bold tracking-wide">
         {label}
       </span>
-    </div>
-  );
-}
-
-function AchievementCard({
-  icon,
-  title,
-  description,
-  current = 0,
-  total,
-}: {
-  icon: React.ReactNode;
-  title: string;
-  description: string;
-  current?: number;
-  total: number;
-}) {
-  const percentage = Math.min((current / total) * 100, 100);
-
-  return (
-    <div className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex items-center gap-4">
-      <div className="w-12 h-12 bg-gray-50 rounded-xl flex items-center justify-center text-xl flex-shrink-0">
-        {icon}
-      </div>
-      <div className="flex-1 min-w-0">
-        <div className="flex justify-between items-start mb-1">
-          <div>
-            <h4 className="font-bold text-gray-900 text-sm">{title}</h4>
-            <p className="text-xs text-gray-500 truncate">{description}</p>
-          </div>
-          <span className="text-xs font-bold text-gray-500">
-            {current}/{total}
-          </span>
-        </div>
-        <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
-          <div
-            className="h-full bg-[var(--color-secondary)] rounded-full transition-all duration-500"
-            style={{ width: `${percentage}%` }}
-          />
-        </div>
-      </div>
     </div>
   );
 }

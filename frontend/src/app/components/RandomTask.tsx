@@ -10,7 +10,10 @@ import {
   FaBan,
   FaTimes,
 } from "react-icons/fa";
-import { challengeService, type DailyChallenge } from "@/app/lib/challenges/challengeService";
+import {
+  challengeService,
+  type DailyChallenge,
+} from "@/app/lib/challenges/challengeService";
 import { useUserStats } from "../lib/userStats/UserStatsContext";
 import { useAuth } from "../lib/auth/authContext";
 
@@ -69,7 +72,9 @@ const placeHolderChallenge: DailyChallenge = {
 };
 
 export default function RandomTask() {
-  const [dailyChallenge, setDailyChallenge] = useState<DailyChallenge | null>(null);
+  const [dailyChallenge, setDailyChallenge] = useState<DailyChallenge | null>(
+    null
+  );
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [actionLoading, setActionLoading] = useState(false);
@@ -82,8 +87,8 @@ export default function RandomTask() {
       try {
         const data = await challengeService.getDailyChallenge();
         setDailyChallenge(data);
-        
-        console.log(data)
+
+        console.log(data);
       } catch (error) {
         setDailyChallenge(placeHolderChallenge);
         console.error("Failed to fetch daily challenge:", error);
@@ -99,11 +104,11 @@ export default function RandomTask() {
 
   const handleDone = async () => {
     if (!dailyChallenge || dailyChallenge.challenge.completed) return;
-    
+
     setActionLoading(true);
     try {
       await challengeService.completeChallenge();
-      
+
       // Update local state to mark as completed
       setDailyChallenge({
         ...dailyChallenge,
@@ -112,12 +117,10 @@ export default function RandomTask() {
           completed: true,
         },
       });
-      
+
       setIsModalOpen(false);
       // Optionally show a success message with points earned
       refreshStats();
-
-      
     } catch (error) {
       console.error("Failed to complete challenge:", error);
       alert("Failed to complete challenge. Please try again.");
@@ -128,12 +131,11 @@ export default function RandomTask() {
 
   const handleBlacklist = async () => {
     if (!dailyChallenge) return;
-    
+
     setActionLoading(true);
     try {
-      const result = await challengeService.toggleBlacklist(dailyChallenge.challenge.category);
-      
-      
+      await challengeService.toggleBlacklist(dailyChallenge.challenge.category);
+
       setIsModalOpen(false);
       // Reload to get a new challenge
       setLoading(true);
@@ -158,25 +160,30 @@ export default function RandomTask() {
   }
 
   if (!dailyChallenge) return null;
-  
+
   const { challenge } = dailyChallenge;
   const completed = challenge.completed;
   const colorClasses = getDifficultyColor(challenge.difficulty);
-  
 
   return (
     <>
       {/* Small Component (Trigger) - Mobile First */}
       <div
         onClick={() => setIsModalOpen(true)}
-        className={`w-full px-5 py-6 rounded-3xl border-2 cursor-pointer active:scale-95 transition-transform flex items-center gap-4 ${colorClasses} ${completed ? 'opacity-60' : ''}`}
+        className={`w-full px-5 py-6 rounded-3xl border-2 cursor-pointer active:scale-95 transition-transform flex items-center gap-4 ${colorClasses} ${
+          completed ? "opacity-60" : ""
+        }`}
       >
-        <div className="text-4xl flex-shrink-0">{getCategoryIcon(challenge.category)}</div>
+        <div className="text-4xl flex-shrink-0">
+          {getCategoryIcon(challenge.category)}
+        </div>
         <div className="flex-1 min-w-0">
           <div className="text-xs font-bold uppercase opacity-60 mb-1 tracking-wide">
             {completed ? "Completed Today!" : "Daily Challenge"}
           </div>
-          <div className="font-bold font-geologica text-xl truncate">{challenge.title}</div>
+          <div className="font-bold font-geologica text-xl truncate">
+            {challenge.title}
+          </div>
         </div>
       </div>
 
@@ -197,14 +204,18 @@ export default function RandomTask() {
               {/* Header with Color */}
               <div className={`p-6 sm:p-8 ${colorClasses}`}>
                 <div className="flex items-center gap-2 text-sm font-bold uppercase tracking-wider mb-3 opacity-80">
-                  <span className="text-xl">{getCategoryIcon(challenge.category)}</span>
+                  <span className="text-xl">
+                    {getCategoryIcon(challenge.category)}
+                  </span>
                   <span>{challenge.category}</span>
                 </div>
                 <h2 className="text-3xl sm:text-4xl font-bold font-geologica leading-tight pr-8">
                   {challenge.title}
                 </h2>
                 <span className="inline-block mt-4 px-4 py-1.5 bg-white/60 rounded-full text-xs font-bold border border-black/5">
-                  {getDifficultyLabel(challenge.difficulty)} • {challenge.difficulty} {challenge.difficulty === 1 ? 'point' : 'points'}
+                  {getDifficultyLabel(challenge.difficulty)} •{" "}
+                  {challenge.difficulty}{" "}
+                  {challenge.difficulty === 1 ? "point" : "points"}
                 </span>
               </div>
 
@@ -240,7 +251,8 @@ export default function RandomTask() {
                         disabled={actionLoading}
                         className="w-full sm:flex-1 bg-gray-100 text-gray-700 py-4 px-6 rounded-2xl font-bold active:scale-95 hover:bg-gray-200 transition-all flex items-center justify-center gap-2 text-lg disabled:opacity-50 disabled:cursor-not-allowed"
                       >
-                        <FaBan /> {actionLoading ? "Processing..." : "Blacklist"}
+                        <FaBan />{" "}
+                        {actionLoading ? "Processing..." : "Blacklist"}
                       </button>
                     </div>
                   </>

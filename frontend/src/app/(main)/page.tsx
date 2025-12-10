@@ -1,12 +1,9 @@
 "use client";
 import { useAuth } from "../lib/auth/authContext";
-import { useRouter } from "next/navigation";
 import RandomTask from "../components/RandomTask";
-import { useEffect } from "react";
 
 export default function Home() {
-  const { user, logout } = useAuth();
-  const router = useRouter();
+  const { user } = useAuth();
 
   // Function to capitalize the first letter of the username
   const capitalizeFirstLetter = (username: string | undefined) => {
@@ -28,17 +25,6 @@ export default function Home() {
       <div className="w-full max-w-md">
         <RandomTask />
       </div>
-      
-
-      <button
-        onClick={async () => {
-          await logout();
-          router.push("/login");
-        }}
-        className="px-6 py-2 bg-red-50 text-red-500 rounded-xl hover:bg-red-100 transition-colors font-medium"
-      >
-        Logout
-      </button>
     </div>
   );
 }

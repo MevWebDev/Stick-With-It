@@ -36,7 +36,7 @@ export function RegisterForm() {
         return;
       }
     } catch (error) {
-      setError("Email check failed");
+      setError(`${error}`);
       return;
     }
 
