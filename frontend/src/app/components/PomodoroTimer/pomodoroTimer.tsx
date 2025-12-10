@@ -186,69 +186,137 @@ export default function PomodoroTimer() {
     return "Break Mode";
   };
 
+  const getTimerTheme = () => {
+    if (timerStatus === "idle") {
+      return {
+        border: "border-gray-800",
+        bg: "bg-gray-100",
+        text: "text-[#677381]",
+        opacity: "opacity-100",
+      };
+    }
+
+    const isPaused = timerStatus === "paused";
+    const opacity = isPaused ? "opacity-50" : "opacity-100";
+
+    if (mode === "focus") {
+      return {
+        border: "border-[#821e3f]",
+        bg: "bg-red-50",
+        shadow: "shadow-2xl shadow-[#ffccdc]",
+        text: "text-[#c94d74]",
+        opacity,
+      };
+    } else {
+      return {
+        border: "border-[#003303]",
+        bg: "bg-green-50",
+        shadow: "shadow-2xl shadow-[#d9faed]",
+        text: "text-[#0f7049]",
+        opacity,
+      };
+    }
+  };
+
+  const theme = getTimerTheme();
+
   return (
-    <div className="space-y-4 flex flex-col items-center">
-      <h1 className="text-4xl font-bold mb-6 text-center">
-        Pomodoro <br /> Timer
-      </h1>
+    <div className="flex flex-col items-center h-full w-full">
+      <div className="h-[65%] flex flex-col items-center justify-center space-y-4 w-full">
+        <h1 className="text-4xl font-bold mb-6 text-center">
+          Pomodoro <br /> Timer
+        </h1>
 
-      <p className="text-center text-base font-semibold tracking-wider opacity-70 text-shadow-lg">
-        {getStatusMessage()}
-      </p>
+        <p
+          className={`text-center text-base font-semibold tracking-wider opacity-70 text-shadow-lg ${theme.text}`}
+        >
+          {getStatusMessage()}
+        </p>
 
-      <div className="w-60 h-60 flex flex-col items-center justify-center rounded-full border-5 border-gray-800 bg-gray-100">
-        <h3 className="text-6xl font-semibold tracking-[0.1em] text-[#677381]">
-          {formatTime(timeLeft)}
-        </h3>
+        <div className="relative">
+          <div
+            className={`w-60 h-60 flex flex-col items-center justify-center rounded-full border-5 transition-all duration-300 ${theme.bg} ${theme.shadow} ${theme.opacity} ${theme.border}`}
+          >
+            <h3
+              className={`text-6xl font-semibold tracking-[0.1em] ${theme.text}`}
+            >
+              {formatTime(timeLeft)}
+            </h3>
+          </div>
+          {timerStatus === "paused" && (
+            <div className="absolute inset-0 flex items-center justify-center z-10">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth={2}
+                stroke="currentColor"
+                className={`w-24 h-24 ${theme.text}`}
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M15.75 5.25v13.5m-7.5-13.5v13.5"
+                />
+              </svg>
+            </div>
+          )}
+        </div>
       </div>
 
-      {timerStatus === "idle" && (
-        <button
-          className="mt-2 px-6 py-2 text-base font-semibold text-[#677381] hover:text-black"
-          onClick={() => setPopup("sessionTime")}
-        >
-          Set Session Time
-        </button>
-      )}
+      <div className="h-[35%] pb-8 flex flex-col items-center justify-end space-y-4 w-full">
+        {timerStatus === "idle" && (
+          <button
+            className="mt-2 px-6 py-2 text-base font-semibold text-[#677381] hover:text-black"
+            onClick={() => setPopup("sessionTime")}
+          >
+            Set Session Time
+          </button>
+        )}
 
-      <StartStopButton
-        timerStatus={timerStatus as "running" | "paused" | "idle"}
-        onStart={() => {
-          if (timerStatus === "paused" && pausedTime !== null) {
-            setTimerStatus("running" as const);
-            setEndTimestamp(Date.now() + pausedTime * 1000);
+        <StartStopButton
+          timerStatus={timerStatus as "running" | "paused" | "idle"}
+          onStart={() => {
+            if (timerStatus === "paused" && pausedTime !== null) {
+              setTimerStatus("running" as "running");
+              setEndTimestamp(Date.now() + pausedTime * 1000);
+              setPausedTime(null);
+            } else {
+              setTimerStatus("running" as "running");
+              setEndTimestamp(
+                Date.now() + (mode === "focus" ? focusTime : breakTime) * 1000
+              );
+            }
+          }}
+          onStop={() => {
+            setTimerStatus("paused" as "paused");
+            setPausedTime(timeLeft);
+            setEndTimestamp(null);
+          }}
+          onReset={() => {
+            setTimerStatus("idle" as "idle");
+            setMode("focus");
+            setFocusTime(focusTime);
+            setBreakTime(breakTime);
+            setTimeLeft(focusTime);
+            setEndTimestamp(null);
             setPausedTime(null);
-          } else {
-            setTimerStatus("running" as const);
-            setEndTimestamp(
-              Date.now() + (mode === "focus" ? focusTime : breakTime) * 1000
-            );
-          }
-        }}
-        onStop={() => {
-          setTimerStatus("paused" as const);
-          setPausedTime(timeLeft);
-          setEndTimestamp(null);
-        }}
-        onReset={() => {
-          setTimerStatus("idle" as const);
-          setMode("focus");
-          setFocusTime(focusTime);
-          setBreakTime(breakTime);
-          setTimeLeft(focusTime);
-          setEndTimestamp(null);
-          setPausedTime(null);
-        }}
-      />
+          }}
+        />
+      </div>
 
       {popUp === "sessionTime" && (
         <SessionTimePopup
           onClose={() => setPopup(null)}
           onSetTimes={(newFocus, newBreak) => {
-            setFocusTime(newFocus * 60);
-            setBreakTime(newBreak * 60);
+            setFocusTime(Math.round(newFocus * 60));
+            setBreakTime(Math.round(newBreak * 60));
             if (timerStatus === "idle") {
-              setTimeLeft(mode === "focus" ? newFocus * 60 : newBreak * 60);
+              setTimeLeft(
+                mode === "focus"
+                  ? Math.round(newFocus * 60)
+                  : Math.round(newBreak * 60)
+              );
             }
           }}
           currentFocus={Math.floor(focusTime / 60)}
