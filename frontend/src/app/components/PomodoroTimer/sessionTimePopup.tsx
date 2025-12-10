@@ -23,7 +23,7 @@ export default function SessionTimePopup({
   return (
     <div className="bg-black/40 fixed inset-0 flex items-center justify-center">
       <div className="bg-white p-6 rounded-lg shadow-lg">
-        <h2 className="text-lg font-bold mb-4">Set Session Time</h2>
+        <h2 className="text-xl font-bold mb-4">Set Session Time</h2>
         <div className="flex flex-col gap-4 mb-4">
           <div className="flex flex-col items-start">
             <label className="mb-1 font-medium">Focus Time</label>
