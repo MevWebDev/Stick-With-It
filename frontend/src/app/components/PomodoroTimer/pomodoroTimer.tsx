@@ -4,6 +4,8 @@ import { usePathname } from "next/navigation";
 import SessionTimePopup from "./sessionTimePopup";
 import StartStopButton from "./startStopButton";
 import EndSessionPopup from "./endSessionPopup";
+import { apiClient } from "@/app/lib/api/client";
+import { useUserStats } from "@/app/lib/userStats/UserStatsContext";
 
 const getStorageValue = (key: string, defaultValue: number): number => {
   if (typeof window === "undefined") return defaultValue;
@@ -13,6 +15,7 @@ const getStorageValue = (key: string, defaultValue: number): number => {
 
 export default function PomodoroTimer() {
   const pathname = usePathname();
+  const { refreshStats } = useUserStats();
 
   const [focusTime, setFocusTime] = useState(() =>
     getStorageValue("pomodoroFocusTime", 25 * 60)
@@ -70,6 +73,35 @@ export default function PomodoroTimer() {
       .padStart(2, "0");
     const s = (seconds % 60).toString().padStart(2, "0");
     return `${m}:${s}`;
+  };
+
+  const completePomodoroSession = async () => {
+    try {
+      const token = localStorage.getItem("access_token");
+      if (!token) {
+        console.warn("No access token found, skipping XP award");
+        return;
+      }
+
+      const response = await apiClient.post<{
+        success: boolean;
+        xp_earned: number;
+        level_info: {
+          current_level: number;
+          current_exp: number;
+          exp_to_next_level: number;
+          total_exp: number;
+          leveled_up: boolean;
+        };
+      }>("/api/auth/pomodoro/complete/", {}, token);
+
+      console.log("Pomodoro XP awarded:", response);
+
+      // Refresh user stats to show updated XP/level
+      await refreshStats();
+    } catch (error) {
+      console.error("Error completing pomodoro session:", error);
+    }
   };
 
   useEffect(() => {
@@ -130,6 +162,8 @@ export default function PomodoroTimer() {
       setEndTimestamp(Date.now() + breakTime * 1000);
       setTimeLeft(breakTime);
     } else {
+      // Call API to award XP for completed focus session
+      completePomodoroSession();
       setTimerStatus("idle");
       setPopup("ended");
       setMode("focus");
