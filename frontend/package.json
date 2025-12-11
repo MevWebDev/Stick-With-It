@@ -9,6 +9,7 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "emoji-picker-react": "^4.16.1",
     "framer-motion": "^12.23.24",
     "next": "15.5.4",
     "next-pwa": "^5.6.0",
