@@ -278,23 +278,23 @@ export default function PomodoroTimer() {
           timerStatus={timerStatus as "running" | "paused" | "idle"}
           onStart={() => {
             if (timerStatus === "paused" && pausedTime !== null) {
-              setTimerStatus("running" as "running");
+              setTimerStatus("running" as const);
               setEndTimestamp(Date.now() + pausedTime * 1000);
               setPausedTime(null);
             } else {
-              setTimerStatus("running" as "running");
+              setTimerStatus("running" as const);
               setEndTimestamp(
                 Date.now() + (mode === "focus" ? focusTime : breakTime) * 1000
               );
             }
           }}
           onStop={() => {
-            setTimerStatus("paused" as "paused");
+            setTimerStatus("paused" as const);
             setPausedTime(timeLeft);
             setEndTimestamp(null);
           }}
           onReset={() => {
-            setTimerStatus("idle" as "idle");
+            setTimerStatus("idle" as const);
             setMode("focus");
             setFocusTime(focusTime);
             setBreakTime(breakTime);
