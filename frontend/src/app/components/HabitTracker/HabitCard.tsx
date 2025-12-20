@@ -38,7 +38,7 @@ export default function HabitCard({
   onHabitClick: (id: number) => void;
 }) {
   const isActive = habit.completed_today;
-  const icon = ICON_MAP[habit.icon_slug] || <FaQuestion />;
+  const icon = ICON_MAP[habit.icon_slug] || <span className="text-3xl">{habit.icon_slug}</span>;
 
   return (
     <div

@@ -7,6 +7,7 @@ import {
   FaStickyNote,
   FaHome,
 } from "react-icons/fa";
+import { FaGlassWaterDroplet } from "react-icons/fa6";
 import { IoMdClose } from "react-icons/io";
 import { usePathname } from "next/navigation";
 import CustomToolButton from "./CustomToolButton";
@@ -19,6 +20,11 @@ const tools = [
   { name: "Home", icon: <FaHome />, href: "/" },
   { name: "Habit Tracker", icon: <FaTasks />, href: "/habittracker" },
   { name: "Pomodoro", icon: <FaClock />, href: "/pomodoro" },
+  {
+    name: "Water Tracker",
+    icon: <FaGlassWaterDroplet />,
+    href: "/watertracker",
+  },
   // Placeholders for future tools
   { name: "Calendar", icon: <FaCalendarAlt />, href: "#" },
   { name: "Notes", icon: <FaStickyNote />, href: "#" },

@@ -2,9 +2,8 @@
 import { useState, useEffect } from "react";
 import HabitCard from "./HabitCard";
 import { habitService, Habit } from "../../lib/habits/habitService";
-import {
-  FaPlus,
-} from "react-icons/fa";
+import {  FaPlus } from "react-icons/fa";
+import EmojiPicker from "emoji-picker-react";
 
 // defaultowe taski
 const availableHabitTemplates = [
@@ -25,8 +24,10 @@ export default function HabitTracker() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedTemplateIndex, setSelectedTemplateIndex] = useState<number>(0);
   const [customHabitName, setCustomHabitName] = useState("");
+  const [customHabitEmoji, setCustomHabitEmoji] = useState("✨");
   const [inputMode, setInputMode] = useState<"template" | "custom">("template");
   const [isLoading, setIsLoading] = useState(false);
+  const [isEmojiPickerOpen, setIsEmojiPickerOpen] = useState(false);
 
   useEffect(() => {
     loadHabits();
@@ -95,7 +96,7 @@ export default function HabitTracker() {
     if (inputMode === "custom") {
       if (!customHabitName.trim()) return;
       name = customHabitName.trim();
-      icon_slug = "angelist";
+      icon_slug = customHabitEmoji.trim() || "✨";
     } else {
       const template = availableHabitTemplates[selectedTemplateIndex];
       if (!template) return;
@@ -117,6 +118,7 @@ export default function HabitTracker() {
       setMyTrackedHabits([...myTrackedHabits, newHabit]);
       setIsModalOpen(false);
       setCustomHabitName("");
+      setCustomHabitEmoji("✨");
     } catch (error) {
       console.error("Failed to create habit:", error);
       alert("Failed to create habit. Please try again.");
@@ -214,13 +216,44 @@ export default function HabitTracker() {
                 <p className="mb-4 text-gray-600 text-xs font-figtree">You are tracking all available templates!</p>
               )
             ) : (
-              <input
-                type="text"
-                placeholder="Custom habit name"
-                value={customHabitName}
-                onChange={(e) => setCustomHabitName(e.target.value)}
-                className="w-full p-2 border rounded mb-4 border-black font-figtree"
-              />
+              <div className="flex gap-2 mb-4 relative">
+                {isEmojiPickerOpen && (
+                  <>
+                    <div 
+                      className="fixed inset-0 z-40" 
+                      onClick={() => setIsEmojiPickerOpen(false)}
+                    />
+                    <div className="absolute top-full z-50">
+                      <EmojiPicker
+                        onEmojiClick={(emojiObject) => {
+                          setCustomHabitEmoji(emojiObject.emoji);
+                          setIsEmojiPickerOpen(false);
+                        }}
+                        width={300}
+                        height={350}
+                        skinTonesDisabled={true}
+                      />
+                    </div>
+                  </>
+                )}
+                
+                <input
+                  type="text"
+                  placeholder="Emoji"
+                  value={customHabitEmoji}
+                  readOnly
+                  className="w-16 p-2 border rounded border-black font-figtree text-center text-2xl cursor-pointer hover:bg-gray-50"
+                  onClick={() => setIsEmojiPickerOpen(!isEmojiPickerOpen)}
+                />
+                
+                <input
+                  type="text"
+                  placeholder="Custom habit name"
+                  value={customHabitName}
+                  onChange={(e) => setCustomHabitName(e.target.value)}
+                  className="flex-1 p-2 border rounded border-black font-figtree text-xs w-20"
+                />
+              </div>
             )}
 
             <div className="flex justify-between gap-4">
