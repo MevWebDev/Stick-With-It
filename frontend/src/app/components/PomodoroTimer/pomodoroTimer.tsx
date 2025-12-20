@@ -237,11 +237,26 @@ export default function PomodoroTimer() {
           <div
             className={`w-60 h-60 flex flex-col items-center justify-center rounded-full border-5 transition-all duration-300 ${theme.bg} ${theme.shadow} ${theme.opacity} ${theme.border}`}
           >
-            <h3
-              className={`text-6xl font-semibold tracking-[0.1em] ${theme.text}`}
+            <div
+              className="flex justify-center items-center w-full"
+              style={{ minHeight: "80px" }}
             >
-              {formatTime(timeLeft)}
-            </h3>
+              <span
+                className={`text-6xl font-semibold tracking-[0.1em] ${theme.text}`}
+                style={{
+                  fontFamily: "geologica",
+                  width: "8ch",
+                  display: "inline-block",
+                  textAlign: "center",
+                  letterSpacing: "0.1em",
+                  lineHeight: 1.1,
+                  userSelect: "none",
+                  fontVariantNumeric: "tabular-nums",
+                }}
+              >
+                {formatTime(timeLeft)}
+              </span>
+            </div>
           </div>
           {timerStatus === "paused" && (
             <div className="absolute inset-0 flex items-center justify-center z-10">
