@@ -65,7 +65,9 @@ export default function PomodoroTimer() {
   });
 
   const intervalRef = useRef<number | null>(null);
-  const [popUp, setPopup] = useState<"sessionTime" | "ended" | null>(null);
+  const [popUp, setPopup] = useState<
+    "sessionTime" | "confirm" | "ended" | null
+  >(null);
 
   const formatTime = (seconds: number) => {
     const m = Math.floor(seconds / 60)
@@ -186,6 +188,7 @@ export default function PomodoroTimer() {
     return "Break Mode";
   };
 
+  // for changing themes
   const getTimerTheme = () => {
     if (timerStatus === "idle") {
       return {
@@ -220,22 +223,55 @@ export default function PomodoroTimer() {
 
   const theme = getTimerTheme();
 
+  const onStart = () => {
+    if (timerStatus === "paused" && pausedTime !== null) {
+      setTimerStatus("running" as "running");
+      setEndTimestamp(Date.now() + pausedTime * 1000);
+      setPausedTime(null);
+    } else {
+      setTimerStatus("running" as "running");
+      setEndTimestamp(
+        Date.now() + (mode === "focus" ? focusTime : breakTime) * 1000
+      );
+    }
+  };
+
+  const onStop = () => {
+    setTimerStatus("paused" as "paused");
+    setPausedTime(timeLeft);
+    setEndTimestamp(null);
+  };
+
+  const onReset = () => {
+    if (timerStatus === "running" || timerStatus === "paused") {
+      setPopup("confirm");
+    } else {
+      setTimerStatus("idle" as "idle");
+      setMode("focus");
+      setFocusTime(focusTime);
+      setBreakTime(breakTime);
+      setTimeLeft(focusTime);
+      setEndTimestamp(null);
+      setPausedTime(null);
+    }
+  };
+
   return (
     <div className="flex flex-col items-center h-full w-full">
-      <div className="h-[65%] flex flex-col items-center justify-center space-y-4 w-full">
-        <h1 className="text-4xl font-bold mb-6 text-center">
+      <div className="flex flex-col items-center justify-center space-y-4 w-full">
+        <h1 className="text-4xl font-bold mb-[2vh] text-center">
           Pomodoro <br /> Timer
         </h1>
 
         <p
-          className={`text-center text-base font-semibold tracking-wider opacity-70 text-shadow-lg ${theme.text}`}
+          className={`text-center mt-[3vh] text-base font-semibold tracking-wider opacity-70 text-shadow-lg ${theme.text} text-xl`}
         >
           {getStatusMessage()}
         </p>
 
-        <div className="relative">
+        <div className="w-65 h-65 mt-[2vh] relative flex flex-col items-center justify-center">
           <div
-            className={`w-60 h-60 flex flex-col items-center justify-center rounded-full border-5 transition-all duration-300 ${theme.bg} ${theme.shadow} ${theme.opacity} ${theme.border}`}
+            className={`w-full h-full flex flex-col items-center justify-center rounded-full border-5 transition-all duration-300 ${theme.bg} ${theme.shadow} ${theme.opacity} ${theme.border}`}
           >
             <div
               className="flex justify-center items-center w-full"
@@ -259,7 +295,7 @@ export default function PomodoroTimer() {
             </div>
           </div>
           {timerStatus === "paused" && (
-            <div className="absolute inset-0 flex items-center justify-center z-10">
+            <div className="absolute inset-0 flex items-center justify-center">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
@@ -282,11 +318,46 @@ export default function PomodoroTimer() {
       <div className="h-[35%] pb-8 flex flex-col items-center justify-end space-y-4 w-full">
         {timerStatus === "idle" && (
           <button
-            className="mt-2 px-6 py-2 text-base font-semibold text-[#677381] hover:text-black"
+            className="px-6 py-2 text-base font-semibold text-[#677381] hover:text-black"
             onClick={() => setPopup("sessionTime")}
           >
             Set Session Time
           </button>
+        )}
+
+        {popUp === "confirm" && (
+          <div className="fixed inset-0 flex flex-col items-center justify-center bg-black/40 h-[100vh]">
+            <div className="bg-white p-6 rounded-lg shadow-lg flex flex-col items-center">
+              <h2 className="font-semibold mb-4 text-center">
+                Do you want to reset the current session?
+              </h2>
+              <div className="flex gap-4">
+                <button
+                  onClick={() => {
+                    setTimerStatus("idle" as "idle");
+                    setMode("focus");
+                    setFocusTime(focusTime);
+                    setBreakTime(breakTime);
+                    setTimeLeft(focusTime);
+                    setEndTimestamp(null);
+                    setPausedTime(null);
+                    setPopup(null);
+                  }}
+                  className="px-4 py-2 text-white bg-red-500 rounded hover:bg-red-600 transition-colors"
+                >
+                  Yes
+                </button>
+                <button
+                  onClick={() => {
+                    setPopup(null);
+                  }}
+                  className="px-4 py-2 text-gray-700 bg-gray-200 rounded hover:bg-gray-300 transition-colors"
+                >
+                  No
+                </button>
+              </div>
+            </div>
+          </div>
         )}
 
         <StartStopButton
