@@ -193,8 +193,8 @@ export default function PomodoroTimer() {
     if (timerStatus === "idle") {
       return {
         border: "border-gray-800",
-        bg: "bg-gray-100",
-        text: "text-[#677381]",
+        bg: "bg-gray-100 dark:bg-gray-900 ",
+        text: "text-[#677381] ",
         opacity: "opacity-100",
       };
     }

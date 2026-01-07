@@ -49,7 +49,7 @@ export default function ProfilePage() {
   const longestStreak = stats?.longest_streak || 0;
   const earnedBadgesCount = stats?.earned_badges?.length || 0;
 
-  // Calculate percentage safely
+  // Calculate percentage safely ??
   const expPercentage =
     expToNextLevel > 0 ? Math.min((currentExp / expToNextLevel) * 100, 100) : 0;
 
@@ -76,7 +76,7 @@ export default function ProfilePage() {
               <span>{currentExp} XP</span>
               <span>{expToNextLevel} XP</span>
             </div>
-            <div className="h-3 bg-gray-200 rounded-full overflow-hidden shadow-inner">
+            <div className="h-3 bg-gray-200  rounded-full overflow-hidden shadow-inner">
               <motion.div
                 className="h-full bg-gradient-to-r from-[var(--color-secondary)] to-[var(--color-primary)] rounded-full"
                 initial={{ width: 0 }}

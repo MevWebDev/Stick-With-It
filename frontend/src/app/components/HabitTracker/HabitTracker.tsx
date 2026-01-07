@@ -28,6 +28,7 @@ export default function HabitTracker() {
   const [inputMode, setInputMode] = useState<"template" | "custom">("template");
   const [isLoading, setIsLoading] = useState(false);
   const [isEmojiPickerOpen, setIsEmojiPickerOpen] = useState(false);
+  const [is_custom,setIs_custom] = useState(false);
 
   useEffect(() => {
     loadHabits();
@@ -92,16 +93,19 @@ export default function HabitTracker() {
   const addHabit = async () => {
     let name = "";
     let icon_slug = "";
-
+    let is_custom = false;
+    
     if (inputMode === "custom") {
       if (!customHabitName.trim()) return;
       name = customHabitName.trim();
       icon_slug = customHabitEmoji.trim() || "✨";
+      is_custom = true;
     } else {
       const template = availableHabitTemplates[selectedTemplateIndex];
       if (!template) return;
       name = template.name;
       icon_slug = template.icon_slug;
+      is_custom = false;
     }
 
     if (myTrackedHabits.some((h) => h.name === name)) {
@@ -114,6 +118,7 @@ export default function HabitTracker() {
       const newHabit = await habitService.createHabit({
         name,
         icon_slug,
+        is_custom,
       });
       setMyTrackedHabits([...myTrackedHabits, newHabit]);
       setIsModalOpen(false);
@@ -132,8 +137,8 @@ export default function HabitTracker() {
   );
 
   return (
-    <div className="flex flex-col items-center bg-white p-6">
-      <h1 className="text-5xl font-bold mb-10">Habit Tracker</h1>
+    <div className="flex flex-col items-center p-6">
+      <h1 className="text-5xl font-bold mb-10 dark:text-slate-400">Habit Tracker</h1>
 
       {/* nawyki */}
       <div className="grid grid-cols-2 gap-6">
@@ -152,7 +157,7 @@ export default function HabitTracker() {
             }
             setIsModalOpen(true);
           }}
-          className="transition-transform duration-300 bg-white rounded-2xl border-4 border-gray-700 flex flex-col items-center justify-center h-40 w-40 cursor-pointer hover:bg-gray-100 hover:scale-105"
+          className="transition-transform duration-300 bg-white rounded-2xl border-4 border-gray-700 dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-100 hover:scale-105 dark:hover:bg-gray-700 flex flex-col items-center justify-center h-40 w-40 cursor-pointer hover:bg-gray-100 hover:scale-105"
         >
           <div className="text-6xl mb-2">
             <FaPlus />
@@ -165,8 +170,8 @@ export default function HabitTracker() {
 
       {/* Menu do dodawania nawyku */}
       {isModalOpen && (
-        <div className="fixed inset-0 bg-white bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-8 rounded-lg shadow-xl border-2 border-black max-w-[330px] flex flex-col">
+        <div className="fixed inset-0 bg-white dark:bg-black dark:border-white bg-opacity-50 flex items-center justify-center z-50">
+          <div className="p-8 rounded-lg shadow-xl border-2  max-w-[330px] flex flex-col">
             <h2 className="text-2xl font-geologica font-bold mb-4">Add a New Habit</h2>
             
             <div className="flex gap-4 mb-4">
