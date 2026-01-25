@@ -40,7 +40,7 @@ export default function ToolsMenu({ onClose }: ToolsMenuProps) {
   };
 
   return (
-    <div className="fixed inset-0 bg-white/95 backdrop-blur-sm z-50 flex flex-col items-center justify-center animate-in fade-in duration-200">
+    <div className="fixed inset-0 bg-white/95 dark:bg-black/95 backdrop-blur-sm z-50 flex flex-col items-center justify-center animate-in fade-in duration-200">
       <div className="grid grid-cols-3 gap-8 p-8 max-w-md w-full">
         {tools.map((tool) => (
           <CustomToolButton
@@ -49,14 +49,15 @@ export default function ToolsMenu({ onClose }: ToolsMenuProps) {
             icon={tool.icon}
             href={tool.href}
             onClick={() => handleToolClick(tool.href)}
+            className="dark:text-gray-200"
           />
         ))}
       </div>
       <button
         onClick={onClose}
-        className="absolute bottom-16 left-1/2 transform -translate-x-1/2 p-4 rounded-full bg-white shadow-lg border border-gray-100 hover:bg-gray-50 hover:scale-110 transition-all duration-200 group"
+        className="absolute bottom-16 left-1/2 transform -translate-x-1/2 p-4 rounded-full bg-white shadow-lg border border-gray-100 hover:bg-gray-50 hover:scale-103 transition-all duration-200 group"
       >
-        <IoMdClose className="text-2xl text-gray-600 group-hover:text-gray-900" />
+        <IoMdClose className="text-2xl text-gray-600 dark:text-gray-200 group-hover:text-gray-900" />
       </button>
     </div>
   );
