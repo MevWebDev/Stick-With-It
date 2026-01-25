@@ -5,7 +5,8 @@ FROM python:3.11-slim
 ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
     PIP_NO_CACHE_DIR=1 \
-    PIP_DISABLE_PIP_VERSION_CHECK=1
+    PIP_DISABLE_PIP_VERSION_CHECK=1 \
+    PORT=8000
 
 # Ustawiamy katalog roboczy
 WORKDIR /app
@@ -24,4 +25,4 @@ RUN mkdir -p /app/data
 EXPOSE 8000
 
 # Uruchamiamy migracje i serwer
-CMD ["sh","-c","python manage.py migrate && exec python manage.py runserver 0.0.0.0:8000"]
+CMD ["sh", "-c", "python manage.py migrate --verbosity 2 && exec python manage.py runserver 0.0.0.0:$PORT"]

@@ -47,6 +47,22 @@ class Migration(migrations.Migration):
             name='earned_badges',
             field=models.ManyToManyField(blank=True, related_name='users_earned', to='accounts.badges'),
         ),
+        # XP/Level system fields
+        migrations.AddField(
+            model_name='userstats',
+            name='level',
+            field=models.IntegerField(default=1),
+        ),
+        migrations.AddField(
+            model_name='userstats',
+            name='current_exp',
+            field=models.IntegerField(default=0),
+        ),
+        migrations.AddField(
+            model_name='userstats',
+            name='total_exp',
+            field=models.IntegerField(default=0),
+        ),
         migrations.CreateModel(
             name='CompletedChallenge',
             fields=[
@@ -62,4 +78,20 @@ class Migration(migrations.Migration):
                 'ordering': ['-completed_date'],
             },
         ),
+        migrations.CreateModel(
+            name='XpLog',
+            fields=[
+                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('date', models.DateField(auto_now_add=True)),
+                ('source', models.CharField(max_length=50)),
+                ('amount', models.IntegerField()),
+                ('created_at', models.DateTimeField(auto_now_add=True)),
+                ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='xp_logs', to=settings.AUTH_USER_MODEL)),
+            ],
+        ),
+        migrations.AddIndex(
+            model_name='xplog',
+            index=models.Index(fields=['user', 'date', 'source'], name='accounts_xp_user_id_9a4e3c_idx'),
+        ),
     ]
+
