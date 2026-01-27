@@ -35,7 +35,7 @@ export default function SessionTimePopup({
                 max={60}
                 onChange={(e) => {
                   let val = Number(e.target.value);
-                  if (val < 1) val = 1;
+                  if (val < 1) val = 0.2;
                   if (val > 60) val = 60;
                   if (val < breakInput) setBreakInput(val);
                   setFocusInput(val);
@@ -56,7 +56,7 @@ export default function SessionTimePopup({
                 max={60}
                 onChange={(e) => {
                   let val = Number(e.target.value);
-                  if (val < 1) val = 1;
+                  if (val < 1) val = 0.2;
                   if (val > 60) val = 60;
                   if (val > focusInput) val = focusInput;
                   setBreakInput(val);
