@@ -65,15 +65,15 @@ function SettingsPage() {
               let response;
               if (setting === "password") {
                 response = await authService.changePassword(
-                  value as ChangePasswordCredentials
+                  value as ChangePasswordCredentials,
                 );
               } else if (setting === "email") {
                 response = await authService.changeEmail(
-                  value as ChangeEmailCredentials
+                  value as ChangeEmailCredentials,
                 );
               } else if (setting === "username") {
                 response = await authService.changeUsername(
-                  value as ChangeUsernameCredentials
+                  value as ChangeUsernameCredentials,
                 );
               } else if (setting === "avatar") {
                 closePopup();
@@ -89,7 +89,7 @@ function SettingsPage() {
                 // Handle error without toast (maybe console or simple alert if needed, but keeping it clean as per user edit)
                 console.error(
                   "Failed to update setting:",
-                  response.errors || response.message
+                  response.errors || response.message,
                 );
               }
             } catch (error: unknown) {
@@ -113,7 +113,7 @@ function SettingsPage() {
               Account
             </h2>
             <motion.div
-            //nie to
+              //nie to
               className="rounded-2xl shadow-sm border text-gray-500 border-gray-100 dark:border-gray-700 overflow-hidden"
               variants={itemVariants}
             >
@@ -122,20 +122,20 @@ function SettingsPage() {
                 label="Username"
                 value={user?.username}
                 onClick={() => openSetting("username")}
-                className="rounded-none"
+                // className="rounded-none"
               />
               <SettingItem
                 icon={<FaEnvelope />}
                 label="Email"
                 value={user?.email}
                 onClick={() => openSetting("email")}
-                className="rounded-none"
+                // className="rounded-none"
               />
               <SettingItem
                 icon={<FaLock />}
                 label="Password"
                 onClick={() => openSetting("password")}
-                className="rounded-none"
+                // className="rounded-none"
               />
               <SettingItem
                 icon={<FaCamera />}
@@ -164,7 +164,9 @@ function SettingsPage() {
                 icon={<FaPalette />}
                 label="Theme"
                 //narazie tak bo nie wiem jak ma wyglądać wizja z wygladem
-                onClick={() => {setTheme(theme === "dark" ? "light" : "dark")}}
+                onClick={() => {
+                  setTheme(theme === "dark" ? "light" : "dark");
+                }}
               />
               <SettingItem
                 icon={<FaBell />}

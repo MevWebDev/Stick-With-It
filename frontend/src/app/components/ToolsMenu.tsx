@@ -49,7 +49,7 @@ export default function ToolsMenu({ onClose }: ToolsMenuProps) {
             icon={tool.icon}
             href={tool.href}
             onClick={() => handleToolClick(tool.href)}
-            className="dark:text-gray-200"
+            // className="dark:text-gray-200"
           />
         ))}
       </div>

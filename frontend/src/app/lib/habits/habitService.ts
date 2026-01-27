@@ -12,6 +12,7 @@ export interface Habit {
 export interface CreateHabitData {
   name: string;
   icon_slug: string;
+  is_custom: boolean;
 }
 
 export interface CheckHabitResponse {
@@ -34,11 +35,18 @@ export const habitService = {
 
   async checkHabit(id: number): Promise<CheckHabitResponse> {
     const token = authService.getAccessToken();
-    return apiClient.post<CheckHabitResponse>(`/api/habits/${id}/check/`, {}, token || undefined);
+    return apiClient.post<CheckHabitResponse>(
+      `/api/habits/${id}/check/`,
+      {},
+      token || undefined,
+    );
   },
 
   async uncheckHabit(id: number): Promise<CheckHabitResponse> {
     const token = authService.getAccessToken();
-    return apiClient.delete<CheckHabitResponse>(`/api/habits/${id}/check/`, token || undefined);
+    return apiClient.delete<CheckHabitResponse>(
+      `/api/habits/${id}/check/`,
+      token || undefined,
+    );
   },
 };
