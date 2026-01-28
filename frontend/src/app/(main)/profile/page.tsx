@@ -60,10 +60,10 @@ export default function ProfilePage() {
       <div className="px-4 pt-6 pb-8">
         {/* Profile Info */}
         <div className="flex flex-col items-center mb-8">
-          <div className="w-24 h-24 bg-[var(--color-primary)] rounded-full flex items-center justify-center text-4xl font-bold text-white shadow-lg mb-4 border-4 border-white">
+          <div className="w-24 h-24 bg-[var(--color-primary)] dark:text-foreground rounded-full flex items-center justify-center text-4xl font-bold text-white shadow-lg mb-4 border-4 border-white">
             {user.username.charAt(0).toUpperCase()}
           </div>
-          <h2 className="text-2xl font-bold text-gray-900 font-geologica mb-1">
+          <h2 className="text-2xl font-bold text-gray-900 font-geologica mb-1 dark:text-foreground">
             {user.username}
           </h2>
           <p className="text-sm font-bold text-[var(--color-secondary)] tracking-wider mb-3">
@@ -76,7 +76,7 @@ export default function ProfilePage() {
               <span>{currentExp} XP</span>
               <span>{expToNextLevel} XP</span>
             </div>
-            <div className="h-3 bg-gray-200  rounded-full overflow-hidden shadow-inner">
+            <div className="h-3 bg-gray-200  rounded-full overflow-hidden shadow-inner dark:bg-primary  ">
               <motion.div
                 className="h-full bg-gradient-to-r from-[var(--color-secondary)] to-[var(--color-primary)] rounded-full"
                 initial={{ width: 0 }}
@@ -112,7 +112,7 @@ export default function ProfilePage() {
         {/* Badges Section */}
         <div className="mb-8">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-bold text-gray-900 font-geologica">
+            <h3 className="text-lg font-bold text-gray-900 font-geologica dark:text-foreground">
               Badges
             </h3>
             <button
@@ -130,18 +130,18 @@ export default function ProfilePage() {
                   key={badge.key}
                   className="flex-shrink-0 flex flex-col items-center gap-2 w-20"
                 >
-                  <div className="w-16 h-16 bg-white rounded-full shadow-sm border border-gray-100 flex items-center justify-center text-2xl">
+                  <div className="w-16 h-16 bg-white rounded-full shadow-sm border border-gray-100 flex items-center justify-center text-2xl dark:bg-zinc-900 dark:border-zinc-800 dark:text-gray-200">
                     {badge.icon}
                   </div>
-                  <span className="text-xs text-center text-gray-600 font-medium truncate w-full">
+                  <span className="text-xs text-center text-gray-600 font-medium truncate w-full dark:text-gray-400">
                     {badge.title}
                   </span>
                 </div>
               ))}
             </div>
           ) : (
-            <div className="bg-white rounded-xl p-6 text-center border border-gray-100">
-              <p className="text-gray-500 text-sm">No badges earned yet</p>
+            <div className="bg-white rounded-xl p-6 text-center border border-gray-100 dark:bg-zinc-900 dark:border-zinc-800">
+              <p className="text-gray-500 text-sm dark:text-gray-400">No badges earned yet</p>
             </div>
           )}
         </div>
@@ -238,18 +238,20 @@ function StatCard({
   icon,
   value,
   label,
+  className,
 }: {
   icon: React.ReactNode;
   value?: number;
   label: string;
+  className?: string;
 }) {
   return (
-    <div className="bg-white p-3 rounded-2xl shadow-sm border border-gray-100 flex flex-col items-center text-center">
+    <div className={`bg-white p-3 rounded-2xl shadow-sm border border-gray-100 flex flex-col items-center text-center dark:bg-zinc-900 dark:border-zinc-800 ${className}`}>
       <div className="mb-2 text-xl">{icon}</div>
-      <span className="text-lg font-bold text-gray-900 leading-none mb-1">
+      <span className="text-lg font-bold text-gray-900 leading-none mb-1 dark:text-white">
         {value ?? 0}
       </span>
-      <span className="text-[10px] text-gray-500 uppercase font-bold tracking-wide">
+      <span className="text-[10px] text-gray-500 uppercase font-bold tracking-wide dark:text-gray-400">
         {label}
       </span>
     </div>

@@ -130,7 +130,7 @@ export function RegisterForm() {
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       required
-                      className="block w-full pl-11 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-[var(--color-secondary)] focus:border-transparent transition-all font-figtree"
+                      className="block dark:text-primary w-full pl-11 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-[var(--color-secondary)] focus:border-transparent transition-all font-figtree"
                     />
                   </div>
 
@@ -145,14 +145,14 @@ export function RegisterForm() {
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       required
-                      className="block w-full pl-11 pr-11 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-[var(--color-secondary)] focus:border-transparent transition-all font-figtree"
+                      className="block dark:text-primary w-full pl-11 pr-11 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-[var(--color-secondary)] focus:border-transparent transition-all font-figtree"
                     />
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
                       className="absolute right-0 inset-y-0 pr-4 flex items-center text-gray-400 hover:text-gray-600 cursor-pointer transition-colors"
                     >
-                      {showPassword ? <FaEyeSlash /> : <FaEye />}
+                      {showPassword ? <FaEyeSlash style={{ color: '#9ca3af' }} /> : <FaEye style={{ color: '#9ca3af' }} />}
                     </button>
                   </div>
 
@@ -167,7 +167,7 @@ export function RegisterForm() {
                       value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}
                       required
-                      className="block w-full pl-11 pr-11 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-[var(--color-secondary)] focus:border-transparent transition-all font-figtree"
+                      className="block dark:text-primary w-full pl-11 pr-11 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-[var(--color-secondary)] focus:border-transparent transition-all font-figtree"
                     />
                     <button
                       type="button"
@@ -176,7 +176,7 @@ export function RegisterForm() {
                       }
                       className="absolute right-0 inset-y-0 pr-4 flex items-center text-gray-400 hover:text-gray-600 cursor-pointer transition-colors"
                     >
-                      {showConfirmPassword ? <FaEyeSlash /> : <FaEye />}
+                      {showConfirmPassword ? <FaEyeSlash style={{ color: '#9ca3af' }} /> : <FaEye style={{ color: '#9ca3af' }} />}
                     </button>
                   </div>
                 </div>
@@ -229,7 +229,7 @@ export function RegisterForm() {
                       onChange={(e) => setUsername(e.target.value)}
                       required
                       autoFocus
-                      className="block w-full pl-11 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-[var(--color-secondary)] focus:border-transparent transition-all font-figtree"
+                      className="block w-full dark:text-primary pl-11 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-[var(--color-secondary)] focus:border-transparent transition-all font-figtree"
                     />
                   </div>
                 </div>
@@ -248,7 +248,7 @@ export function RegisterForm() {
                   <button
                     type="button"
                     onClick={() => setStep(1)}
-                    className="flex-1 bg-gray-100 text-gray-600 font-bold text-lg py-3.5 rounded-xl hover:bg-gray-200 active:scale-[0.98] transition-all"
+                    className="flex-1 bg-gray-100 dark:bg-primary text-gray-600 font-bold text-lg py-3.5 rounded-xl hover:bg-gray-200 active:scale-[0.98] transition-all"
                   >
                     Back
                   </button>
@@ -277,7 +277,7 @@ export function RegisterForm() {
         Already have an account?{" "}
         <button
           onClick={() => router.push("/login")}
-          className="text-[var(--color-secondary)] font-bold hover:underline"
+          className="text-[var(--color-secondary)]  dark:bg-primary font-bold hover:underline"
         >
           Sign in
         </button>
