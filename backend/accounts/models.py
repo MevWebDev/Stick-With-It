@@ -3,8 +3,8 @@ from django.core.validators import MinValueValidator, MaxValueValidator
 from django.contrib.auth.models import User
 
 class Challenge(models.Model):
-    title = models.CharField(max_length=20)
-    category = models.CharField(max_length=20)
+    title = models.CharField(max_length=50)
+    category = models.CharField(max_length=50)
     description = models.CharField(max_length=200)
     difficulty = models.IntegerField(validators=[MinValueValidator(1),MaxValueValidator(3)])
     
