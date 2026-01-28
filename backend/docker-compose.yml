@@ -1,6 +1,36 @@
-version: '3.8'
-
 services:
+  db:
+    image: postgres:16-alpine
+    container_name: postgres-db
+    environment:
+      - POSTGRES_DB=habittracker
+      - POSTGRES_USER=habituser
+      - POSTGRES_PASSWORD=habitpass123
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U habituser -d habittracker"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    container_name: redis-cache
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
   web:
     build: .
     container_name: django-backend
@@ -12,4 +42,20 @@ services:
       - DJANGO_SECRET_KEY=django-insecure-mlc@tkg4$$lm_jes(4%^8$$1g7i=+-bhd14t_3uzngy5w$$y$$w#3s
       - DJANGO_DEBUG=True
       - ALLOWED_HOSTS=localhost,127.0.0.1
+      - DB_ENGINE=postgresql
+      - DB_NAME=habittracker
+      - DB_USER=habituser
+      - DB_PASSWORD=habitpass123
+      - DB_HOST=db
+      - DB_PORT=5432
+      - REDIS_URL=redis://redis:6379/0
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
     restart: unless-stopped
+
+volumes:
+  postgres-data:
+  redis-data:
