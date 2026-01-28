@@ -238,7 +238,7 @@ function ChangeSettingPopup({
         <div className="flex gap-2">
           <button
             onClick={onClose}
-            className="flex-1 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors font-medium"
+            className="flex-1 px-4 py-2 bg-gray-300 dark:bg-primary-secondary text-gray-700 rounded-lg hover:bg-gray-200 transition-colors font-medium"
           >
             Cancel
           </button>

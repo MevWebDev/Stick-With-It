@@ -49,7 +49,6 @@ export default function ToolsMenu({ onClose }: ToolsMenuProps) {
             icon={tool.icon}
             href={tool.href}
             onClick={() => handleToolClick(tool.href)}
-            // className="dark:text-gray-200"
           />
         ))}
       </div>
@@ -57,7 +56,7 @@ export default function ToolsMenu({ onClose }: ToolsMenuProps) {
         onClick={onClose}
         className="absolute bottom-16 left-1/2 transform -translate-x-1/2 p-4 rounded-full bg-white shadow-lg border border-gray-100 hover:bg-gray-50 hover:scale-103 transition-all duration-200 group"
       >
-        <IoMdClose className="text-2xl text-gray-600 dark:text-gray-200 group-hover:text-gray-900" />
+        <IoMdClose className="text-2xl text-gray-600 dark:text-background group-hover:text-gray-900" />
       </button>
     </div>
   );
