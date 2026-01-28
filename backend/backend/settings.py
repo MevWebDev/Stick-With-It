@@ -150,7 +150,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # CORS Configuration
 CORS_ALLOWED_ORIGINS = os.environ.get(
     'CORS_ALLOWED_ORIGINS',
-    'http://localhost:3000,https://stick-with-it-production.up.railway.app'
+    'http://localhost:3000,https://stick-with-it-production.up.railway.app,https://upbeat-patience-production.up.railway.app'
 ).split(',')
 
 CORS_ALLOW_CREDENTIALS = True
