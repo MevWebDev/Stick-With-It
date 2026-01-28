@@ -7,13 +7,13 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  
+
   /* Map your custom colors so you can use bg-primary, text-secondary, etc. */
   --color-primary: var(--color-primary);
   --color-primary-dark: var(--color-primary-dark);
   --color-secondary: var(--color-secondary);
   --color-secondary-light: var(--color-secondary-light);
-  
+
   /* Fonts */
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
@@ -37,15 +37,15 @@
   /* Dark Mode Overrides */
   /* This activates when next-themes adds data-theme="dark" to the <html> tag */
   [data-theme="dark"] {
-    --background: #0a0a0a;  /* Dark background */
-    --foreground: #ededed;  /* Light text */
+    --background: #0a0a0a; /* Dark background */
+    --foreground: #ededed; /* Light text */
 
-    --color-primary: #8a96a3; 
+    --color-primary: #8a96a3;
     --color-primary-dark: #677381;
-    --color-secondary: #5e7c85; 
+    --color-secondary: #5e7c85;
     --color-secondary-light: #82a0aa;
-    --color-button-bg: #1f1f1f; 
-    --color-button-bg-hover: #2a2a2a; 
+    --color-button-bg: #1f1f1f;
+    --color-button-bg-hover: #2a2a2a;
     --color-button-text: #fffbf4;
   }
 }
@@ -58,7 +58,12 @@ body {
 }
 
 /* Typography settings */
-h1, h2, h3, h4, h5, h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   font-family: var(--font-geologica);
 }
 
@@ -68,8 +73,7 @@ p {
 
 button {
   cursor: pointer;
- 
- 
+
   padding: 0.75rem 1.5rem;
   border-radius: 0.5rem;
   font-weight: 600;
@@ -83,8 +87,8 @@ button {
 
   /* Hover states */
   &:hover {
-     /* Light mode hover */
-     scale:1.02;
+    /* Light mode hover */
+    scale: 1.02;
 
     /* Dark mode hover */
     :where([data-theme="dark"] &) {
@@ -92,4 +96,31 @@ button {
       border-color: #444444;
     }
   }
+}
+
+@keyframes bounce-slow {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes shine {
+  0% {
+    left: -100%;
+  }
+  100% {
+    left: 100%;
+  }
+}
+
+.animate-bounce-slow {
+  animation: bounce-slow 3s ease-in-out infinite;
+}
+
+.animate-shine {
+  animation: shine 3s ease-in-out infinite;
 }
