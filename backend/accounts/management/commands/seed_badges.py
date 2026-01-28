@@ -100,12 +100,13 @@ class Command(BaseCommand):
         ]
         
         for badge_data in badges_data:
-            Badges.objects.get_or_create(
+            Badges.objects.update_or_create(
                 key=badge_data['key'],
                 defaults={
                     'title': badge_data['title'],
                     'description': badge_data['description'],
                     'icon': badge_data['icon'],
                     'rarity': badge_data['rarity'],
+                    'condition': badge_data['condition']
                 }
             )

@@ -82,7 +82,7 @@ class Badges(models.Model):
     title = models.CharField(max_length=20)
     description = models.CharField(max_length=200)
     icon = models.CharField(max_length=10, default='🥳')
-    condition = models.CharField(max_length=100)  # np. 'challenges_completed_total >= 1'
+    condition = models.CharField(max_length=100, default='')  # np. 'challenges_completed_total >= 1'
     class Rarity(models.TextChoices):
         BRONZE = 'BRONZE', 'Bronze'
         SILVER = 'SILVER', 'Silver'

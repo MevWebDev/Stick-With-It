@@ -633,12 +633,28 @@ def complete_pomodoro(request):
     try:
         user = request.user
         
+        # Update stats
+        user.stats.pomodoro_sessions_completed += 1
+        user.stats.save(update_fields=['pomodoro_sessions_completed'])
+        
         xp_result = XpService.award_xp(user, 10, 'pomodoro')
+        
+        # Check badges
+        new_badges = check_and_award_badges(user)
         
         return JsonResponse({
             'success': True,
             'xp_earned': xp_result['earned'],
-            'level_info': xp_result
+            'level_info': xp_result,
+            'new_badges': [
+                {
+                    'key': badge.key,
+                    'title': badge.title,
+                    'icon': badge.icon,
+                    'rarity': badge.rarity
+                }
+                for badge in new_badges
+            ]
         })
         
     except Exception as e:

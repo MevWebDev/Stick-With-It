@@ -10,7 +10,7 @@ import pytz
 
 from .models import Habit, HabitCompletion
 from .serializers import HabitSerializer
-from accounts.services import XpService
+from accounts.services import XpService, check_and_award_badges
 
 def get_user_date(request):
     """
@@ -73,14 +73,38 @@ def habits_list_create(request):
             return Response({'error': 'name and icon_slug are required'}, status=status.HTTP_400_BAD_REQUEST)
         
         try:
-            habit = Habit.objects.create(
-                user=request.user,
-                name=name,
-                icon_slug=icon_slug,
-                is_custom=is_custom
-            )
-            serializer = HabitSerializer(habit)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+            with transaction.atomic():
+                habit = Habit.objects.create(
+                    user=request.user,
+                    name=name,
+                    icon_slug=icon_slug,
+                    is_custom=is_custom
+                )
+                
+                # Update stats
+                user_stats = request.user.stats
+                user_stats.habits_created += 1
+                user_stats.save()
+                
+                # Check badges (e.g. Habit Builder)
+                new_badges = check_and_award_badges(request.user)
+                
+                serializer = HabitSerializer(habit)
+                data = serializer.data
+                
+                # Add badge info if any
+                if new_badges:
+                    data['new_badges'] = [
+                        {
+                            'key': badge.key,
+                            'title': badge.title,
+                            'icon': badge.icon,
+                            'rarity': badge.rarity
+                        }
+                        for badge in new_badges
+                    ]
+                
+                return Response(data, status=status.HTTP_201_CREATED)
             
         except Exception as e:
             return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
@@ -146,12 +170,36 @@ def check_habit(request, id):
             # Award XP
             xp_result = XpService.award_xp(request.user, 10, 'habit')
             
+            # Check badges (e.g. Week Warrior)
+            # Longest streak is updated in model save or handled via sync?
+            # UserStats.longest_streak is updated in check_and_award_badges? No, logic is in service eval.
+            # But we need to update user stats longest_streak somewhere if it's not done automatically.
+            # Wait, `check_and_award_badges` only reads.
+            # We need to update user.stats.longest_streak explicitly if habit streak > user max streak.
+            # Let's do it here.
+            
+            user_stats = request.user.stats
+            if habit.current_streak > user_stats.longest_streak:
+                user_stats.longest_streak = habit.current_streak
+                user_stats.save(update_fields=['longest_streak'])
+                
+            new_badges = check_and_award_badges(request.user)
+            
             return Response({
                 'success': True,
                 'streak': habit.current_streak,
                 'completed_today': True,
                 'xp_earned': xp_result['earned'],
-                'level_info': xp_result
+                'level_info': xp_result,
+                'new_badges': [
+                    {
+                        'key': badge.key,
+                        'title': badge.title,
+                        'icon': badge.icon,
+                        'rarity': badge.rarity
+                    }
+                    for badge in new_badges
+                ]
             })
             
     except Exception as e:

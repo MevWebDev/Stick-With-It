@@ -6,7 +6,7 @@ from accounts.models import Badges, UserStats
 
 def check_and_award_badges(user):
     """Check all badge conditions and award new ones"""
-    user_stats = user.userstats
+    user_stats = user.stats
     new_badges = []
     
     # Pobrać wszystkie odznaki
@@ -14,12 +14,12 @@ def check_and_award_badges(user):
     
     for badge in all_badges:
         # Sprawdzić czy użytkownik już ma tę odznakę
-        if user.userstats.earned_badges.filter(pk=badge.pk).exists():
+        if user.stats.earned_badges.filter(pk=badge.pk).exists():
             continue
         
         # Sprawdzić warunek
         if evaluate_badge_condition(badge.condition, user_stats):
-            user.userstats.earned_badges.add(badge)
+            user.stats.earned_badges.add(badge)
             new_badges.append(badge)
     
     return new_badges
