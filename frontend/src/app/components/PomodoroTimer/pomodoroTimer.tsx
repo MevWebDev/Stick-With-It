@@ -5,6 +5,7 @@ import SessionTimePopup from "./sessionTimePopup";
 import StartStopButton from "./startStopButton";
 import EndSessionPopup from "./endSessionPopup";
 import { apiClient } from "@/app/lib/api/client";
+import { authService } from "../../lib/auth/authService";
 import { useUserStats } from "@/app/lib/userStats/UserStatsContext";
 
 const getStorageValue = (key: string, defaultValue: number): number => {
@@ -18,11 +19,11 @@ export default function PomodoroTimer() {
   const { refreshStats } = useUserStats();
 
   const [focusTime, setFocusTime] = useState(() =>
-    getStorageValue("pomodoroFocusTime", 25 * 60)
+    getStorageValue("pomodoroFocusTime", 25 * 60),
   );
 
   const [breakTime, setBreakTime] = useState(() =>
-    getStorageValue("pomodoroBreakTime", 5 * 60)
+    getStorageValue("pomodoroBreakTime", 5 * 60),
   );
 
   const [mode, setMode] = useState<"focus" | "break">(() => {
@@ -37,15 +38,15 @@ export default function PomodoroTimer() {
       return status === "running" || status === "paused"
         ? (status as "running" | "paused")
         : "idle";
-    }
+    },
   );
 
   const [pausedTime, setPausedTime] = useState<number | null>(
-    () => getStorageValue("pomodoroPausedTime", 0) || null
+    () => getStorageValue("pomodoroPausedTime", 0) || null,
   );
 
   const [endTimestamp, setEndTimestamp] = useState<number | null>(
-    () => getStorageValue("pomodoroEndTimestamp", 0) || null
+    () => getStorageValue("pomodoroEndTimestamp", 0) || null,
   );
 
   const [timeLeft, setTimeLeft] = useState(() => {
@@ -79,7 +80,7 @@ export default function PomodoroTimer() {
 
   const completePomodoroSession = async () => {
     try {
-      const token = localStorage.getItem("access_token");
+      const token = authService.getAccessToken();
       if (!token) {
         console.warn("No access token found, skipping XP award");
         return;
@@ -231,7 +232,7 @@ export default function PomodoroTimer() {
     } else {
       setTimerStatus("running" as "running");
       setEndTimestamp(
-        Date.now() + (mode === "focus" ? focusTime : breakTime) * 1000
+        Date.now() + (mode === "focus" ? focusTime : breakTime) * 1000,
       );
     }
   };
@@ -370,7 +371,7 @@ export default function PomodoroTimer() {
             } else {
               setTimerStatus("running" as const);
               setEndTimestamp(
-                Date.now() + (mode === "focus" ? focusTime : breakTime) * 1000
+                Date.now() + (mode === "focus" ? focusTime : breakTime) * 1000,
               );
             }
           }}
@@ -401,7 +402,7 @@ export default function PomodoroTimer() {
               setTimeLeft(
                 mode === "focus"
                   ? Math.round(newFocus * 60)
-                  : Math.round(newBreak * 60)
+                  : Math.round(newBreak * 60),
               );
             }
           }}

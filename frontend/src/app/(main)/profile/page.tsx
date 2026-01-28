@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
 import { UserStats, Badge } from "../../lib/auth/types";
 import { FaFire, FaStar, FaMedal } from "react-icons/fa";
 import { IoMdClose } from "react-icons/io";
-
+import BadgeCard from "../../components/Badges/BadgeCard";
 import { AnimatePresence, motion } from "framer-motion";
 
 export default function ProfilePage() {
@@ -20,17 +20,20 @@ export default function ProfilePage() {
     const fetchData = async () => {
       if (user) {
         try {
-          const [statsData, badgesData] = await Promise.all([
-            authService.getStats(),
-            authService.getBadges(),
-          ]);
+          const statsData = await authService.getStats();
           setStats(statsData);
+        } catch (error) {
+          console.error("Failed to fetch stats:", error);
+        }
+
+        try {
+          const badgesData = await authService.getBadges();
           setBadges(badgesData);
         } catch (error) {
-          console.error("Failed to fetch profile data:", error);
-        } finally {
-          setLoading(false);
+          console.error("Failed to fetch badges:", error);
         }
+
+        setLoading(false);
       }
     };
 
@@ -49,12 +52,15 @@ export default function ProfilePage() {
   const longestStreak = stats?.longest_streak || 0;
   const earnedBadgesCount = stats?.earned_badges?.length || 0;
 
-  // Calculate percentage safely ??
+  // Calculate percentage safely
   const expPercentage =
     expToNextLevel > 0 ? Math.min((currentExp / expToNextLevel) * 100, 100) : 0;
 
+  // Filter earned badges
+  const earnedBadges = badges?.filter((badge) => badge.earned) || [];
+
   return (
-    <div className=" pb-20 relative">
+    <div className="pb-20 relative">
       {/* Header */}
 
       <div className="px-4 pt-6 pb-8">
@@ -76,7 +82,7 @@ export default function ProfilePage() {
               <span>{currentExp} XP</span>
               <span>{expToNextLevel} XP</span>
             </div>
-            <div className="h-3 bg-gray-200  rounded-full overflow-hidden shadow-inner">
+            <div className="h-3 bg-gray-200 rounded-full overflow-hidden shadow-inner">
               <motion.div
                 className="h-full bg-gradient-to-r from-[var(--color-secondary)] to-[var(--color-primary)] rounded-full"
                 initial={{ width: 0 }}
@@ -109,11 +115,11 @@ export default function ProfilePage() {
           />
         </div>
 
-        {/* Badges Section */}
+        {/* Badges Section - Preview of Earned Badges */}
         <div className="mb-8">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-lg font-bold text-gray-900 font-geologica">
-              Badges
+              Recent Badges
             </h3>
             <button
               onClick={() => setIsBadgesModalOpen(true)}
@@ -123,61 +129,33 @@ export default function ProfilePage() {
             </button>
           </div>
 
-          {badges && badges.length > 0 ? (
+          {earnedBadges.length > 0 ? (
             <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide">
-              {badges.map((badge) => (
-                <div
-                  key={badge.key}
-                  className="flex-shrink-0 flex flex-col items-center gap-2 w-20"
-                >
-                  <div className="w-16 h-16 bg-white rounded-full shadow-sm border border-gray-100 flex items-center justify-center text-2xl">
-                    {badge.icon}
-                  </div>
-                  <span className="text-xs text-center text-gray-600 font-medium truncate w-full">
-                    {badge.title}
-                  </span>
+              {earnedBadges.slice(0, 5).map((badge) => (
+                <div key={badge.key} className="flex-shrink-0 w-24">
+                  <BadgeCard
+                    icon={badge.icon}
+                    title={badge.title}
+                    description={badge.description}
+                    rarity={badge.rarity}
+                    earned={badge.earned}
+                    earnedDate={badge.earnedDate}
+                  />
                 </div>
               ))}
             </div>
           ) : (
             <div className="bg-white rounded-xl p-6 text-center border border-gray-100">
-              <p className="text-gray-500 text-sm">No badges earned yet</p>
+              <p className="text-gray-500 text-sm">
+                No badges earned yet. Complete challenges to earn your first
+                badge!
+              </p>
             </div>
           )}
         </div>
-
-        {/* Achievements / Progress */}
-        {/* <div>
-          <h3 className="text-lg font-bold text-gray-900 font-geologica mb-4">
-            Achievements
-          </h3>
-          <div className="space-y-4">
-            <AchievementCard
-              icon={<FaMedal className="text-purple-500" />}
-              title="Level 1 Master"
-              description="Complete tasks in Level 1"
-              current={stats?.level1_completed}
-              total={10} // Assuming 10 for now
-            />
-            <AchievementCard
-              icon={<FaMedal className="text-indigo-500" />}
-              title="Level 2 Master"
-              description="Complete tasks in Level 2"
-              current={stats?.level2_completed}
-              total={10}
-            />
-            <AchievementCard
-              icon={<FaKey className="text-amber-500" />}
-              title="Level 3 Master"
-              description="Complete tasks in Level 3"
-              current={stats?.level3_completed}
-              total={10}
-            />
-          </div> */}
-        {/* </div> */}
       </div>
 
-      {/* Badges Modal */}
+      {/* Badges Modal - All Badges Grid */}
       <AnimatePresence>
         {isBadgesModalOpen && (
           <motion.div
@@ -189,7 +167,7 @@ export default function ProfilePage() {
           >
             <div className="px-4 py-4 flex items-center justify-between border-b border-gray-100">
               <h2 className="text-lg font-bold font-geologica text-gray-900">
-                All Badges
+                All Badges ({badges?.length || 0})
               </h2>
               <button
                 onClick={() => setIsBadgesModalOpen(false)}
@@ -199,31 +177,56 @@ export default function ProfilePage() {
               </button>
             </div>
 
+            {/* Stats Bar in Modal */}
+            <div className="px-4 py-3 bg-gray-50 border-b border-gray-100 flex justify-around text-center">
+              <div>
+                <p className="text-xs text-gray-500 uppercase font-bold">
+                  Total
+                </p>
+                <p className="text-lg font-bold text-gray-900">
+                  {badges?.length || 0}
+                </p>
+              </div>
+              <div>
+                <p className="text-xs text-gray-500 uppercase font-bold">
+                  Earned
+                </p>
+                <p className="text-lg font-bold text-green-600">
+                  {earnedBadgesCount}
+                </p>
+              </div>
+              <div>
+                <p className="text-xs text-gray-500 uppercase font-bold">
+                  Locked
+                </p>
+                <p className="text-lg font-bold text-gray-400">
+                  {(badges?.length || 0) - earnedBadgesCount}
+                </p>
+              </div>
+            </div>
+
             <div className="flex-1 overflow-y-auto p-4">
               {badges && badges.length > 0 ? (
-                <div className="grid grid-cols-3 gap-4">
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
                   {badges.map((badge) => (
-                    <div
+                    <BadgeCard
                       key={badge.key}
-                      className="flex flex-col items-center gap-2"
-                    >
-                      <div className="w-20 h-20 bg-gray-50 rounded-2xl shadow-sm border border-gray-100 flex items-center justify-center text-3xl">
-                        {badge.icon}
-                      </div>
-                      <div className="text-center">
-                        <span className="text-xs font-bold text-gray-900 block mb-0.5">
-                          {badge.title}
-                        </span>
-                        <span className="text-[10px] text-gray-500 leading-tight block">
-                          {badge.description}
-                        </span>
-                      </div>
-                    </div>
+                      icon={badge.icon}
+                      title={badge.title}
+                      description={badge.description}
+                      rarity={badge.rarity}
+                      earned={badge.earned}
+                      earnedDate={badge.earnedDate}
+                    />
                   ))}
                 </div>
               ) : (
                 <div className="flex flex-col items-center justify-center h-full text-gray-500">
-                  <p>No badges earned yet</p>
+                  <FaMedal className="text-6xl text-gray-300 mb-4" />
+                  <p className="text-lg font-medium">No badges available</p>
+                  <p className="text-sm text-gray-400">
+                    Check back later for new badges!
+                  </p>
                 </div>
               )}
             </div>

@@ -1,7 +1,43 @@
 from django.db import transaction
 from django.db.models import Sum
 from django.utils import timezone
-from .models import UserStats, XpLog
+from .models import UserStats, XpLog, Badges
+from accounts.models import Badges, UserStats
+
+def check_and_award_badges(user):
+    """Check all badge conditions and award new ones"""
+    user_stats = user.userstats
+    new_badges = []
+    
+    # Pobrać wszystkie odznaki
+    all_badges = Badges.objects.all()
+    
+    for badge in all_badges:
+        # Sprawdzić czy użytkownik już ma tę odznakę
+        if user.userstats.earned_badges.filter(pk=badge.pk).exists():
+            continue
+        
+        # Sprawdzić warunek
+        if evaluate_badge_condition(badge.condition, user_stats):
+            user.userstats.earned_badges.add(badge)
+            new_badges.append(badge)
+    
+    return new_badges
+
+def evaluate_badge_condition(condition: str, user_stats: UserStats) -> bool:
+    try:
+        # Bezpieczne ewaluowanie warunku
+        return eval(condition, {
+            'pomodoro_sessions_completed': user_stats.pomodoro_sessions_completed,
+            'challenges_completed_total': user_stats.challenges_completed_total,
+            'challenges_completed_easy': user_stats.challenges_completed_easy,
+            'challenges_completed_medium': user_stats.challenges_completed_medium,
+            'challenges_completed_hard': user_stats.challenges_completed_hard,
+            'habits_created': user_stats.habits_created,
+            'max_streak_days': user_stats.longest_streak,
+        })
+    except:
+        return False
 
 class XpService:
     BASE_XP_REQ = 150
