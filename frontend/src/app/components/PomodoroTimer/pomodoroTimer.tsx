@@ -364,30 +364,13 @@ export default function PomodoroTimer() {
         <StartStopButton
           timerStatus={timerStatus as "running" | "paused" | "idle"}
           onStart={() => {
-            if (timerStatus === "paused" && pausedTime !== null) {
-              setTimerStatus("running" as const);
-              setEndTimestamp(Date.now() + pausedTime * 1000);
-              setPausedTime(null);
-            } else {
-              setTimerStatus("running" as const);
-              setEndTimestamp(
-                Date.now() + (mode === "focus" ? focusTime : breakTime) * 1000,
-              );
-            }
+            onStart();
           }}
           onStop={() => {
-            setTimerStatus("paused" as const);
-            setPausedTime(timeLeft);
-            setEndTimestamp(null);
+            onStop();
           }}
           onReset={() => {
-            setTimerStatus("idle" as const);
-            setMode("focus");
-            setFocusTime(focusTime);
-            setBreakTime(breakTime);
-            setTimeLeft(focusTime);
-            setEndTimestamp(null);
-            setPausedTime(null);
+            onReset();
           }}
         />
       </div>

@@ -5,3 +5,15 @@ django-cors-headers>=4.3.0
 gunicorn>=21.0.0
 pytz
 coverage>=7.0.0
+
+# PostgreSQL adapter
+psycopg2-binary>=2.9.9
+
+# Redis for caching
+redis>=5.0.1
+django-redis>=5.4.0
+
+# Testing
+pytest>=7.4.0
+pytest-django>=4.5.0
+pytest-cov>=4.1.0
