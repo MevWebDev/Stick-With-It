@@ -16,15 +16,37 @@ export interface DailyChallenge {
   success: boolean;
 }
 
+export interface CompleteChallengeResponse {
+  success: boolean;
+  message: string;
+  points_earned: number;
+  xp_earned: number;
+  total_points: number;
+  current_streak: number;
+  level_info: {
+    earned: number;
+    leveled_up: boolean;
+    new_level: number;
+    current_exp: number;
+    xp_to_next: number;
+  };
+  new_badges: Array<{
+    key: string;
+    title: string;
+    icon: string;
+    rarity: string;
+  }>;
+}
+
 export const challengeService = {
   async getDailyChallenge(): Promise<DailyChallenge> {
     const token = authService.getAccessToken();
     return apiClient.get<DailyChallenge>("/api/auth/daily-challenge/", token || undefined);
   },
 
-  async completeChallenge(): Promise<{ message: string; points_earned: number }> {
+  async completeChallenge(): Promise<CompleteChallengeResponse> {
     const token = authService.getAccessToken();
-    return apiClient.post<{ message: string; points_earned: number }>(
+    return apiClient.post<CompleteChallengeResponse>(
       "/api/auth/complete-challenge/",
       {},
       token || undefined

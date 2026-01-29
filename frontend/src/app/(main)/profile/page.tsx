@@ -1,5 +1,4 @@
 "use client";
-
 import { useAuth } from "../../lib/auth/authContext";
 import { authService } from "../../lib/auth/authService";
 import { useEffect, useState } from "react";
@@ -130,9 +129,9 @@ export default function ProfilePage() {
           </div>
 
           {earnedBadges.length > 0 ? (
-            <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide">
+            <div className="flex gap-3 overflow-x-auto pb-4 scrollbar-hide">
               {earnedBadges.slice(0, 5).map((badge) => (
-                <div key={badge.key} className="flex-shrink-0 w-24">
+                <div key={badge.key} className="flex-shrink-0">
                   <BadgeCard
                     icon={badge.icon}
                     title={badge.title}
@@ -140,6 +139,7 @@ export default function ProfilePage() {
                     rarity={badge.rarity}
                     earned={badge.earned}
                     earnedDate={badge.earnedDate}
+                    compact
                   />
                 </div>
               ))}
