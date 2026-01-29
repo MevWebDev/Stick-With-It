@@ -6,6 +6,7 @@ from django.shortcuts import get_object_or_404
 from django.db import transaction, IntegrityError
 from django.utils import timezone
 from datetime import datetime, timedelta
+from accounts.models import XpLog
 import pytz
 
 from .models import Habit, HabitCompletion
@@ -167,8 +168,24 @@ def check_habit(request, id):
             habit.last_completion_at = timezone.now()
             habit.save()
             
-            # Award XP
-            xp_result = XpService.award_xp(request.user, 10, 'habit')
+            # Award XP (only if not already awarded today)
+            xp_source = f'habit_{habit.id}'
+            
+            already_awarded = XpLog.objects.filter(
+                user=request.user,
+                date=today,
+                source=xp_source
+            ).exists()
+            
+            if not already_awarded:
+                xp_result = XpService.award_xp(request.user, 10, xp_source)
+            else:
+                xp_result = {
+                    'success': True,
+                    'earned': 0,
+                    'leveled_up': False,
+                    'new_level': request.user.stats.level
+                }
             
             # Check badges (e.g. Week Warrior)
             # Longest streak is updated in model save or handled via sync?
