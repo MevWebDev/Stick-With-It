@@ -8,7 +8,10 @@ import { apiClient } from "@/app/lib/api/client";
 import { authService } from "../../lib/auth/authService";
 import { useUserStats } from "@/app/lib/userStats/UserStatsContext";
 import { useToast } from "@/app/lib/toast/ToastContext";
+<<<<<<< HEAD
 import { notificationPreferencesService } from "@/app/lib/pushNotifications/notificationPreferencesService";
+=======
+>>>>>>> 5d0c17d (added better styles for badges, added notifications when badge or xp is earned)
 
 const getStorageValue = (key: string, defaultValue: number): number => {
   if (typeof window === "undefined") return defaultValue;
