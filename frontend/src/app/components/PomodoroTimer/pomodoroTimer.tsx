@@ -7,6 +7,7 @@ import EndSessionPopup from "./endSessionPopup";
 import { apiClient } from "@/app/lib/api/client";
 import { authService } from "../../lib/auth/authService";
 import { useUserStats } from "@/app/lib/userStats/UserStatsContext";
+import { useToast } from "@/app/lib/toast/ToastContext";
 
 const getStorageValue = (key: string, defaultValue: number): number => {
   if (typeof window === "undefined") return defaultValue;
@@ -17,6 +18,7 @@ const getStorageValue = (key: string, defaultValue: number): number => {
 export default function PomodoroTimer() {
   const pathname = usePathname();
   const { refreshStats } = useUserStats();
+  const { showXpToast, showBadgeToast } = useToast();
 
   const [focusTime, setFocusTime] = useState(() =>
     getStorageValue("pomodoroFocusTime", 25 * 60),
@@ -96,9 +98,36 @@ export default function PomodoroTimer() {
           total_exp: number;
           leveled_up: boolean;
         };
+        new_badges?: Array<{
+          key: string;
+          title: string;
+          icon: string;
+          rarity: string;
+        }>;
       }>("/api/auth/pomodoro/complete/", {}, token);
 
       console.log("Pomodoro XP awarded:", response);
+
+      // Show XP toast
+      if (response.xp_earned > 0) {
+        showXpToast(response.xp_earned, "Pomodoro Complete!");
+      }
+
+      // Show badge toasts
+      if (response.new_badges && response.new_badges.length > 0) {
+        response.new_badges.forEach((badge, index) => {
+          setTimeout(
+            () => {
+              showBadgeToast({
+                icon: badge.icon,
+                title: badge.title,
+                rarity: badge.rarity,
+              });
+            },
+            (index + 1) * 600,
+          );
+        });
+      }
 
       // Refresh user stats to show updated XP/level
       await refreshStats();
