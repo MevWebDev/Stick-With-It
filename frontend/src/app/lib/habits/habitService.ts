@@ -7,6 +7,7 @@ export interface Habit {
   icon_slug: string;
   current_streak: number;
   completed_today: boolean;
+  is_custom: boolean;
 }
 
 export interface CreateHabitData {
