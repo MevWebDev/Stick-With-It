@@ -21,15 +21,12 @@ import {
   FaSignOutAlt,
   FaChevronRight,
 } from "react-icons/fa";
-//narazie tak onClick() bo nie wiem jaka ma być wizja z wygladem settingow do pogadania z szymonem
-import { useTheme } from "next-themes";
 import { IoIosSettings } from "react-icons/io";
 import { motion } from "framer-motion";
 
 function SettingsPage() {
   const router = useRouter();
   const { user, logout } = useAuth();
-  const { theme, setTheme } = useTheme();
   const [openPopup, setOpenPopup] = useState(false);
   const [setting, setSetting] = useState("username");
 
@@ -100,7 +97,7 @@ function SettingsPage() {
         />
       )}
 
-      <div className="">
+      <div className=" bg-gray-50">
         <motion.div
           className="px-4 py-6 space-y-6"
           variants={containerVariants}
@@ -109,12 +106,11 @@ function SettingsPage() {
         >
           {/* Account Section */}
           <section>
-            <h2 className="text-sm font-bold text-gray-500 dark:text-gray-200 uppercase tracking-wider mb-3 px-2">
+            <h2 className="text-sm font-bold text-gray-500 uppercase tracking-wider mb-3 px-2">
               Account
             </h2>
             <motion.div
-              //nie to
-              className="rounded-2xl shadow-sm border text-gray-500 border-gray-100 dark:border-gray-700 overflow-hidden"
+              className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden"
               variants={itemVariants}
             >
               <SettingItem
@@ -148,11 +144,11 @@ function SettingsPage() {
 
           {/* General Section */}
           <section>
-            <h2 className="text-sm font-bold text-gray-200 uppercase tracking-wider mb-3 px-2">
+            <h2 className="text-sm font-bold text-gray-500 uppercase tracking-wider mb-3 px-2">
               General
             </h2>
             <motion.div
-              className="rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden"
+              className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden"
               variants={itemVariants}
             >
               <SettingItem
@@ -163,10 +159,7 @@ function SettingsPage() {
               <SettingItem
                 icon={<FaPalette />}
                 label="Theme"
-                //narazie tak bo nie wiem jak ma wyglądać wizja z wygladem
-                onClick={() => {
-                  setTheme(theme === "dark" ? "light" : "dark");
-                }}
+                onClick={() => {}}
               />
               <SettingItem
                 icon={<FaBell />}
@@ -195,7 +188,7 @@ function SettingsPage() {
               await logout();
               router.push("/login");
             }}
-            className="w-full bg-background rounded-2xl p-4 shadow-sm border border-red-100 flex items-center justify-center gap-2 text-red-500 font-bold hover:bg-red-50 active:scale-[0.98] transition-all"
+            className="w-full bg-white rounded-2xl p-4 shadow-sm border border-red-100 flex items-center justify-center gap-2 text-red-500 font-bold hover:bg-red-50 active:scale-[0.98] transition-all"
           >
             <FaSignOutAlt />
             Log Out
@@ -226,8 +219,7 @@ function SettingItem({
   return (
     <button
       onClick={onClick}
-      //nie wiem jak usunac te bordery male potem ogarne cba
-      className={`w-full flex items-center justify-between p-4 hover:bg-gray-50 transition-colors rounded-none ${
+      className={`w-full flex items-center justify-between p-4 hover:bg-gray-50 transition-colors ${
         !last ? "border-b border-gray-100" : ""
       }`}
     >
@@ -236,7 +228,7 @@ function SettingItem({
           {icon}
         </div>
         <div className="text-left">
-          <span className="block text-gray-900 dark:text-gray-200 font-medium font-figtree">
+          <span className="block text-gray-900 font-medium font-figtree">
             {label}
           </span>
           {value && (

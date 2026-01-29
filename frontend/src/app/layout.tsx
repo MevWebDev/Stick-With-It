@@ -4,7 +4,7 @@ import "./globals.css";
 import { AuthProvider } from "./lib/auth/authContext";
 import { UserStatsProvider } from "./lib/userStats/UserStatsContext";
 import { ToastProvider } from "./lib/toast/ToastContext";
-import { ThemeProvider } from "next-themes";
+
 const geologica = Geologica({
   variable: "--font-geologica",
   subsets: ["latin"],
@@ -40,16 +40,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en">
       <body className={`${geologica.variable} ${figtree.variable} antialiased`}>
-        
         <AuthProvider>
           <UserStatsProvider>
-            <ToastProvider>
-              <ThemeProvider enableSystem={true} defaultTheme="system"  attribute="data-theme">
-              {children}
-              </ThemeProvider>
-              </ToastProvider>
+            <ToastProvider>{children}</ToastProvider>
           </UserStatsProvider>
         </AuthProvider>
       </body>

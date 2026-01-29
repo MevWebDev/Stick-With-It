@@ -34,14 +34,14 @@ const getCategoryIcon = (category: string) => {
 
 const getDifficultyColor = (difficulty: number) => {
   switch (difficulty) {
-    case 1: // Easy (Green)
-      return "bg-green-100 text-green-700 border-green-200 dark:bg-green-900/30 dark:text-green-400 dark:border-green-800";
-    case 2: // Medium (Yellow)
-      return "bg-yellow-100 text-yellow-800 border-yellow-200 dark:bg-yellow-900/30 dark:text-yellow-300 dark:border-yellow-800";
-    case 3: // Hard (Red)
-      return "bg-red-100 text-red-700 border-red-200 dark:bg-red-900/30 dark:text-red-400 dark:border-red-800";
-    default: // Default (Gray)
-      return "bg-gray-100 text-gray-700 border-gray-200 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-700";
+    case 1:
+      return "bg-green-100 text-green-700 border-green-200";
+    case 2:
+      return "bg-yellow-100 text-yellow-700 border-yellow-200";
+    case 3:
+      return "bg-red-100 text-red-700 border-red-200";
+    default:
+      return "bg-gray-100 text-gray-700 border-gray-200";
   }
 };
 
@@ -190,7 +190,7 @@ export default function RandomTask() {
       {/* Modal - Mobile First Full Screen */}
       {isModalOpen && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center animate-in fade-in duration-200">
-          <div className="bg-background rounded-t-3xl sm:rounded-3xl shadow-xl w-full sm:max-w-lg max-h-[90vh] sm:max-h-[85vh] overflow-hidden relative animate-in slide-in-from-bottom sm:zoom-in-95 duration-300">
+          <div className="bg-white rounded-t-3xl sm:rounded-3xl shadow-xl w-full sm:max-w-lg max-h-[90vh] sm:max-h-[85vh] overflow-hidden relative animate-in slide-in-from-bottom sm:zoom-in-95 duration-300">
             {/* Close Button */}
             <button
               onClick={() => setIsModalOpen(false)}
@@ -212,7 +212,7 @@ export default function RandomTask() {
                 <h2 className="text-3xl sm:text-4xl font-bold font-geologica leading-tight pr-8">
                   {challenge.title}
                 </h2>
-                <span className="inline-block mt-4 px-4 py-1.5 bg-background rounded-full text-xs font-bold border border-black/5">
+                <span className="inline-block mt-4 px-4 py-1.5 bg-white/60 rounded-full text-xs font-bold border border-black/5">
                   {getDifficultyLabel(challenge.difficulty)} •{" "}
                   {challenge.difficulty}{" "}
                   {challenge.difficulty === 1 ? "point" : "points"}
@@ -226,12 +226,12 @@ export default function RandomTask() {
                 </p>
 
                 {completed ? (
-                  <div className="bg-green-50 border-2 border-green-200  dark:bg-emerald-950 dark:border-emerald-800 rounded-2xl p-6 text-center">
-                    <FaCheck className="text-green-500 text-4xl mx-auto mb-3 dark:text-emerald-300" />
-                    <p className="text-green-700 dark:text-emerald-300 font-bold text-lg">
+                  <div className="bg-green-50 border-2 border-green-200 rounded-2xl p-6 text-center">
+                    <FaCheck className="text-green-500 text-4xl mx-auto mb-3" />
+                    <p className="text-green-700 font-bold text-lg">
                       Challenge Completed!
                     </p>
-                    <p className="text-green-600 dark:text-emerald-300 text-sm mt-1">
+                    <p className="text-green-600 text-sm mt-1">
                       Come back tomorrow for a new challenge
                     </p>
                   </div>

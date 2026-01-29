@@ -22,7 +22,7 @@ export default function SessionTimePopup({
 
   return (
     <div className="bg-black/40 fixed inset-0 flex items-center justify-center ">
-      <div className="bg-white dark:bg-black dark:border-white dark:border-1 p-6 rounded-lg shadow-lg">
+      <div className="bg-white p-6 rounded-lg shadow-lg">
         <h2 className="text-xl font-bold">Set Session Time</h2>
         <div className="flex flex-col gap-4 mb-4">
           <div className="flex flex-col items-start">
@@ -30,7 +30,6 @@ export default function SessionTimePopup({
             <div className="flex gap-2 items-end">
               <input
                 type="number"
-                placeholder="ex.10"
                 min={1}
                 max={60}
                 onChange={(e) => {
@@ -51,7 +50,6 @@ export default function SessionTimePopup({
             <div className="flex gap-2 items-end">
               <input
                 type="number"
-                placeholder="ex.5"
                 min={1}
                 max={60}
                 onChange={(e) => {

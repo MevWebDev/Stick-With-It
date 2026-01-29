@@ -219,15 +219,15 @@ function ChangeSettingPopup({
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <div className="bg-white dark:bg-black  rounded-2xl p-6 w-full max-w-md mx-4 relative shadow-xl">
+      <div className="bg-white rounded-2xl p-6 w-full max-w-md mx-4 relative shadow-xl">
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 dark:text-gray-200 dark:hover:text-gray-400 text-2xl font-bold"
+          className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-2xl font-bold"
         >
-          
+          ×
         </button>
 
-        <h1 className="text-xl font-bold text-gray-900 mb-6 capitalize dark:text-white">
+        <h1 className="text-xl font-bold text-gray-900 mb-6 capitalize">
           Change {setting}
         </h1>
 
