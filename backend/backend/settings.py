@@ -81,29 +81,39 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
-# Configure database based on environment variables
-DB_ENGINE = os.environ.get('DB_ENGINE', 'sqlite3')
+import dj_database_url
 
-if DB_ENGINE == 'postgresql':
+# Use DATABASE_URL if available (Railway, Heroku, etc.)
+DATABASE_URL = os.environ.get('DATABASE_URL')
+
+if DATABASE_URL:
     DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.postgresql',
-            'NAME': os.environ.get('DB_NAME', 'habittracker'),
-            'USER': os.environ.get('DB_USER', 'habituser'),
-            'PASSWORD': os.environ.get('DB_PASSWORD', 'habitpass123'),
-            'HOST': os.environ.get('DB_HOST', 'localhost'),
-            'PORT': os.environ.get('DB_PORT', '5432'),
-            'CONN_MAX_AGE': 600,
-        }
+        'default': dj_database_url.config(default=DATABASE_URL, conn_max_age=600)
     }
 else:
-    # Default to SQLite for development
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': BASE_DIR / 'data' / 'db.sqlite3',
+    # Fallback: check for explicit DB_ENGINE setting
+    DB_ENGINE = os.environ.get('DB_ENGINE', 'sqlite3')
+    
+    if DB_ENGINE == 'postgresql':
+        DATABASES = {
+            'default': {
+                'ENGINE': 'django.db.backends.postgresql',
+                'NAME': os.environ.get('DB_NAME', 'habittracker'),
+                'USER': os.environ.get('DB_USER', 'habituser'),
+                'PASSWORD': os.environ.get('DB_PASSWORD', 'habitpass123'),
+                'HOST': os.environ.get('DB_HOST', 'localhost'),
+                'PORT': os.environ.get('DB_PORT', '5432'),
+                'CONN_MAX_AGE': 600,
+            }
         }
-    }
+    else:
+        # Default to SQLite for development
+        DATABASES = {
+            'default': {
+                'ENGINE': 'django.db.backends.sqlite3',
+                'NAME': BASE_DIR / 'data' / 'db.sqlite3',
+            }
+        }
 
 
 # Password validation
