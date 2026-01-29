@@ -16,6 +16,7 @@ import {
 } from "@/app/lib/challenges/challengeService";
 import { useUserStats } from "../lib/userStats/UserStatsContext";
 import { useAuth } from "../lib/auth/authContext";
+import { useToast } from "../lib/toast/ToastContext";
 
 const getCategoryIcon = (category: string) => {
   switch (category) {
@@ -73,7 +74,7 @@ const placeHolderChallenge: DailyChallenge = {
 
 export default function RandomTask() {
   const [dailyChallenge, setDailyChallenge] = useState<DailyChallenge | null>(
-    null
+    null,
   );
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -81,6 +82,7 @@ export default function RandomTask() {
 
   const { refreshStats } = useUserStats();
   const { user } = useAuth();
+  const { showXpToast, showBadgeToast, showToast } = useToast();
 
   useEffect(() => {
     const loadChallenge = async () => {
@@ -107,7 +109,7 @@ export default function RandomTask() {
 
     setActionLoading(true);
     try {
-      await challengeService.completeChallenge();
+      const response = await challengeService.completeChallenge();
 
       // Update local state to mark as completed
       setDailyChallenge({
@@ -119,11 +121,32 @@ export default function RandomTask() {
       });
 
       setIsModalOpen(false);
-      // Optionally show a success message with points earned
+
+      // Show XP toast
+      if (response.xp_earned > 0) {
+        showXpToast(response.xp_earned, "Challenge Complete!");
+      }
+
+      // Show badge toasts with delay
+      if (response.new_badges && response.new_badges.length > 0) {
+        response.new_badges.forEach((badge, index) => {
+          setTimeout(
+            () => {
+              showBadgeToast({
+                icon: badge.icon,
+                title: badge.title,
+                rarity: badge.rarity,
+              });
+            },
+            (index + 1) * 600,
+          );
+        });
+      }
+
       refreshStats();
     } catch (error) {
       console.error("Failed to complete challenge:", error);
-      alert("Failed to complete challenge. Please try again.");
+      showToast("Failed to complete challenge. Please try again.", "error");
     } finally {
       setActionLoading(false);
     }

@@ -48,7 +48,9 @@ export interface Badge {
   title: string;
   description: string;
   icon: string;
-  rarity: string;
+  rarity: "BRONZE" | "SILVER" | "GOLD" | "ULTIMATE";
+  earned: boolean;
+  earnedDate?: string;
 }
 
 export interface LoginCredentials {

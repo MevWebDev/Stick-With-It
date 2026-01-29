@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import HabitCard from "./HabitCard";
 import { habitService, Habit } from "../../lib/habits/habitService";
-import {  FaPlus } from "react-icons/fa";
+import { FaPlus } from "react-icons/fa";
 import EmojiPicker from "emoji-picker-react";
 
 // defaultowe taski
@@ -55,11 +55,13 @@ export default function HabitTracker() {
           return {
             ...h,
             completed_today: isCompleting,
-            current_streak: isCompleting ? h.current_streak + 1 : Math.max(0, h.current_streak - 1), 
+            current_streak: isCompleting
+              ? h.current_streak + 1
+              : Math.max(0, h.current_streak - 1),
           };
         }
         return h;
-      })
+      }),
     );
 
     try {
@@ -81,7 +83,7 @@ export default function HabitTracker() {
             };
           }
           return h;
-        })
+        }),
       );
     } catch (error) {
       console.error("Failed to toggle habit:", error);
@@ -128,7 +130,7 @@ export default function HabitTracker() {
   };
 
   const availableTemplates = availableHabitTemplates.filter(
-    (t) => !myTrackedHabits.some((h) => h.name === t.name)
+    (t) => !myTrackedHabits.some((h) => h.name === t.name),
   );
 
   return (
@@ -147,7 +149,9 @@ export default function HabitTracker() {
             if (availableTemplates.length > 0) {
               // Find index in original array to set selected correctly
               const firstAvailable = availableTemplates[0];
-              const index = availableHabitTemplates.findIndex(t => t.name === firstAvailable.name);
+              const index = availableHabitTemplates.findIndex(
+                (t) => t.name === firstAvailable.name,
+              );
               setSelectedTemplateIndex(index);
             }
             setIsModalOpen(true);
@@ -167,8 +171,10 @@ export default function HabitTracker() {
       {isModalOpen && (
         <div className="fixed inset-0 bg-white bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white p-8 rounded-lg shadow-xl border-2 border-black max-w-[330px] flex flex-col">
-            <h2 className="text-2xl font-geologica font-bold mb-4">Add a New Habit</h2>
-            
+            <h2 className="text-2xl font-geologica font-bold mb-4">
+              Add a New Habit
+            </h2>
+
             <div className="flex gap-4 mb-4">
               <label className="flex items-center gap-2 cursor-pointer">
                 <input
@@ -198,29 +204,39 @@ export default function HabitTracker() {
               availableTemplates.length > 0 ? (
                 <select
                   value={selectedTemplateIndex}
-                  onChange={(e) => setSelectedTemplateIndex(Number(e.target.value))}
+                  onChange={(e) =>
+                    setSelectedTemplateIndex(Number(e.target.value))
+                  }
                   className="w-full p-2 border rounded mb-4 border-black "
                 >
                   {availableHabitTemplates.map((template, index) => {
-                    const isTracked = myTrackedHabits.some(h => h.name === template.name);
+                    const isTracked = myTrackedHabits.some(
+                      (h) => h.name === template.name,
+                    );
                     if (isTracked) return null;
-                    
+
                     return (
-                      <option key={index} value={index} className="font-figtree font-semibold rounded-md">
+                      <option
+                        key={index}
+                        value={index}
+                        className="font-figtree font-semibold rounded-md"
+                      >
                         {template.name}
                       </option>
                     );
                   })}
                 </select>
               ) : (
-                <p className="mb-4 text-gray-600 text-xs font-figtree">You are tracking all available templates!</p>
+                <p className="mb-4 text-gray-600 text-xs font-figtree">
+                  You are tracking all available templates!
+                </p>
               )
             ) : (
               <div className="flex gap-2 mb-4 relative">
                 {isEmojiPickerOpen && (
                   <>
-                    <div 
-                      className="fixed inset-0 z-40" 
+                    <div
+                      className="fixed inset-0 z-40"
                       onClick={() => setIsEmojiPickerOpen(false)}
                     />
                     <div className="absolute top-full z-50">
@@ -236,7 +252,7 @@ export default function HabitTracker() {
                     </div>
                   </>
                 )}
-                
+
                 <input
                   type="text"
                   placeholder="Emoji"
@@ -245,7 +261,7 @@ export default function HabitTracker() {
                   className="w-16 p-2 border rounded border-black font-figtree text-center text-2xl cursor-pointer hover:bg-gray-50"
                   onClick={() => setIsEmojiPickerOpen(!isEmojiPickerOpen)}
                 />
-                
+
                 <input
                   type="text"
                   placeholder="Custom habit name"
@@ -265,7 +281,11 @@ export default function HabitTracker() {
               </button>
               <button
                 onClick={addHabit}
-                disabled={isLoading || (inputMode === "custom" && !customHabitName) || (inputMode === "template" && availableTemplates.length === 0)}
+                disabled={
+                  isLoading ||
+                  (inputMode === "custom" && !customHabitName) ||
+                  (inputMode === "template" && availableTemplates.length === 0)
+                }
                 className="px-6 py-2 rounded-xl font-figtree  text-white font-bold shadow-lg bg-teal-400 hover:scale-105 transition-transform  cursor-pointer duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isLoading ? "Adding..." : "Add"}
