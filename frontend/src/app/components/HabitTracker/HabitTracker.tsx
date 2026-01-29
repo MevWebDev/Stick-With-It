@@ -116,6 +116,7 @@ export default function HabitTracker() {
       const newHabit = await habitService.createHabit({
         name,
         icon_slug,
+        is_custom: inputMode === "custom",
       });
       setMyTrackedHabits([...myTrackedHabits, newHabit]);
       setIsModalOpen(false);
