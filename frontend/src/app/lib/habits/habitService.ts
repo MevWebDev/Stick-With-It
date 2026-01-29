@@ -21,6 +21,20 @@ export interface CheckHabitResponse {
   streak: number;
   completed_today: boolean;
   message?: string;
+  xp_earned?: number;
+  level_info?: {
+    earned: number;
+    leveled_up: boolean;
+    new_level: number;
+    current_exp: number;
+    xp_to_next: number;
+  };
+  new_badges?: Array<{
+    key: string;
+    title: string;
+    icon: string;
+    rarity: string;
+  }>;
 }
 
 export const habitService = {
