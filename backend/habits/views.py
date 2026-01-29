@@ -202,21 +202,6 @@ def check_habit(request, id):
                 
             new_badges = check_and_award_badges(request.user)
             
-            # Check badges (e.g. Week Warrior)
-            # Longest streak is updated in model save or handled via sync?
-            # UserStats.longest_streak is updated in check_and_award_badges? No, logic is in service eval.
-            # But we need to update user stats longest_streak somewhere if it's not done automatically.
-            # Wait, `check_and_award_badges` only reads.
-            # We need to update user.stats.longest_streak explicitly if habit streak > user max streak.
-            # Let's do it here.
-            
-            user_stats = request.user.stats
-            if habit.current_streak > user_stats.longest_streak:
-                user_stats.longest_streak = habit.current_streak
-                user_stats.save(update_fields=['longest_streak'])
-                
-            new_badges = check_and_award_badges(request.user)
-            
             return Response({
                 'success': True,
                 'streak': habit.current_streak,
