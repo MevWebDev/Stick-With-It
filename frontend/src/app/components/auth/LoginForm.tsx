@@ -41,7 +41,7 @@ export function LoginForm() {
     >
       <div className="bg-white rounded-3xl shadow-xl p-8 border border-gray-100">
         <div className="text-center mb-8">
-          <h2 className="text-3xl font-bold font-geologica text-gray-900 mb-2">
+          <h2 className="text-3xl font-bold font-geologica text-foreground dark:text-background mb-2">
             Welcome Back
           </h2>
           <p className="text-gray-500 font-figtree">
@@ -62,7 +62,7 @@ export function LoginForm() {
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 required
-                className="block w-full pl-11 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-[var(--color-secondary)] focus:border-transparent transition-all font-figtree"
+                className="dark:text-gray-500 block w-full pl-11 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-[var(--color-secondary)] focus:border-transparent transition-all font-figtree"
               />
             </div>
 
@@ -77,14 +77,14 @@ export function LoginForm() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                className="block w-full pl-11 pr-11 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-[var(--color-secondary)] focus:border-transparent transition-all font-figtree"
+                className="block w-full pl-11 dark:text-gray-500 pr-11 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-[var(--color-secondary)] focus:border-transparent transition-all font-figtree"
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
                 className="absolute right-0 inset-y-0 pr-4 flex items-center text-gray-400 hover:text-gray-600 cursor-pointer transition-colors"
               >
-                {showPassword ? <FaEyeSlash /> : <FaEye />}
+                {showPassword ? <FaEyeSlash style={{ color: '#9ca3af' }} /> : <FaEye style={{ color: '#9ca3af' }} />}
               </button>
             </div>
           </div>
@@ -123,7 +123,7 @@ export function LoginForm() {
         Don't have an account?{" "}
         <button
           onClick={() => router.push("/register")}
-          className="text-[var(--color-secondary)] font-bold hover:underline"
+          className="text-[var(--color-secondary)] dark:bg-[var(--color-primary)] dark:text-foreground font-bold hover:underline"
         >
           Sign up
         </button>
