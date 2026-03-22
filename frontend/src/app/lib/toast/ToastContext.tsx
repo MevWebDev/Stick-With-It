@@ -3,7 +3,19 @@
 import React, { createContext, useContext, useState, useCallback } from "react";
 import Toast from "../../components/Toast";
 
-export type ToastType = "success" | "error" | "info" | "warning" | "xp";
+export type ToastType =
+  | "success"
+  | "error"
+  | "info"
+  | "warning"
+  | "xp"
+  | "badge";
+
+export interface BadgeInfo {
+  icon: string;
+  title: string;
+  rarity: string;
+}
 
 interface ToastMessage {
   id: string;
@@ -11,6 +23,7 @@ interface ToastMessage {
   type: ToastType;
   duration?: number;
   xpAmount?: number;
+  badge?: BadgeInfo;
 }
 
 interface ToastContextType {
@@ -18,9 +31,10 @@ interface ToastContextType {
     message: string,
     type?: ToastType,
     duration?: number,
-    xpAmount?: number
+    xpAmount?: number,
   ) => void;
   showXpToast: (xpAmount: number, message?: string) => void;
+  showBadgeToast: (badge: BadgeInfo) => void;
 }
 
 const ToastContext = createContext<ToastContextType | undefined>(undefined);
@@ -37,7 +51,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
       message: string,
       type: ToastType = "info",
       duration: number = 3000,
-      xpAmount?: number
+      xpAmount?: number,
     ) => {
       const id = Math.random().toString(36).substring(2, 11);
       const newToast: ToastMessage = { id, message, type, duration, xpAmount };
@@ -50,18 +64,30 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
         }, duration);
       }
     },
-    [removeToast]
+    [removeToast],
   );
 
   const showXpToast = useCallback(
     (xpAmount: number, message: string = "XP Earned!") => {
       showToast(message, "xp", 4000, xpAmount);
     },
-    [showToast]
+    [showToast],
   );
 
+  const showBadgeToast = useCallback((badge: BadgeInfo) => {
+    const id = Math.random().toString(36).substring(2, 11);
+    const newToast: ToastMessage = {
+      id,
+      message: "New Badge Unlocked!",
+      type: "badge",
+      duration: 5000,
+      badge,
+    };
+    setToasts((prev) => [...prev, newToast]);
+  }, []);
+
   return (
-    <ToastContext.Provider value={{ showToast, showXpToast }}>
+    <ToastContext.Provider value={{ showToast, showXpToast, showBadgeToast }}>
       {children}
       <div className="fixed top-20 right-4 z-50 flex flex-col gap-2 pointer-events-none">
         {toasts.map((toast) => (
@@ -70,6 +96,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
             message={toast.message}
             type={toast.type}
             xpAmount={toast.xpAmount}
+            badge={toast.badge}
             onClose={() => removeToast(toast.id)}
           />
         ))}

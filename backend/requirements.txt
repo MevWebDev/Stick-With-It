@@ -9,6 +9,9 @@ coverage>=7.0.0
 # PostgreSQL adapter
 psycopg2-binary>=2.9.9
 
+# Database URL parsing (for Railway/Heroku)
+dj-database-url>=2.1.0
+
 # Redis for caching
 redis>=5.0.1
 django-redis>=5.4.0

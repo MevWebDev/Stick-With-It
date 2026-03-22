@@ -21,7 +21,7 @@ export const authService = {
   async register(credentials: RegisterCredentials): Promise<AuthResponse> {
     const response = await apiClient.post<AuthResponse>(
       "/api/auth/register/",
-      credentials
+      credentials,
     );
     if (response.tokens) {
       this.setTokens(response.tokens.access, response.tokens.refresh);
@@ -32,7 +32,7 @@ export const authService = {
   async checkEmail(email: string): Promise<CheckEmailResponse> {
     const response = await apiClient.post<CheckEmailResponse>(
       "/api/auth/check-email/",
-      { email }
+      { email },
     );
 
     return response;
@@ -41,7 +41,7 @@ export const authService = {
   async login(credentials: LoginCredentials): Promise<AuthResponse> {
     const response = await apiClient.post<AuthResponse>(
       "/api/auth/login/",
-      credentials
+      credentials,
     );
     if (response.tokens) {
       this.setTokens(response.tokens.access, response.tokens.refresh);
@@ -50,35 +50,35 @@ export const authService = {
   },
 
   async changePassword(
-    credentials: ChangePasswordCredentials
+    credentials: ChangePasswordCredentials,
   ): Promise<ChangeResponse> {
     const token = this.getAccessToken();
     return apiClient.post<ChangeResponse>(
       "/api/auth/change-password/",
       credentials,
-      token || undefined
+      token || undefined,
     );
   },
 
   async changeEmail(
-    credentials: ChangeEmailCredentials
+    credentials: ChangeEmailCredentials,
   ): Promise<ChangeResponse> {
     const token = this.getAccessToken();
     return apiClient.post<ChangeResponse>(
       "/api/auth/change-email/",
       credentials,
-      token || undefined
+      token || undefined,
     );
   },
 
   async changeUsername(
-    credentials: ChangeUsernameCredentials
+    credentials: ChangeUsernameCredentials,
   ): Promise<ChangeResponse> {
     const token = this.getAccessToken();
     return apiClient.post<ChangeResponse>(
       "/api/auth/change-username/",
       credentials,
-      token || undefined
+      token || undefined,
     );
   },
 
@@ -98,14 +98,18 @@ export const authService = {
     const token = this.getAccessToken();
     const response = await apiClient.get<StatsResponse>(
       "/api/auth/stats/",
-      token || undefined
+      token || undefined,
     );
     return response.stats;
   },
 
   async getBadges(): Promise<Badge[]> {
     const token = this.getAccessToken();
-    return apiClient.get<Badge[]>("/api/auth/badges/", token || undefined);
+    const response = await apiClient.get<{ success: boolean; badges: Badge[] }>(
+      "/api/auth/badges/",
+      token || undefined,
+    );
+    return response.badges;
   },
 
   async getCurrentUser(): Promise<User> {
@@ -121,7 +125,7 @@ export const authService = {
       "/api/auth/refresh/",
       {
         refresh: refreshToken,
-      }
+      },
     );
     this.setAccessToken(response.access);
     return response.access;

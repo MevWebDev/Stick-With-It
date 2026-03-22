@@ -29,6 +29,8 @@ import secrets
 from django.core.mail import send_mail
 from django.conf import settings
 from django.core.cache import cache
+from accounts.services import check_and_award_badges
+
 # REJESTRACJA
 @csrf_exempt
 @require_http_methods(["POST"])
@@ -394,7 +396,16 @@ def complete_challenge(request):
             stats.level2_completed += 1
         elif challenge.difficulty == 3:
             stats.level3_completed += 1
-        
+
+        stats.challenges_completed_total += 1
+        if challenge.difficulty == 'EASY':
+            stats.challenges_completed_easy += 1
+        elif challenge.difficulty == 'MEDIUM':
+            stats.challenges_completed_medium += 1
+        elif challenge.difficulty == 'HARD':
+            stats.challenges_completed_hard += 1
+        stats.save()
+
         # Oblicz streak
         if stats.last_completed_date:
             # Konwertuj na date jeśli to datetime
@@ -434,7 +445,7 @@ def complete_challenge(request):
         
         xp_result = XpService.award_xp(user, xp_amount, 'challenge')
         
-        # Sprawdź nowe badges (funkcję napiszemy za chwilę)
+        # Sprawdź nowe badges
         new_badges = check_and_award_badges(user)
         
         return JsonResponse({
@@ -622,39 +633,32 @@ def complete_pomodoro(request):
     try:
         user = request.user
         
+        # Update stats
+        user.stats.pomodoro_sessions_completed += 1
+        user.stats.save(update_fields=['pomodoro_sessions_completed'])
+        
         xp_result = XpService.award_xp(user, 10, 'pomodoro')
+        
+        # Check badges
+        new_badges = check_and_award_badges(user)
         
         return JsonResponse({
             'success': True,
             'xp_earned': xp_result['earned'],
-            'level_info': xp_result
+            'level_info': xp_result,
+            'new_badges': [
+                {
+                    'key': badge.key,
+                    'title': badge.title,
+                    'icon': badge.icon,
+                    'rarity': badge.rarity
+                }
+                for badge in new_badges
+            ]
         })
         
     except Exception as e:
         return JsonResponse({'success': False, 'error': str(e)}, status=500)
-
-
-# ============================================
-# HELPER - Sprawdzanie i przyznawanie badges
-# ============================================
-
-def check_and_award_badges(user):
-    """Sprawdza warunki i przyznaje nowe badges"""
-    stats = user.stats
-    new_badges = []
-    
-    # Pobierz badges które user już ma
-    earned_keys = set(stats.earned_badges.values_list('key', flat=True))
-    
-    # Badge: First Steps - pierwsze wyzwanie
-    if stats.total_completed >= 1 and 'first_steps' not in earned_keys:
-        try:
-            badge = Badges.objects.get(key='first_steps')
-            stats.earned_badges.add(badge)
-            new_badges.append(badge)
-        except Badges.DoesNotExist:
-            pass
-    return new_badges
 
 
 # ============================================

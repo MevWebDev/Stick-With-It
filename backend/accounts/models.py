@@ -32,6 +32,19 @@ class UserStats(models.Model):
     current_exp = models.IntegerField(default=0)
     total_exp = models.IntegerField(default=0)
 
+    # Stats for badges
+    # Pomodoro counters
+    pomodoro_sessions_completed = models.IntegerField(default=0)
+    
+    # Challenge counters
+    challenges_completed_total = models.IntegerField(default=0)
+    challenges_completed_easy = models.IntegerField(default=0)
+    challenges_completed_medium = models.IntegerField(default=0)
+    challenges_completed_hard = models.IntegerField(default=0)
+    
+    # Habit counters
+    habits_created = models.IntegerField(default=0)
+
     def __str__(self):
         return f"{self.user.username} - Lvl {self.level} ({self.points} pts, Streak: {self.current_streak})"
 
@@ -69,6 +82,7 @@ class Badges(models.Model):
     title = models.CharField(max_length=20)
     description = models.CharField(max_length=200)
     icon = models.CharField(max_length=10, default='🥳')
+    condition = models.CharField(max_length=100, default='')  # np. 'challenges_completed_total >= 1'
     class Rarity(models.TextChoices):
         BRONZE = 'BRONZE', 'Bronze'
         SILVER = 'SILVER', 'Silver'

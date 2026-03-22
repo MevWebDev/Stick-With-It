@@ -5,7 +5,9 @@ import SessionTimePopup from "./sessionTimePopup";
 import StartStopButton from "./startStopButton";
 import EndSessionPopup from "./endSessionPopup";
 import { apiClient } from "@/app/lib/api/client";
+import { authService } from "../../lib/auth/authService";
 import { useUserStats } from "@/app/lib/userStats/UserStatsContext";
+import { useToast } from "@/app/lib/toast/ToastContext";
 
 const getStorageValue = (key: string, defaultValue: number): number => {
   if (typeof window === "undefined") return defaultValue;
@@ -16,13 +18,14 @@ const getStorageValue = (key: string, defaultValue: number): number => {
 export default function PomodoroTimer() {
   const pathname = usePathname();
   const { refreshStats } = useUserStats();
+  const { showXpToast, showBadgeToast } = useToast();
 
   const [focusTime, setFocusTime] = useState(() =>
-    getStorageValue("pomodoroFocusTime", 25 * 60)
+    getStorageValue("pomodoroFocusTime", 25 * 60),
   );
 
   const [breakTime, setBreakTime] = useState(() =>
-    getStorageValue("pomodoroBreakTime", 5 * 60)
+    getStorageValue("pomodoroBreakTime", 5 * 60),
   );
 
   const [mode, setMode] = useState<"focus" | "break">(() => {
@@ -37,15 +40,15 @@ export default function PomodoroTimer() {
       return status === "running" || status === "paused"
         ? (status as "running" | "paused")
         : "idle";
-    }
+    },
   );
 
   const [pausedTime, setPausedTime] = useState<number | null>(
-    () => getStorageValue("pomodoroPausedTime", 0) || null
+    () => getStorageValue("pomodoroPausedTime", 0) || null,
   );
 
   const [endTimestamp, setEndTimestamp] = useState<number | null>(
-    () => getStorageValue("pomodoroEndTimestamp", 0) || null
+    () => getStorageValue("pomodoroEndTimestamp", 0) || null,
   );
 
   const [timeLeft, setTimeLeft] = useState(() => {
@@ -79,7 +82,7 @@ export default function PomodoroTimer() {
 
   const completePomodoroSession = async () => {
     try {
-      const token = localStorage.getItem("access_token");
+      const token = authService.getAccessToken();
       if (!token) {
         console.warn("No access token found, skipping XP award");
         return;
@@ -95,9 +98,36 @@ export default function PomodoroTimer() {
           total_exp: number;
           leveled_up: boolean;
         };
+        new_badges?: Array<{
+          key: string;
+          title: string;
+          icon: string;
+          rarity: string;
+        }>;
       }>("/api/auth/pomodoro/complete/", {}, token);
 
       console.log("Pomodoro XP awarded:", response);
+
+      // Show XP toast
+      if (response.xp_earned > 0) {
+        showXpToast(response.xp_earned, "Pomodoro Complete!");
+      }
+
+      // Show badge toasts
+      if (response.new_badges && response.new_badges.length > 0) {
+        response.new_badges.forEach((badge, index) => {
+          setTimeout(
+            () => {
+              showBadgeToast({
+                icon: badge.icon,
+                title: badge.title,
+                rarity: badge.rarity,
+              });
+            },
+            (index + 1) * 600,
+          );
+        });
+      }
 
       // Refresh user stats to show updated XP/level
       await refreshStats();
@@ -231,7 +261,7 @@ export default function PomodoroTimer() {
     } else {
       setTimerStatus("running" as "running");
       setEndTimestamp(
-        Date.now() + (mode === "focus" ? focusTime : breakTime) * 1000
+        Date.now() + (mode === "focus" ? focusTime : breakTime) * 1000,
       );
     }
   };
@@ -384,7 +414,7 @@ export default function PomodoroTimer() {
               setTimeLeft(
                 mode === "focus"
                   ? Math.round(newFocus * 60)
-                  : Math.round(newBreak * 60)
+                  : Math.round(newBreak * 60),
               );
             }
           }}
