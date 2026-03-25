@@ -26,7 +26,7 @@ const tools = [
     href: "/watertracker",
   },
   // Placeholders for future tools
-  { name: "Calendar", icon: <FaCalendarAlt />, href: "#" },
+  { name: "Journal", icon: <FaCalendarAlt />, href: "/journal" },
   { name: "Notes", icon: <FaStickyNote />, href: "#" },
 ];
 
