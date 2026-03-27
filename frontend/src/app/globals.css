@@ -28,8 +28,8 @@
     --background: #ffffff;
     --foreground: #171717;
 
-    --color-primary: #677381;
-    --color-primary-dark: #4b4a54;
+    --color-primary: #263f5c;
+    --color-primary-dark: #2d2950;
     --color-secondary: #82a0aa;
     --color-secondary-light: #a3cfcd;
   }
@@ -40,12 +40,12 @@
     --background: #0a0a0a; /* Dark background */
     --foreground: #ededed; /* Light text */
 
-    --color-primary: #8a96a3;
-    --color-primary-dark: #677381;
-    --color-secondary: #5e7c85;
+    --color-primary: #08213d;
+    --color-primary-dark: #051b34;
+    --color-secondary: #256275;
     --color-secondary-light: #82a0aa;
     --color-button-bg: #1f1f1f;
-    --color-button-bg-hover: #2a2a2a;
+    --color-button-bg-hover: #010a47;
     --color-button-text: #fffbf4;
   }
 }
@@ -93,7 +93,7 @@ button {
     /* Dark mode hover */
     :where([data-theme="dark"] &) {
       background-color: var(--color-button-bg-hover);
-      border-color: #444444;
+      border-color: #0048e3;
     }
   }
 }

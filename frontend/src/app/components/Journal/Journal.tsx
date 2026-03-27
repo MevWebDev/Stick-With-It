@@ -77,7 +77,7 @@ export default function Journal() {
     }
     .rdp-day_selected, .rdp-day_selected:focus-visible, .rdp-day_selected:hover {
       background-color: var(--color-secondary);
-      color: white;
+      color: background;
     }
     .rdp-day_today {
       font-weight: bold;
@@ -94,27 +94,27 @@ export default function Journal() {
   if (!mounted) return null; // Uniknięcie hydration mismatch
 
   return (
-    <div className="flex flex-col flex-1 h-full bg-white dark:bg-black rounded-3xl shadow-sm border border-gray-100 dark:border-gray-800 relative w-full overflow-hidden">
+    <div className="flex flex-col flex-1 h-full bg-background dark:bg-black rounded-3xl shadow-sm border border-gray-100 dark:border-gray-800 relative w-full overflow-hidden">
       <style>{css}</style>
 
       {/* HEADER */}
       <header className="px-8 py-8 flex items-center justify-between z-10 border-b border-gray-50 dark:border-gray-900">
         <div>
-          <h1 className="text-3xl font-extrabold text-gray-900 dark:text-white capitalize">
+          <h1 className="text-3xl font-extrabold capitalize">
             {getDayLabel(selectedDate)}
           </h1>
-          <p className="text-sm font-medium text-gray-500 capitalize mt-1">
+          <p className="text-sm font-medium text-secondary capitalize mt-1 ">
             {formattedDate}
           </p>
         </div>
 
         <button
           onClick={() => setIsCalendarOpen(true)}
-          className="ml-4 border-none flex items-center justify-center hover:scale-105 active:scale-95 transition-all text-gray-600 dark:text-gray-300"
+          className="ml-4 border-none flex items-center justify-center hover:scale-105 active:scale-95 transition-all"
         >
           <FaCalendarAlt
             size={24}
-            style={{ color: "var(--color-secondary, currentColor)" }}
+            style={{ color: "var(--color-foreground, currentColor)" }}
           />
         </button>
       </header>
@@ -125,13 +125,13 @@ export default function Journal() {
           value={noteContent}
           onChange={(e) => setNoteContent(e.target.value)}
           placeholder="O czym dzisiaj myślisz?"
-          className="w-full flex-1 resize-none bg-transparent outline-none text-gray-800 dark:text-gray-100 text-lg sm:text-xl font-figtree placeholder-gray-400 dark:placeholder-gray-600 leading-relaxed min-h-full pb-16"
+          className="w-full flex-1 resize-none bg-transparent outline-none text-primary-dark dark:text-foreground text-lg sm:text-xl font-figtree placeholder-gray-400 dark:placeholder-gray-600 leading-relaxed min-h-full pb-16"
         />
 
         {/* Autosave Indicator */}
         <div className="fixed bottom-10 right-10 md:absolute md:bottom-6 md:right-8 z-20 pointer-events-none">
           {" "}
-          <span className="text-xs text-gray-400 flex items-center gap-1 font-medium bg-white/90 dark:bg-black/90 backdrop-blur-sm px-3 py-1.5 rounded-full shadow-sm border border-gray-100 dark:border-gray-800 opacity-80">
+          <span className="text-xs text-gray-400 flex items-center gap-1 font-medium bg-background/90 dark:bg-black/90 backdrop-blur-sm px-3 py-1.5 rounded-full shadow-sm border border-gray-100 dark:border-gray-800 opacity-80">
             {isSaving
               ? "Zapisywanie..."
               : noteContent
@@ -157,7 +157,7 @@ export default function Journal() {
               animate={{ y: 0 }}
               exit={{ y: "100%" }}
               transition={{ type: "spring", damping: 25, stiffness: 300 }}
-              className="absolute bottom-0 left-0 right-0 bg-white dark:bg-gray-900 rounded-t-3xl shadow-2xl z-30 p-6 flex flex-col items-center max-h-[90%] overflow-y-auto"
+              className="absolute bottom-0 left-0 right-0 bg-background dark:bg-gray-900 rounded-t-3xl shadow-2xl z-30 p-6 flex flex-col items-center max-h-[90%] overflow-y-auto"
             >
               <div
                 className="w-12 h-1.5 bg-gray-300 dark:bg-gray-700 rounded-full mb-6 cursor-grab active:cursor-grabbing"
@@ -165,14 +165,14 @@ export default function Journal() {
               />
 
               <div className="w-full flex justify-between items-center mb-4 px-2">
-                <h2 className="text-xl font-bold text-gray-900 dark:text-white">
-                  Wybierz datę
-                </h2>
+                <h2 className="text-xl font-bold">Wybierz datę</h2>
                 <button
                   onClick={() => setIsCalendarOpen(false)}
-                  className="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-gray-500 hover:text-gray-800 dark:hover:text-white transition-colors"
+                  className="size-10 rounded-full flex items-center justify-center hover:scale-105"
                 >
-                  <IoIosClose size={24} />
+                  <IoIosClose size={24} />{" "}
+                  {/* nie dziala mi to ??   dalem x narazie */}
+                  🗙
                 </button>
               </div>
 
@@ -183,7 +183,7 @@ export default function Journal() {
                   onSelect={handleDateSelect}
                   locale={pl}
                   showOutsideDays
-                  className="text-gray-800 dark:text-gray-200"
+                  className="text-primary dark:text-foreground"
                 />
               </div>
             </motion.div>
