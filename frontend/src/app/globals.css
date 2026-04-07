@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "react-datepicker/dist/react-datepicker.css";
 
 /* 1. Define the dark variant so you can still use dark:bg-red-500 if needed */
 @custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *));
