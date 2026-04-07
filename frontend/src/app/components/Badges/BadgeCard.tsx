@@ -175,8 +175,8 @@ const BadgeCard: React.FC<BadgeCardProps> = ({
         relative rounded-2xl p-4 transition-all duration-200
         ${
           earned
-            ? `bg-white border ${styles.border} shadow-sm hover:shadow-md`
-            : "bg-gray-50 border border-gray-100"
+            ? `bg-background border ${styles.border} shadow-sm hover:shadow-md`
+            : "bg-background border border-secondary"
         }
       `}
     >
@@ -197,7 +197,7 @@ const BadgeCard: React.FC<BadgeCardProps> = ({
       <h3
         className={`
           text-center font-semibold text-sm mb-1 line-clamp-2
-          ${earned ? "text-gray-900" : "text-gray-400"}
+          ${earned ? "text-foreground" : "text-gray-500 dark:text-gray-600"}
         `}
       >
         {title}
@@ -207,7 +207,7 @@ const BadgeCard: React.FC<BadgeCardProps> = ({
       <p
         className={`
           text-center text-xs mb-2 line-clamp-2
-          ${earned ? "text-gray-500" : "text-gray-300"}
+          ${earned ? "text-gray-500" : "text-gray-400"}
         `}
       >
         {description}
@@ -218,7 +218,7 @@ const BadgeCard: React.FC<BadgeCardProps> = ({
         <span
           className={`
             px-2 py-0.5 rounded-full text-[10px] font-medium uppercase tracking-wide
-            ${earned ? styles.pill : "bg-gray-100 text-gray-400"}
+            ${earned ? styles.pill : "bg-gray-100 text-gray-400 dark:text-gray-600"}
           `}
         >
           {rarity}
