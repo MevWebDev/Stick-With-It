@@ -6,6 +6,7 @@ import {
   FaCalendarAlt,
   FaStickyNote,
   FaHome,
+  FaList,
 } from "react-icons/fa";
 import { FaGlassWaterDroplet } from "react-icons/fa6";
 import { IoMdClose } from "react-icons/io";
@@ -28,6 +29,7 @@ const tools = [
   // Placeholders for future tools
   { name: "Journal", icon: <FaCalendarAlt />, href: "/journal" },
   { name: "Notes", icon: <FaStickyNote />, href: "#" },
+  { name: "To Do", icon: <FaList />, href: "/todo" },
 ];
 
 export default function ToolsMenu({ onClose }: ToolsMenuProps) {
