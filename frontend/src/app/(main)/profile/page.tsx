@@ -65,13 +65,13 @@ export default function ProfilePage() {
       <div className="px-4 pt-6 pb-8">
         {/* Profile Info */}
         <div className="flex flex-col items-center mb-8">
-          <div className="w-24 h-24 bg-[var(--color-primary)] dark:text-foreground rounded-full flex items-center justify-center text-4xl font-bold text-white shadow-lg mb-4 border-4 border-white">
+          <div className="w-24 h-24 bg-primary dark:text-foreground rounded-full flex items-center justify-center text-4xl font-bold text-white shadow-lg mb-4 border-2 border-secondary">
             {user.username.charAt(0).toUpperCase()}
           </div>
           <h2 className="text-2xl font-bold text-gray-900 font-geologica mb-1 dark:text-foreground">
             {user.username}
           </h2>
-          <p className="text-sm font-bold text-[var(--color-secondary)] tracking-wider mb-3">
+          <p className="text-sm font-bold  text-primary-dark dark:text-secondary-light tracking-wider mb-3">
             LEVEL {level}
           </p>
 
@@ -81,9 +81,9 @@ export default function ProfilePage() {
               <span>{currentExp} XP</span>
               <span>{expToNextLevel} XP</span>
             </div>
-            <div className="h-3 bg-gray-200  rounded-full overflow-hidden shadow-inner dark:bg-primary  ">
+            <div className="h-3 bg-gray-200  rounded-full overflow-hidden shadow-inner dark:bg-secondary-light  ">
               <motion.div
-                className="h-full bg-gradient-to-r from-[var(--color-secondary)] to-[var(--color-primary)] rounded-full"
+                className="h-full bg-linear-to-r from-primary to-secondary rounded-full"
                 initial={{ width: 0 }}
                 animate={{ width: `${expPercentage}%` }}
                 transition={{ duration: 1, ease: "easeOut" }}
@@ -122,7 +122,7 @@ export default function ProfilePage() {
             </h3>
             <button
               onClick={() => setIsBadgesModalOpen(true)}
-              className="text-sm text-[var(--color-secondary)] font-medium hover:opacity-80"
+              className="text-sm text-foreground font-medium hover:opacity-80"
             >
               See All
             </button>
@@ -135,7 +135,7 @@ export default function ProfilePage() {
                   key={badge.key}
                   className="flex-shrink-0 flex flex-col items-center gap-2 w-20"
                 >
-                  <div className="w-16 h-16 bg-white rounded-full shadow-sm border border-gray-100 flex items-center justify-center text-2xl dark:bg-zinc-900 dark:border-zinc-800 dark:text-gray-200">
+                  <div className="w-16 h-16 bg-white rounded-full shadow-sm border border-secondary flex items-center justify-center text-2xl dark:bg-zinc-900 dark:border-zinc-800 dark:text-gray-200">
                     {badge.icon}
                   </div>
                   <span className="text-xs text-center text-gray-600 font-medium truncate w-full dark:text-gray-400">
@@ -145,8 +145,10 @@ export default function ProfilePage() {
               ))}
             </div>
           ) : (
-            <div className="bg-white rounded-xl p-6 text-center border border-gray-100 dark:bg-zinc-900 dark:border-zinc-800">
-              <p className="text-gray-500 text-sm dark:text-gray-400">No badges earned yet</p>
+            <div className="bg-white rounded-xl p-6 text-center border border-secondary dark:bg-zinc-900 dark:border-zinc-800">
+              <p className="text-gray-500 text-sm dark:text-gray-400">
+                No badges earned yet
+              </p>
             </div>
           )}
         </div>
@@ -160,43 +162,33 @@ export default function ProfilePage() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: "100%" }}
             transition={{ type: "spring", damping: 25, stiffness: 200 }}
-            className="fixed inset-0 bg-white z-50 flex flex-col"
+            className="fixed inset-0 bg-background z-50 flex flex-col"
           >
-            <div className="px-4 py-4 flex items-center justify-between border-b border-gray-100">
-              <h2 className="text-lg font-bold font-geologica text-gray-900">
-                All Badges ({badges?.length || 0})
+            <div className="px-4 py-4 flex items-center justify-between">
+              <h2 className="text-xl font-bold font-geologica text-foreground">
+                Badges
               </h2>
               <button
                 onClick={() => setIsBadgesModalOpen(false)}
-                className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+                className="p-2 rounded-full transition-colors"
               >
-                <IoMdClose size={24} className="text-gray-700" />
+                <IoMdClose size={28} />
               </button>
             </div>
 
             {/* Stats Bar in Modal */}
-            <div className="px-4 py-3 bg-gray-50 border-b border-gray-100 flex justify-around text-center">
+            <div className="px-4 py-3 bg-back border-y  border-secondary flex justify-around text-center">
               <div>
-                <p className="text-xs text-gray-500 uppercase font-bold">
-                  Total
-                </p>
-                <p className="text-lg font-bold text-gray-900">
-                  {badges?.length || 0}
-                </p>
+                <p className="text-xs  uppercase font-bold">Total</p>
+                <p className="text-lg font-bold">{badges?.length || 0}</p>
               </div>
               <div>
-                <p className="text-xs text-gray-500 uppercase font-bold">
-                  Earned
-                </p>
-                <p className="text-lg font-bold text-green-600">
-                  {earnedBadgesCount}
-                </p>
+                <p className="text-xs  uppercase font-bold">Earned</p>
+                <p className="text-lg font-bold ">{earnedBadgesCount}</p>
               </div>
               <div>
-                <p className="text-xs text-gray-500 uppercase font-bold">
-                  Locked
-                </p>
-                <p className="text-lg font-bold text-gray-400">
+                <p className="text-xs  uppercase font-bold">Locked</p>
+                <p className="text-lg font-bold ">
                   {(badges?.length || 0) - earnedBadgesCount}
                 </p>
               </div>
@@ -246,12 +238,14 @@ function StatCard({
   className?: string;
 }) {
   return (
-    <div className={`bg-white p-3 rounded-2xl shadow-sm border border-gray-100 flex flex-col items-center text-center dark:bg-zinc-900 dark:border-zinc-800 ${className}`}>
+    <div
+      className={`bg-white p-3 rounded-2xl shadow-sm border border-secondary flex flex-col items-center text-center dark:bg-zinc-900 dark:border-zinc-800 ${className}`}
+    >
       <div className="mb-2 text-xl">{icon}</div>
-      <span className="text-lg font-bold text-gray-900 leading-none mb-1 dark:text-white">
+      <span className="text-lg font-bold text-foreground leading-none mb-1">
         {value ?? 0}
       </span>
-      <span className="text-[10px] text-gray-500 uppercase font-bold tracking-wide dark:text-gray-400">
+      <span className="text-[10px]  text-foreground uppercase font-bold tracking-wide ">
         {label}
       </span>
     </div>

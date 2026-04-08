@@ -32,7 +32,7 @@ const getCategoryIcon = (category: string) => {
       return <FaBrain />;
   }
 };
-
+// tutaj jakos zamienic kolorki na zmienne
 const getDifficultyColor = (difficulty: number) => {
   switch (difficulty) {
     case 1: // Easy (Green)
@@ -217,9 +217,9 @@ export default function RandomTask() {
             {/* Close Button */}
             <button
               onClick={() => setIsModalOpen(false)}
-              className="absolute top-5 right-5 p-3 text-gray-500 hover:text-gray-700 active:scale-90 transition-all z-10 bg-white/80 rounded-full"
+              className="absolute top-5 right-5 p-3 text-gray-500 hover:text-gray-700 dark:bg-background dark:border dark:border-bg-secondary-light   active:scale-90 transition-all z-10 bg-white/80 rounded-full"
             >
-              <FaTimes size={22} />
+              <FaTimes size={22} className="dark:text-foreground" />
             </button>
 
             {/* Scrollable Content */}
@@ -244,7 +244,7 @@ export default function RandomTask() {
 
               {/* Body */}
               <div className="p-6 sm:p-8">
-                <p className="text-gray-600 text-lg sm:text-xl leading-relaxed font-figtree mb-8">
+                <p className="text-gray-600 dark:text-foreground text-lg sm:text-xl leading-relaxed font-figtree mb-8">
                   {challenge.description}
                 </p>
 
@@ -265,14 +265,14 @@ export default function RandomTask() {
                       <button
                         onClick={handleDone}
                         disabled={actionLoading}
-                        className="w-full sm:flex-1 bg-green-500 text-white py-4 px-6 rounded-2xl font-bold active:scale-95 hover:bg-green-600 transition-all flex items-center justify-center gap-2 shadow-lg shadow-green-200 text-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="w-full sm:flex-1 bg-green-400 dark:bg-emerald-700 text-white py-4 px-6 rounded-2xl font-bold active:scale-95 hover:bg-green-600 transition-all flex items-center justify-center gap-2  text-lg disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         <FaCheck /> {actionLoading ? "Processing..." : "Done"}
                       </button>
                       <button
                         onClick={handleBlacklist}
                         disabled={actionLoading}
-                        className="w-full sm:flex-1 bg-gray-100 text-gray-700 py-4 px-6 rounded-2xl font-bold active:scale-95 hover:bg-gray-200 transition-all flex items-center justify-center gap-2 text-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="w-full sm:flex-1 bg-gray-100 text-gray-700 dark:text-foreground dark:bg-background dark:border-2 dark:border-secondary-light py-4 px-6 rounded-2xl font-bold active:scale-95 hover:bg-gray-200 transition-all flex items-center justify-center gap-2 text-lg disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         <FaBan />{" "}
                         {actionLoading ? "Processing..." : "Blacklist"}
