@@ -18,10 +18,10 @@ export default function ToDoPagination({
   }
 
   return (
-    <div className="flex items-center justify-center gap-4 pt-2 text-sm text-gray-500">
+    <div className="flex items-center justify-center gap-4 pt-2 text-sm">
       <button
         onClick={onPrev}
-        className="rounded border border-gray-200 px-2 py-1"
+        className="rounded border border-gray-500 px-2 py-1 dark:border-gray-400"
         disabled={safePage === 1}
       >
         &lt;
@@ -31,7 +31,7 @@ export default function ToDoPagination({
       </span>
       <button
         onClick={onNext}
-        className="rounded border border-gray-200 px-2 py-1"
+        className="rounded border border-gray-500 px-2 py-1 dark:border-gray-400"
         disabled={safePage === totalPages}
       >
         &gt;

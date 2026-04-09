@@ -41,54 +41,49 @@ export default function ToDoSheet({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end bg-black/40">
+    <div className="fixed inset-0 z-50 flex items-end">
       <div
-        className={`w-full max-h-[85vh] overflow-y-auto rounded-t-2xl bg-white p-6 shadow-xl transition-transform duration-300 ease-out sm:mx-auto sm:max-w-2xl ${
+        className={`w-full max-h-[85vh] overflow-y-auto rounded-t-2xl bg-white p-6 text-gray-900 shadow-xl transition-transform duration-300 ease-out dark:bg-gray-900 dark:text-gray-100 sm:mx-auto sm:max-w-2xl ${
           isSheetOpen ? "translate-y-0" : "translate-y-full"
         }`}
       >
         <div className="flex flex-col gap-6">
           <div className="flex items-center justify-between">
-            <h2 className="text-xl font-bold text-gray-900">
+            <h2 className="text-xl font-bold">
               {editingId !== null ? "Edit task" : "Add a new task"}
             </h2>
-            <button onClick={onClose} className="text-gray-500">
-              Close
-            </button>
+            <button onClick={onClose}>Close</button>
           </div>
           <div className="flex flex-col gap-6">
             <div>
-              <label className="mb-2 block text-sm font-medium text-gray-700">
-                Task
-              </label>
+              <label className="mb-2 block text-sm font-medium">Task</label>
               <input
                 type="text"
                 placeholder="ex. Laundry"
                 value={newTaskName}
                 onChange={(event) => onNameChange(event.target.value)}
-                className="w-full rounded border border-gray-200 px-3 py-2"
+                className="w-full rounded border px-3 py-2 dark:bg-gray-800 dark:text-white"
               />
             </div>
 
             <div>
-              <label className="mb-2 block text-sm font-medium text-gray-700">
-                Date
-              </label>
+              <label className="mb-2 block text-sm font-medium">Date</label>
               <div className="flex flex-col gap-3">
                 <button
                   type="button"
                   onClick={onToggleCalendar}
-                  className="w-full rounded border border-gray-200 px-3 py-2 text-left text-sm text-gray-600"
+                  className="w-full rounded border px-3 py-2 text-left text-sm dark:bg-gray-800 dark:text-white"
                 >
                   {selectedDate
                     ? selectedDate.toLocaleDateString()
                     : "Choose a date"}
                 </button>
                 {showCalendar && (
-                  <div className="rounded border border-gray-200 p-2">
+                  <div className="rounded border p-2 dark:bg-gray-800 dark:text-white">
                     <DatePicker
                       selected={selectedDate}
                       onChange={(date: Date | null) => onDateSelect(date)}
+                      calendarClassName="dark:bg-gray-800 dark:text-white"
                       inline
                     />
                   </div>
@@ -96,16 +91,14 @@ export default function ToDoSheet({
               </div>
             </div>
             <div>
-              <p className="mb-3 text-sm font-medium text-gray-700">Time</p>
+              <p className="mb-3 text-sm font-medium">Time</p>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="mb-1 block text-xs text-gray-500">
-                    Hour
-                  </label>
+                  <label className="mb-1 block text-xs">Hour</label>
                   <select
                     value={hour}
                     onChange={(event) => onHourChange(event.target.value)}
-                    className="w-full rounded border border-gray-200 px-3 py-2"
+                    className="w-full rounded border px-3 py-2 dark:bg-gray-800 dark:text-white"
                   >
                     <option value="">--</option>
                     {Array.from({ length: 24 }, (_, index) => {
@@ -119,13 +112,11 @@ export default function ToDoSheet({
                   </select>
                 </div>
                 <div>
-                  <label className="mb-1 block text-xs text-gray-500">
-                    Minute
-                  </label>
+                  <label className="mb-1 block text-xs">Minute</label>
                   <select
                     value={minute}
                     onChange={(event) => onMinuteChange(event.target.value)}
-                    className="w-full rounded border border-gray-200 px-3 py-2"
+                    className="w-full rounded border px-3 py-2 dark:bg-gray-800 dark:text-white"
                   >
                     <option value="">--</option>
                     {Array.from({ length: 12 }, (_, index) => {
@@ -139,18 +130,18 @@ export default function ToDoSheet({
                   </select>
                 </div>
               </div>
-              <p className="mt-2 text-xs text-gray-400">
+              <p className="mt-2 text-xs">
                 Leave both empty for no deadline. Hour only = today at that
                 hour.
               </p>
             </div>
           </div>
 
-          <div className="flex items-center justify-end gap-3 border-t border-gray-100 pt-4">
-            <button onClick={onClose} className="px-4 py-2 text-gray-600">
+          <div className="flex items-center justify-end gap-3 border-t pt-4">
+            <button onClick={onClose} className="px-4 py-2">
               Cancel
             </button>
-            <button onClick={onAdd} className="px-4 py-2 text-blue-600">
+            <button onClick={onAdd} className="px-4 py-2">
               Add
             </button>
           </div>
