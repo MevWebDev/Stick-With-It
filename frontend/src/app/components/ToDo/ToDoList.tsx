@@ -5,6 +5,7 @@ import ToDoItem from "./ToDoItem";
 import ToDoPagination from "./ToDoPagination";
 import ToDoSheet from "./ToDoSheet";
 import ToDoSortControls from "./ToDoSortControls";
+import { useAuth } from "../../lib/auth/authContext";
 import {
   PAGE_SIZE,
   SortDirection,
@@ -16,6 +17,7 @@ import {
 } from "./ToDoUtils";
 
 export default function ToDoList() {
+  const { user } = useAuth();
   const [todos, setTodos] = useState<TODO_TYPE[]>([]);
   const [popUp, setPopUp] = useState<"addNew" | null>(null);
   const [newTaskName, setNewTaskName] = useState("");
@@ -30,8 +32,12 @@ export default function ToDoList() {
   const [currentPage, setCurrentPage] = useState(1);
 
   useEffect(() => {
-    todoService.getTodos().then(setTodos);
-  }, []);
+    if (!user) {
+      setTodos([]);
+      return;
+    }
+    todoService.getTodos(user.id).then(setTodos);
+  }, [user]);
 
   useEffect(() => {
     if (popUp === "addNew") {
@@ -71,30 +77,36 @@ export default function ToDoList() {
           name: trimmedName,
           deadline: buildDeadline(selectedDate, hour, minute),
         };
-        const updated = await todoService.updateTodo(updatedTodo);
+        const updated = await todoService.updateTodo(updatedTodo, user?.id);
         setTodos(updated);
       }
     } else {
+      if (!user) {
+        closePopup();
+        return;
+      }
       const todo: TODO_TYPE = {
         id: Date.now(),
         name: trimmedName,
         completed: false,
         deadline: buildDeadline(selectedDate, hour, minute),
+        createdById: user.id,
+        createdByUsername: user.username,
       };
 
-      const added = await todoService.addTodo(todo);
+      const added = await todoService.addTodo(todo, user.id);
       setTodos((prev) => [...prev, added]);
     }
     closePopup();
   };
 
   const toggleTodo = async (id: number) => {
-    const updated = await todoService.toggleTodo(id);
+    const updated = await todoService.toggleTodo(id, user?.id);
     setTodos(updated);
   };
 
   const deleteTodo = async (id: number) => {
-    const updated = await todoService.deleteTodo(id);
+    const updated = await todoService.deleteTodo(id, user?.id);
     setTodos(updated);
   };
 
