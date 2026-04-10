@@ -43,9 +43,7 @@ export default function ToDoSheet({
   return (
     <div className="fixed inset-0 z-50 flex items-end">
       <div
-        className={`w-full max-h-[85vh] overflow-y-auto rounded-t-2xl bg-white p-6 text-gray-900 shadow-xl transition-transform duration-300 ease-out dark:bg-gray-900 dark:text-gray-100 sm:mx-auto sm:max-w-2xl ${
-          isSheetOpen ? "translate-y-0" : "translate-y-full"
-        }`}
+        className={`w-full max-h-[85vh] overflow-y-auto rounded-t-2xl bg-white p-6 text-gray-900 shadow-xl transition-transform duration-300 ease-out sm:mx-auto sm:max-w-2xl dark:bg-[#1b1b1c] dark:text-white ${isSheetOpen ? "translate-y-0" : "translate-y-full"}`}
       >
         <div className="flex flex-col gap-6">
           <div className="flex items-center justify-between">
@@ -62,7 +60,7 @@ export default function ToDoSheet({
                 placeholder="ex. Laundry"
                 value={newTaskName}
                 onChange={(event) => onNameChange(event.target.value)}
-                className="w-full rounded border px-3 py-2 dark:bg-gray-800 dark:text-white"
+                className="w-full rounded border px-3 py-2 dark:bg-[#3b3b3f] dark:text-white dark:border-gray-900"
               />
             </div>
 
@@ -72,14 +70,14 @@ export default function ToDoSheet({
                 <button
                   type="button"
                   onClick={onToggleCalendar}
-                  className="w-full rounded border px-3 py-2 text-left text-sm dark:bg-gray-800 dark:text-white"
+                  className="w-full rounded border px-3 py-2 text-left text-sm dark:bg-[#3b3b3f] dark:text-white dark:border-gray-900"
                 >
                   {selectedDate
                     ? selectedDate.toLocaleDateString()
                     : "Choose a date"}
                 </button>
                 {showCalendar && (
-                  <div className="rounded border p-2 dark:bg-gray-800 dark:text-white">
+                  <div className="rounded border p-2 dark:bg-[#3b3b3f] dark:text-white dark:border-gray-900">
                     <DatePicker
                       selected={selectedDate}
                       onChange={(date: Date | null) => onDateSelect(date)}
@@ -98,7 +96,7 @@ export default function ToDoSheet({
                   <select
                     value={hour}
                     onChange={(event) => onHourChange(event.target.value)}
-                    className="w-full rounded border px-3 py-2 dark:bg-gray-800 dark:text-white"
+                    className="w-full rounded border px-3 py-2 dark:bg-[#3b3b3f] dark:text-white dark:border-gray-900"
                   >
                     <option value="">--</option>
                     {Array.from({ length: 24 }, (_, index) => {
@@ -116,7 +114,7 @@ export default function ToDoSheet({
                   <select
                     value={minute}
                     onChange={(event) => onMinuteChange(event.target.value)}
-                    className="w-full rounded border px-3 py-2 dark:bg-gray-800 dark:text-white"
+                    className="w-full rounded border px-3 py-2 dark:bg-[#3b3b3f] dark:text-white dark:border-gray-900"
                   >
                     <option value="">--</option>
                     {Array.from({ length: 12 }, (_, index) => {
@@ -130,14 +128,10 @@ export default function ToDoSheet({
                   </select>
                 </div>
               </div>
-              <p className="mt-2 text-xs">
-                Leave both empty for no deadline. Hour only = today at that
-                hour.
-              </p>
             </div>
           </div>
 
-          <div className="flex items-center justify-end gap-3 border-t pt-4">
+          <div className="flex items-center justify-end gap-3 border-t pt-4 dark:border-white">
             <button onClick={onClose} className="px-4 py-2">
               Cancel
             </button>

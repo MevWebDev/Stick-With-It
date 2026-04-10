@@ -17,8 +17,8 @@ export default function ToDoItem({
   formatDeadline,
 }: Props) {
   return (
-    <div className="rounded border border-gray-500 px-4 py-3 shadow-sm dark:border-gray-400">
-      <div className="flex flex-wrap items-center justify-between gap-3">
+    <div className="rounded px-4 pt-3 pb-1 mt-[15px] shadow-md dark:bg-[#3b3b3f]">
+      <div className="flex flex-wrap items-center justify-between">
         <label className="flex items-center gap-3">
           <input
             type="checkbox"
@@ -26,14 +26,16 @@ export default function ToDoItem({
             onChange={() => onToggle(todo.id)}
             className="h-4 w-4"
           />
-          <span className={todo.completed ? "line-through" : ""}>
+          <span
+            className={todo.completed ? "line-through dark:text-gray-400" : ""}
+          >
             {todo.name}
           </span>
         </label>
       </div>
-      <div className="mt-4 flex items-center justify-between text-sm">
+      <div className="mt-4 flex items-center justify-between text-sm dark:text-gray-300">
         <span>{formatDeadline(todo.deadline)}</span>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center">
           <button onClick={() => onEdit(todo)}>Edit</button>
           <button onClick={() => onRemove(todo.id)}>Remove</button>
         </div>

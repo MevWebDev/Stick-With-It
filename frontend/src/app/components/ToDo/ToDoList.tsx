@@ -146,7 +146,7 @@ export default function ToDoList() {
         onClick={() => {
           setPopUp("addNew");
         }}
-        className="fixed bottom-24 right-6 flex h-14 w-14 items-center justify-center rounded-full bg-black text-2xl text-white shadow-lg dark:!bg-gray-800"
+        className="fixed bottom-24 right-6 flex h-14 w-14 items-center justify-center rounded-full bg-black text-2xl text-white shadow-lg dark:bg-[#3b3b3f] dark:text-white dark:border-gray-900"
         aria-label="Add todo"
       >
         +
@@ -166,23 +166,19 @@ export default function ToDoList() {
           }}
         />
 
-        <div
-          className={
-            paginated.length > 3
-              ? "space-y-2 max-h-[60vh] overflow-y-auto"
-              : "space-y-2"
-          }
-        >
-          {paginated.map((todo) => (
-            <ToDoItem
-              key={todo.id}
-              todo={todo}
-              onToggle={toggleTodo}
-              onEdit={startEdit}
-              onRemove={deleteTodo}
-              formatDeadline={formatDeadline}
-            />
-          ))}
+        <div className="space-y-2">
+          <div className="max-h-[60vh] overflow-y-auto p-2">
+            {paginated.map((todo) => (
+              <ToDoItem
+                key={todo.id}
+                todo={todo}
+                onToggle={toggleTodo}
+                onEdit={startEdit}
+                onRemove={deleteTodo}
+                formatDeadline={formatDeadline}
+              />
+            ))}
+          </div>{" "}
         </div>
 
         <ToDoPagination

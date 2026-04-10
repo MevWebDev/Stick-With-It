@@ -11,27 +11,25 @@ export default function Navbar() {
   const closeToolsMenu = () => setOpenTools(false);
   const pathname = usePathname();
 
-
   // genialny zapis xd
   useEffect(() => {
     setOpenTools(false);
   }, [pathname]);
-  
 
   return (
     <>
-    <div className="flex justify-evenly items-center gap-6 p-8 text-3xl ">
-      <button onClick={() => setOpenTools(!openTools)}>
-        <FaTools />
-      </button>
-      <button>
-        <MdOutlineQueryStats />
-      </button>
-      <button>
-        <FaUserFriends />
-      </button>
-    </div>  
-    {openTools && <ToolsMenu onClose={closeToolsMenu} />}
+      <div className="flex justify-evenly items-center gap-6 p-8 text-3xl ">
+        <button onClick={() => setOpenTools(!openTools)}>
+          <FaTools />
+        </button>
+        <button>
+          <MdOutlineQueryStats />
+        </button>
+        <button>
+          <FaUserFriends />
+        </button>
+      </div>
+      {openTools && <ToolsMenu onClose={closeToolsMenu} />}
     </>
   );
 }

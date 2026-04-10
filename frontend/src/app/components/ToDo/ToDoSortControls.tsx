@@ -23,7 +23,7 @@ export default function ToDoSortControls({
           onChange={(event) => {
             onSortKeyChange(event.target.value as SortKey);
           }}
-          className="rounded border px-2 py-1 text-sm dark:bg-gray-900 dark:text-white"
+          className="rounded border border-gray-300 px-2 py-1 text-sm dark:bg-[#3b3b3f] dark:text-white dark:border-gray-900"
         >
           <option value="title">Title</option>
           <option value="created">Created</option>
@@ -37,7 +37,7 @@ export default function ToDoSortControls({
           onChange={(event) => {
             onSortDirectionChange(event.target.value as SortDirection);
           }}
-          className="rounded border px-2 py-1 text-sm dark:bg-gray-900 dark:text-white"
+          className="rounded border border-gray-300 px-2 py-1 text-sm dark:bg-[#3b3b3f] dark:text-white dark:border-gray-900"
         >
           <option value="asc">Ascending</option>
           <option value="desc">Descending</option>
