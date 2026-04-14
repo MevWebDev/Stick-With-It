@@ -222,9 +222,9 @@ export default function PomodoroTimer() {
   const getTimerTheme = () => {
     if (timerStatus === "idle") {
       return {
-        border: "border-gray-800",
-        bg: "bg-gray-100 dark:bg-gray-900 ",
-        text: "text-[#677381] ",
+        border: "border-gray-800 dark:border-[var(--color-border)]",
+        bg: "bg-gray-100 dark:bg-[var(--color-primary)] ",
+        text: "text-[#677381] dark:text-[var(--color-secondary)] ",
         opacity: "opacity-100",
       };
     }
@@ -234,18 +234,18 @@ export default function PomodoroTimer() {
 
     if (mode === "focus") {
       return {
-        border: "border-[#821e3f]",
-        bg: "bg-red-50",
-        shadow: "shadow-2xl shadow-[#ffccdc]",
-        text: "text-[#c94d74]",
+        border: "border-[#821e3f] dark:border-[#4a0f25]",
+        bg: "bg-red-50 dark:bg-red-900",
+        shadow: "shadow-2xl shadow-[#ffccdc] dark:shadow-none",
+        text: "text-[#c94d74] dark:text-red-300",
         opacity,
       };
     } else {
       return {
-        border: "border-[#003303]",
-        bg: "bg-green-50",
-        shadow: "shadow-2xl shadow-[#d9faed]",
-        text: "text-[#0f7049]",
+        border: "border-[#003303] dark:border-[#0b2a17]",
+        bg: "bg-green-50 dark:bg-green-900",
+        shadow: "shadow-2xl shadow-[#d9faed] dark:shadow-none",
+        text: "text-[#0f7049] dark:text-green-300",
         opacity,
       };
     }
@@ -348,7 +348,7 @@ export default function PomodoroTimer() {
       <div className="h-[35%] pb-8 flex flex-col items-center justify-end space-y-4 w-full">
         {timerStatus === "idle" && (
           <button
-            className="px-6 py-2 text-base font-semibold text-[#677381] hover:text-black"
+            className="px-6 py-2 text-base font-semibold text-[#677381] hover:text-black dark:text-[var(--color-secondary)] dark:hover:text-[var(--color-foreground)]"
             onClick={() => setPopup("sessionTime")}
           >
             Set Session Time
@@ -357,7 +357,7 @@ export default function PomodoroTimer() {
 
         {popUp === "confirm" && (
           <div className="fixed inset-0 flex flex-col items-center justify-center bg-black/40 h-[100vh]">
-            <div className="bg-white p-6 rounded-lg shadow-lg flex flex-col items-center">
+            <div className="bg-white p-6 rounded-lg shadow-lg flex flex-col items-center dark:bg-[var(--color-primary)] dark:text-[var(--color-foreground)] dark:border dark:border-[var(--color-border)]">
               <h2 className="font-semibold mb-4 text-center">
                 Do you want to reset the current session?
               </h2>
@@ -373,7 +373,7 @@ export default function PomodoroTimer() {
                     setPausedTime(null);
                     setPopup(null);
                   }}
-                  className="px-4 py-2 text-white bg-red-500 rounded hover:bg-red-600 transition-colors"
+                  className="px-4 py-2 text-white bg-red-500 rounded hover:bg-red-600 transition-colors dark:bg-red-700 dark:hover:bg-red-800"
                 >
                   Yes
                 </button>
@@ -381,7 +381,7 @@ export default function PomodoroTimer() {
                   onClick={() => {
                     setPopup(null);
                   }}
-                  className="px-4 py-2 text-gray-700 bg-gray-200 rounded hover:bg-gray-300 transition-colors"
+                  className="px-4 py-2 text-gray-700 bg-gray-200 rounded hover:bg-gray-300 transition-colors dark:bg-[var(--color-button-bg)] dark:text-[var(--color-button-text)] dark:hover:bg-[var(--color-button-bg-hover)]"
                 >
                   No
                 </button>

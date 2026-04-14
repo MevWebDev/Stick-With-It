@@ -107,11 +107,11 @@ function SettingsPage() {
       >
         {/* Account Section */}
         <section>
-          <h2 className="text-sm font-bold text-gray-500 dark:text-gray-200 uppercase tracking-wider mb-3 px-2">
+          <h2 className="text-sm font-bold text-gray-500 dark:text-[var(--color-secondary)] uppercase tracking-wider mb-3 px-2">
             Account
           </h2>
           <motion.div
-            className="rounded-2xl shadow-sm border text-gray-500 border-gray-100 dark:border-gray-700 overflow-hidden bg-white dark:bg-black"
+            className="rounded-2xl shadow-sm border text-gray-500 border-gray-100 dark:border-[var(--color-border)] dark:text-[var(--color-secondary)] overflow-hidden bg-white dark:bg-[var(--color-primary)]"
             variants={itemVariants}
           >
             <ExpandableSettingItem
@@ -173,7 +173,7 @@ function SettingsPage() {
             General
           </h2>
           <motion.div
-            className="rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden bg-white dark:bg-black"
+            className="rounded-2xl shadow-sm border border-gray-100 dark:border-[var(--color-border)] overflow-hidden bg-white dark:bg-[var(--color-primary)]"
             variants={itemVariants}
           >
             <ExpandableSettingItem
@@ -183,11 +183,11 @@ function SettingsPage() {
               onToggle={() => toggleSetting("music")}
             >
               <div className="pt-2 w-full space-y-4">
-                <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900 rounded-xl border border-transparent dark:border-gray-800">
-                  <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-[var(--color-primary)] rounded-xl border border-transparent dark:border-[var(--color-border)]">
+                  <span className="text-sm font-medium text-gray-700 dark:text-[var(--color-foreground)]">
                     Background Harmony
                   </span>
-                  <div className="w-12 h-6 bg-gray-300 dark:bg-gray-700 rounded-full flex items-center p-1 justify-start cursor-pointer transition-colors">
+                  <div className="w-12 h-6 bg-gray-300 dark:bg-[var(--color-button-bg)] rounded-full flex items-center p-1 justify-start cursor-pointer transition-colors">
                     <div className="w-5 h-5 rounded-full bg-white shadow-sm transition-transform" />
                   </div>
                 </div>
@@ -196,7 +196,7 @@ function SettingsPage() {
                     <span>Volume</span>
                     <span>50%</span>
                   </div>
-                  <div className="w-full h-2 bg-gray-200 dark:bg-gray-800 rounded-full overflow-hidden">
+                  <div className="w-full h-2 bg-gray-200 dark:bg-[var(--color-primary)] rounded-full overflow-hidden">
                     <div className="w-1/2 h-full bg-secondary"></div>
                   </div>
                 </div>
@@ -216,7 +216,7 @@ function SettingsPage() {
                     setTheme("light");
                     setExpandedSetting(null);
                   }}
-                  className={`w-full px-4 py-3 rounded-xl border flex items-center justify-between transition-colors ${theme === "light" ? "border-secondary bg-secondary/10 text-secondary font-bold" : "border-gray-200 dark:border-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-900"}`}
+                  className={`w-full px-4 py-3 rounded-xl border flex items-center justify-between transition-colors ${theme === "light" ? "border-secondary bg-secondary/10 text-secondary font-bold" : "border-gray-200 dark:border-[var(--color-border)] text-gray-700 dark:text-[var(--color-foreground)] hover:bg-gray-50 dark:hover:bg-[var(--color-button-bg-hover)]"}`}
                 >
                   Light Mode
                   {theme === "light" && (
@@ -228,7 +228,7 @@ function SettingsPage() {
                     setTheme("dark");
                     setExpandedSetting(null);
                   }}
-                  className={`w-full px-4 py-3 rounded-xl border flex items-center justify-between transition-colors ${theme === "dark" ? "border-secondary bg-secondary/10 text-secondary font-bold" : "border-gray-200 dark:border-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-900"}`}
+                  className={`w-full px-4 py-3 rounded-xl border flex items-center justify-between transition-colors ${theme === "dark" ? "border-secondary bg-secondary/10 text-secondary font-bold" : "border-gray-200 dark:border-[var(--color-border)] text-gray-700 dark:text-[var(--color-foreground)] hover:bg-gray-50 dark:hover:bg-[var(--color-button-bg-hover)]"}`}
                 >
                   Dark Mode
                   {theme === "dark" && (
@@ -245,12 +245,12 @@ function SettingsPage() {
               onToggle={() => toggleSetting("notifications")}
             >
               <div className="pt-2 w-full space-y-3">
-                <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900 rounded-xl border border-transparent dark:border-gray-800">
+                <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-[var(--color-primary)] rounded-xl border border-transparent dark:border-[var(--color-border)]">
                   <div>
-                    <span className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                    <span className="block text-sm font-medium text-gray-700 dark:text-[var(--color-foreground)]">
                       Push Notifications
                     </span>
-                    <span className="block text-xs text-gray-500 mt-1">
+                    <span className="block text-xs text-gray-500 mt-1 dark:text-[var(--color-secondary)]">
                       Receive alerts for reminders
                     </span>
                   </div>
@@ -259,20 +259,20 @@ function SettingsPage() {
                   </div>
                 </div>
 
-                <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900 rounded-xl border border-transparent dark:border-gray-800">
+                <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-[var(--color-primary)] rounded-xl border border-transparent dark:border-[var(--color-border)]">
                   <div>
-                    <span className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                    <span className="block text-sm font-medium text-gray-700 dark:text-[var(--color-foreground)]">
                       Email Updates
                     </span>
-                    <span className="block text-xs text-gray-500 mt-1">
+                    <span className="block text-xs text-gray-500 mt-1 dark:text-[var(--color-secondary)]">
                       Weekly digests & reports
                     </span>
                   </div>
-                  <div className="w-12 h-6 bg-gray-300 dark:bg-gray-700 rounded-full flex items-center p-1 justify-start cursor-pointer">
+                  <div className="w-12 h-6 bg-gray-300 dark:bg-[var(--color-button-bg)] rounded-full flex items-center p-1 justify-start cursor-pointer">
                     <div className="w-5 h-5 rounded-full bg-white shadow-sm" />
                   </div>
                 </div>
-                <p className="text-xs text-center text-gray-400 mt-2">
+                <p className="text-xs text-center text-gray-400 mt-2 dark:text-[var(--color-secondary)]">
                   Mock preferences
                 </p>
               </div>
@@ -285,15 +285,15 @@ function SettingsPage() {
               onToggle={() => toggleSetting("privacy")}
             >
               <div className="pt-2 w-full flex flex-col items-center">
-                <p className="text-sm text-gray-500 mb-6 text-center px-2">
+                <p className="text-sm text-gray-500 mb-6 text-center px-2 dark:text-[var(--color-secondary)]">
                   Control your data visibility and learn how we manage your
                   personal information.
                 </p>
-                <button className="px-4 py-3 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors rounded-xl text-sm w-full font-medium flex justify-between items-center group">
+                <button className="px-4 py-3 bg-gray-50 dark:bg-[var(--color-button-bg)] border border-gray-200 dark:border-[var(--color-border)] text-gray-700 dark:text-[var(--color-button-text)] hover:bg-gray-100 dark:hover:bg-[var(--color-button-bg-hover)] transition-colors rounded-xl text-sm w-full font-medium flex justify-between items-center group">
                   <span>Export User Data</span>
-                  <FaChevronRight className="text-gray-400 group-hover:text-gray-600 dark:group-hover:text-gray-200 transition-colors" />
+                  <FaChevronRight className="text-gray-400 group-hover:text-gray-600 dark:text-[var(--color-secondary)] dark:group-hover:text-[var(--color-foreground)] transition-colors" />
                 </button>
-                <button className="px-4 py-3 mt-3 bg-red-50 dark:bg-red-900/10 border border-red-100 dark:border-red-900/30 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors rounded-xl text-sm w-full font-bold flex justify-center items-center">
+                <button className="px-4 py-3 mt-3 bg-red-50 dark:bg-[var(--color-button-bg)] border border-red-100 dark:border-[var(--color-border)] text-red-600 dark:text-[var(--color-button-text)] hover:bg-red-100 dark:hover:bg-[var(--color-button-bg-hover)] transition-colors rounded-xl text-sm w-full font-bold flex justify-center items-center">
                   Delete Account
                 </button>
               </div>
@@ -307,15 +307,15 @@ function SettingsPage() {
               onToggle={() => toggleSetting("other")}
             >
               <div className="pt-2 w-full pb-2">
-                <div className="p-4 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl">
-                  <span className="block text-sm font-bold text-gray-700 dark:text-gray-200 mb-1">
+                <div className="p-4 bg-gray-50 dark:bg-[var(--color-primary)] border border-gray-200 dark:border-[var(--color-border)] rounded-xl">
+                  <span className="block text-sm font-bold text-gray-700 dark:text-[var(--color-foreground)] mb-1">
                     Developer Mode
                   </span>
-                  <span className="block text-xs text-gray-500">
+                  <span className="block text-xs text-gray-500 dark:text-[var(--color-secondary)]">
                     Enable advanced debugging tools and experimental features.
                     (Mock)
                   </span>
-                  <button className="mt-4 w-full py-2 bg-gray-200 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-lg text-sm font-medium opacity-50 cursor-not-allowed">
+                  <button className="mt-4 w-full py-2 bg-gray-200 dark:bg-[var(--color-button-bg)] text-gray-700 dark:text-[var(--color-button-text)] rounded-lg text-sm font-medium opacity-50 cursor-not-allowed">
                     Activate
                   </button>
                 </div>
@@ -331,7 +331,7 @@ function SettingsPage() {
             await logout();
             router.push("/login");
           }}
-          className="w-full bg-background rounded-2xl p-4 shadow-sm border border-red-100 flex items-center justify-center gap-2 text-red-500 font-bold hover:bg-red-50 active:scale-[0.98] transition-all"
+          className="w-full bg-background rounded-2xl p-4 shadow-sm border border-red-100 flex items-center justify-center gap-2 text-red-500 font-bold hover:bg-red-50 active:scale-[0.98] transition-all dark:border-red-400"
         >
           <FaSignOutAlt />
           Log Out
@@ -364,29 +364,31 @@ function ExpandableSettingItem({
 }) {
   return (
     <div
-      className={`w-full overflow-hidden ${!last ? "border-b border-gray-100 dark:border-gray-800" : ""}`}
+      className={`w-full overflow-hidden ${!last ? "border-b border-gray-100 dark:border-[var(--color-border)]" : ""}`}
     >
       <button
         onClick={onToggle}
-        className="w-full flex items-center justify-between p-4 hover:bg-gray-50 dark:hover:bg-gray-900 transition-colors"
+        className="w-full flex items-center justify-between p-4 hover:bg-gray-50 dark:hover:bg-[var(--color-button-bg-hover)] transition-colors"
       >
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-full bg-gray-50 dark:bg-gray-800 flex items-center justify-center text-gray-500 text-sm">
+          <div className="w-8 h-8 rounded-full bg-gray-50 dark:bg-[var(--color-primary)] flex items-center justify-center text-gray-500 text-sm">
             {icon}
           </div>
           <div className="text-left">
-            <span className="block text-gray-900 dark:text-gray-200 font-medium font-figtree">
+            <span className="block text-gray-900 dark:text-[var(--color-foreground)] font-medium font-figtree">
               {label}
             </span>
             {value && (
-              <span className="block text-xs text-gray-400">{value}</span>
+              <span className="block text-xs text-gray-400 dark:text-[var(--color-secondary)]">
+                {value}
+              </span>
             )}
           </div>
         </div>
         {isExpanded ? (
-          <FaChevronDown className="text-gray-300 text-xs" />
+          <FaChevronDown className="text-gray-300 text-xs dark:text-[var(--color-secondary)]" />
         ) : (
-          <FaChevronRight className="text-gray-300 text-xs" />
+          <FaChevronRight className="text-gray-300 text-xs dark:text-[var(--color-secondary)]" />
         )}
       </button>
       <AnimatePresence>
@@ -421,24 +423,28 @@ function SimpleSettingItem({
   return (
     <button
       onClick={onClick}
-      className={`w-full flex items-center justify-between p-4 hover:bg-gray-50 dark:hover:bg-gray-900 transition-colors rounded-none ${
-        !last ? "border-b border-gray-100 dark:border-gray-800" : ""
+      className={`w-full flex items-center justify-between p-4 hover:bg-gray-50 dark:hover:bg-[var(--color-button-bg-hover)] transition-colors rounded-none ${
+        !last
+          ? "border-b border-gray-100 dark:border-[var(--color-border)]"
+          : ""
       }`}
     >
       <div className="flex items-center gap-3">
-        <div className="w-8 h-8 rounded-full bg-gray-50 dark:bg-gray-800 flex items-center justify-center text-gray-500 text-sm">
+        <div className="w-8 h-8 rounded-full bg-gray-50 dark:bg-[var(--color-primary)] flex items-center justify-center text-gray-500 text-sm">
           {icon}
         </div>
         <div className="text-left">
-          <span className="block text-gray-900 dark:text-gray-200 font-medium font-figtree">
+          <span className="block text-gray-900 dark:text-[var(--color-foreground)] font-medium font-figtree">
             {label}
           </span>
           {value && (
-            <span className="block text-xs text-gray-400">{value}</span>
+            <span className="block text-xs text-gray-400 dark:text-[var(--color-secondary)]">
+              {value}
+            </span>
           )}
         </div>
       </div>
-      <FaChevronRight className="text-gray-300 text-xs" />
+      <FaChevronRight className="text-gray-300 text-xs dark:text-[var(--color-secondary)]" />
     </button>
   );
 }
@@ -461,7 +467,7 @@ function SettingForm({
 
   const commonInputProps = {
     className:
-      "w-full px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-secondary)] bg-transparent text-gray-900 dark:text-white placeholder-gray-400",
+      "w-full px-4 py-2 border border-gray-300 dark:border-[var(--color-input-border)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-secondary)] bg-transparent dark:bg-[var(--color-input-bg)] text-gray-900 dark:text-[var(--color-foreground)] placeholder-gray-400 dark:placeholder-[var(--color-secondary)]",
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -600,7 +606,7 @@ function SettingForm({
         return (
           <div className="w-full flex flex-col items-center gap-4">
             <div
-              className="w-24 h-24 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center overflow-hidden border-2 border-dashed border-gray-300 dark:border-gray-700 cursor-pointer hover:border-secondary transition-colors"
+              className="w-24 h-24 bg-gray-100 dark:bg-[var(--color-input-bg)] rounded-full flex items-center justify-center overflow-hidden border-2 border-dashed border-gray-300 dark:border-[var(--color-input-border)] cursor-pointer hover:border-secondary dark:hover:border-[var(--color-secondary)] transition-colors"
               onClick={() => fileInputRef.current?.click()}
             >
               {previewUrl ? (
@@ -612,7 +618,7 @@ function SettingForm({
                   className="w-full h-full object-cover"
                 />
               ) : (
-                <span className="text-gray-400 text-xs p-2 text-center">
+                <span className="text-gray-400 text-xs p-2 text-center dark:text-[var(--color-secondary)]">
                   Click to upload
                 </span>
               )}
@@ -624,7 +630,7 @@ function SettingForm({
               onChange={handleFileChange}
               className="hidden"
             />
-            <p className="text-[10px] text-gray-500">
+            <p className="text-[10px] text-gray-500 dark:text-[var(--color-secondary)]">
               Supported formats: JPG, PNG, GIF
             </p>
           </div>
@@ -681,7 +687,7 @@ function SettingForm({
       <button
         onClick={handleSubmit}
         disabled={isLoading}
-        className="w-full mt-4 px-4 py-2 bg-secondary text-white rounded-lg hover:opacity-90 transition-opacity font-medium disabled:opacity-50"
+        className="w-full mt-4 px-4 py-2 bg-secondary text-white rounded-lg hover:opacity-90 transition-opacity font-medium disabled:opacity-50 dark:bg-[var(--color-button-bg)] dark:text-[var(--color-button-text)] dark:hover:bg-[var(--color-button-bg-hover)]"
       >
         {isLoading ? "Saving..." : "Save Changes"}
       </button>

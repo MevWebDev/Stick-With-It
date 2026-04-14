@@ -94,11 +94,11 @@ export default function Journal() {
   if (!mounted) return null; // Uniknięcie hydration mismatch
 
   return (
-    <div className="flex flex-col flex-1 h-full bg-background dark:bg-black rounded-3xl shadow-sm border border-gray-100 dark:border-gray-800 relative w-full overflow-hidden">
+    <div className="flex flex-col flex-1 h-full bg-background dark:bg-[var(--color-primary)] rounded-3xl shadow-sm border border-gray-100 dark:border-[var(--color-border)] relative w-full overflow-hidden">
       <style>{css}</style>
 
       {/* HEADER */}
-      <header className="px-8 py-8 flex items-center justify-between z-10 border-b border-gray-50 dark:border-gray-900">
+      <header className="px-8 py-8 flex items-center justify-between z-10 border-b border-gray-50 dark:border-[var(--color-border)]">
         <div>
           <h1 className="text-3xl font-extrabold capitalize">
             {getDayLabel(selectedDate)}
@@ -125,13 +125,13 @@ export default function Journal() {
           value={noteContent}
           onChange={(e) => setNoteContent(e.target.value)}
           placeholder="O czym dzisiaj myślisz?"
-          className="w-full flex-1 resize-none bg-transparent outline-none text-primary-dark dark:text-foreground text-lg sm:text-xl font-figtree placeholder-gray-400 dark:placeholder-gray-600 leading-relaxed min-h-full pb-16"
+          className="w-full flex-1 resize-none bg-transparent outline-none text-primary-dark dark:text-[var(--color-foreground)] text-lg sm:text-xl font-figtree placeholder-gray-400 dark:placeholder-[var(--color-secondary)] leading-relaxed min-h-full pb-16"
         />
 
         {/* Autosave Indicator */}
         <div className="fixed bottom-10 right-10 md:absolute md:bottom-6 md:right-8 z-20 pointer-events-none">
           {" "}
-          <span className="text-xs text-gray-400 flex items-center gap-1 font-medium bg-background/90 dark:bg-black/90 backdrop-blur-sm px-3 py-1.5 rounded-full shadow-sm border border-gray-100 dark:border-gray-800 opacity-80">
+          <span className="text-xs text-gray-400 flex items-center gap-1 font-medium bg-background/90 dark:bg-[var(--color-primary)] backdrop-blur-sm px-3 py-1.5 rounded-full shadow-sm border border-gray-100 dark:border-[var(--color-border)] opacity-80">
             {isSaving
               ? "Zapisywanie..."
               : noteContent
@@ -150,17 +150,17 @@ export default function Journal() {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setIsCalendarOpen(false)}
-              className="absolute inset-0 bg-black/40 dark:bg-black/60 z-20 backdrop-blur-sm rounded-2xl"
+              className="absolute inset-0 bg-black/40 dark:opacity-80 z-20 backdrop-blur-sm rounded-2xl"
             />
             <motion.div
               initial={{ y: "100%" }}
               animate={{ y: 0 }}
               exit={{ y: "100%" }}
               transition={{ type: "spring", damping: 25, stiffness: 300 }}
-              className="absolute bottom-0 left-0 right-0 bg-background dark:bg-gray-900 rounded-t-3xl shadow-2xl z-30 p-6 flex flex-col items-center max-h-[90%] overflow-y-auto"
+              className="absolute bottom-0 left-0 right-0 bg-background rounded-t-3xl shadow-2xl z-30 p-6 flex flex-col items-center max-h-[90%] overflow-y-auto"
             >
               <div
-                className="w-12 h-1.5 bg-gray-300 dark:bg-gray-700 rounded-full mb-6 cursor-grab active:cursor-grabbing"
+                className="w-12 h-1.5 bg-gray-300 dark:bg-[var(--color-border)] rounded-full mb-6 cursor-grab active:cursor-grabbing"
                 onClick={() => setIsCalendarOpen(false)}
               />
 
@@ -183,7 +183,7 @@ export default function Journal() {
                   onSelect={handleDateSelect}
                   locale={pl}
                   showOutsideDays
-                  className="text-primary dark:text-foreground"
+                  className="text-primary dark:text-[var(--color-foreground)]"
                 />
               </div>
             </motion.div>

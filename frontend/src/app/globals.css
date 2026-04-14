@@ -36,18 +36,20 @@
   }
 
   /* Dark Mode Overrides */
-  /* This activates when next-themes adds data-theme="dark" to the <html> tag */
   [data-theme="dark"] {
-    --background: #0a0a0a; /* Dark background */
-    --foreground: #ededed; /* Light text */
+    --background: #181818; /* background */
+    --foreground: #e0e0e0; /* text primary */
 
-    --color-primary: #08213d;
-    --color-primary-dark: #051b34;
-    --color-secondary: #256275;
-    --color-secondary-light: #82a0aa;
-    --color-button-bg: #1f1f1f;
-    --color-button-bg-hover: #040929;
+    --color-primary: #292929; /* component bg */
+    --color-secondary: #d1d1d1; /* text secondary */
+    --color-button-bg: #454753;
+    --color-button-bg-hover: #353535;
     --color-button-text: #fffbf4;
+
+    --color-border: #525252;
+
+    --color-input-border: #6e6e6e;
+    --color-input-bg: #3a3a3a;
   }
 }
 
