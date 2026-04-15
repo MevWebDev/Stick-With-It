@@ -146,7 +146,7 @@ export default function ToDoList() {
         onClick={() => {
           setPopUp("addNew");
         }}
-        className="fixed bottom-24 right-6 flex h-14 w-14 items-center justify-center rounded-full bg-black text-2xl text-white shadow-lg dark:!bg-gray-800"
+        className="fixed bottom-24 right-6 flex h-14 w-14 items-center justify-center bg-black text-2xl text-white shadow-lg dark:bg-[var(--color-button-bg)] dark:text-[var(--color-button-text)]"
         aria-label="Add todo"
       >
         +

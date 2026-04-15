@@ -43,7 +43,7 @@ export default function ToDoSheet({
   return (
     <div className="fixed inset-0 z-50 flex items-end">
       <div
-        className={`w-full max-h-[85vh] overflow-y-auto rounded-t-2xl bg-white p-6 text-gray-900 shadow-xl transition-transform duration-300 ease-out dark:bg-gray-900 dark:text-gray-100 sm:mx-auto sm:max-w-2xl ${
+        className={`w-full max-h-[85vh] overflow-y-auto rounded-t-2xl bg-white p-6 text-gray-900 shadow-xl transition-transform duration-300 ease-out dark:bg-[var(--color-primary)] dark:text-[var(--color-foreground)] sm:mx-auto sm:max-w-2xl ${
           isSheetOpen ? "translate-y-0" : "translate-y-full"
         }`}
       >
@@ -62,7 +62,7 @@ export default function ToDoSheet({
                 placeholder="ex. Laundry"
                 value={newTaskName}
                 onChange={(event) => onNameChange(event.target.value)}
-                className="w-full rounded border px-3 py-2 dark:bg-gray-800 dark:text-white"
+                className="w-full rounded border px-3 py-2 dark:bg-[var(--color-primary)] dark:text-[var(--color-foreground)] dark:border-[var(--color-border)]"
               />
             </div>
 
@@ -72,18 +72,18 @@ export default function ToDoSheet({
                 <button
                   type="button"
                   onClick={onToggleCalendar}
-                  className="w-full rounded border px-3 py-2 text-left text-sm dark:bg-gray-800 dark:text-white"
+                  className="w-full rounded border px-3 py-2 text-left text-sm dark:bg-[var(--color-primary)] dark:text-[var(--color-foreground)] dark:border-[var(--color-border)]"
                 >
                   {selectedDate
                     ? selectedDate.toLocaleDateString()
                     : "Choose a date"}
                 </button>
                 {showCalendar && (
-                  <div className="rounded border p-2 dark:bg-gray-800 dark:text-white">
+                  <div className="rounded">
                     <DatePicker
                       selected={selectedDate}
                       onChange={(date: Date | null) => onDateSelect(date)}
-                      calendarClassName="dark:bg-gray-800 dark:text-white"
+                      calendarClassName=""
                       inline
                     />
                   </div>
@@ -98,7 +98,7 @@ export default function ToDoSheet({
                   <select
                     value={hour}
                     onChange={(event) => onHourChange(event.target.value)}
-                    className="w-full rounded border px-3 py-2 dark:bg-gray-800 dark:text-white"
+                    className="w-full rounded border px-3 py-2 dark:bg-[var(--color-primary)] dark:text-[var(--color-foreground)] dark:border-[var(--color-border)]"
                   >
                     <option value="">--</option>
                     {Array.from({ length: 24 }, (_, index) => {
@@ -116,7 +116,7 @@ export default function ToDoSheet({
                   <select
                     value={minute}
                     onChange={(event) => onMinuteChange(event.target.value)}
-                    className="w-full rounded border px-3 py-2 dark:bg-gray-800 dark:text-white"
+                    className="w-full rounded border px-3 py-2 dark:bg-[var(--color-primary)] dark:text-[var(--color-foreground)] dark:border-[var(--color-border)]"
                   >
                     <option value="">--</option>
                     {Array.from({ length: 12 }, (_, index) => {
@@ -137,11 +137,17 @@ export default function ToDoSheet({
             </div>
           </div>
 
-          <div className="flex items-center justify-end gap-3 border-t pt-4">
-            <button onClick={onClose} className="px-4 py-2">
+          <div className="flex items-center justify-end gap-3 border-t pt-4 dark:border-[var(--color-border)]">
+            <button
+              onClick={onClose}
+              className="px-4 py-2 dark:bg-[var(--color-button-bg)] dark:text-[var(--color-button-text)] dark:hover:bg-[var(--color-button-bg-hover)]"
+            >
               Cancel
             </button>
-            <button onClick={onAdd} className="px-4 py-2">
+            <button
+              onClick={onAdd}
+              className="px-4 py-2 dark:bg-[var(--color-button-bg)] dark:text-[var(--color-button-text)] dark:hover:bg-[var(--color-button-bg-hover)]"
+            >
               Add
             </button>
           </div>
