@@ -91,14 +91,14 @@ export function RegisterForm() {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
-      className="w-full max-w-md mx-auto"
+      className="w-full max-w-md mx-auto dark:bg-[var(--color-background)]"
     >
-      <div className="bg-white rounded-3xl shadow-xl p-8 border border-gray-100 overflow-hidden relative min-h-[500px] flex flex-col justify-center">
+      <div className="bg-white rounded-3xl shadow-xl p-8 border border-gray-100 overflow-hidden relative min-h-[500px] flex flex-col justify-center dark:bg-[var(--color-primary)] dark:border-[var(--color-border)]">
         <div className="text-center mb-8">
-          <h2 className="text-3xl font-bold font-geologica text-gray-900 mb-2">
+          <h2 className="text-3xl font-bold font-geologica text-gray-900 mb-2 dark:text-[var(--color-foreground)]">
             Create Account
           </h2>
-          <p className="text-gray-500 font-figtree">
+          <p className="text-gray-500 font-figtree dark:text-[var(--color-secondary)]">
             {step === 1 ? "Start your journey today" : "One last thing!"}
           </p>
         </div>
@@ -130,7 +130,7 @@ export function RegisterForm() {
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       required
-                      className="block dark:text-primary w-full pl-11 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-[var(--color-secondary)] focus:border-transparent transition-all font-figtree"
+                      className="block w-full pl-11 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-[var(--color-secondary)] focus:border-transparent transition-all font-figtree dark:bg-[var(--color-input-bg)] dark:text-[var(--color-foreground)] dark:border-[var(--color-input-border)] dark:focus:bg-[var(--color-button-bg-hover)]"
                     />
                   </div>
 
@@ -145,14 +145,18 @@ export function RegisterForm() {
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       required
-                      className="block dark:text-primary w-full pl-11 pr-11 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-[var(--color-secondary)] focus:border-transparent transition-all font-figtree"
+                      className="block w-full pl-11 pr-11 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-[var(--color-secondary)] focus:border-transparent transition-all font-figtree dark:bg-[var(--color-input-bg)] dark:text-[var(--color-foreground)] dark:border-[var(--color-input-border)] dark:focus:bg-[var(--color-button-bg-hover)]"
                     />
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
                       className="absolute right-0 inset-y-0 pr-4 flex items-center text-gray-400 hover:text-gray-600 cursor-pointer transition-colors"
                     >
-                      {showPassword ? <FaEyeSlash style={{ color: '#9ca3af' }} /> : <FaEye style={{ color: '#9ca3af' }} />}
+                      {showPassword ? (
+                        <FaEyeSlash className="text-gray-400 dark:text-[var(--color-secondary)]" />
+                      ) : (
+                        <FaEye className="text-gray-400 dark:text-[var(--color-secondary)]" />
+                      )}
                     </button>
                   </div>
 
@@ -167,7 +171,7 @@ export function RegisterForm() {
                       value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}
                       required
-                      className="block dark:text-primary w-full pl-11 pr-11 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-[var(--color-secondary)] focus:border-transparent transition-all font-figtree"
+                      className="block w-full pl-11 pr-11 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-[var(--color-secondary)] focus:border-transparent transition-all font-figtree dark:bg-[var(--color-input-bg)] dark:text-[var(--color-foreground)] dark:border-[var(--color-input-border)] dark:focus:bg-[var(--color-button-bg-hover)]"
                     />
                     <button
                       type="button"
@@ -176,7 +180,11 @@ export function RegisterForm() {
                       }
                       className="absolute right-0 inset-y-0 pr-4 flex items-center text-gray-400 hover:text-gray-600 cursor-pointer transition-colors"
                     >
-                      {showConfirmPassword ? <FaEyeSlash style={{ color: '#9ca3af' }} /> : <FaEye style={{ color: '#9ca3af' }} />}
+                      {showConfirmPassword ? (
+                        <FaEyeSlash className="text-gray-400 dark:text-[var(--color-secondary)]" />
+                      ) : (
+                        <FaEye className="text-gray-400 dark:text-[var(--color-secondary)]" />
+                      )}
                     </button>
                   </div>
                 </div>
@@ -185,7 +193,7 @@ export function RegisterForm() {
                   <motion.div
                     initial={{ opacity: 0, height: 0 }}
                     animate={{ opacity: 1, height: "auto" }}
-                    className="text-red-500 text-sm text-center font-medium bg-red-50 p-2 rounded-lg"
+                    className="text-red-500 text-sm text-center font-medium bg-red-50 p-2 rounded-lg dark:bg-red-950 dark:text-red-300"
                   >
                     {error}
                   </motion.div>
@@ -193,7 +201,7 @@ export function RegisterForm() {
 
                 <button
                   type="submit"
-                  className="w-full bg-[var(--color-primary)] text-white font-bold text-lg py-3.5 rounded-xl hover:bg-[var(--color-primary-dark)] active:scale-[0.98] transition-all shadow-lg shadow-[var(--color-primary)]/20"
+                  className="w-full bg-[var(--color-primary)] text-white font-bold text-lg py-3.5 rounded-xl hover:bg-[var(--color-primary-dark)] active:scale-[0.98] transition-all shadow-lg shadow-[var(--color-primary)]/20 dark:bg-[var(--color-button-bg)] dark:text-[var(--color-button-text)] dark:hover:bg-[var(--color-button-bg-hover)]"
                 >
                   Continue
                 </button>
@@ -212,7 +220,7 @@ export function RegisterForm() {
               >
                 <div className="space-y-4">
                   <div className="text-center pb-2">
-                    <p className="font-figtree text-gray-600">
+                    <p className="font-figtree text-gray-600 dark:text-[var(--color-secondary)]">
                       How should we call you?
                     </p>
                   </div>
@@ -229,7 +237,7 @@ export function RegisterForm() {
                       onChange={(e) => setUsername(e.target.value)}
                       required
                       autoFocus
-                      className="block w-full dark:text-primary pl-11 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-[var(--color-secondary)] focus:border-transparent transition-all font-figtree"
+                      className="block w-full pl-11 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-[var(--color-secondary)] focus:border-transparent transition-all font-figtree dark:bg-[var(--color-input-bg)] dark:text-[var(--color-foreground)] dark:border-[var(--color-input-border)] dark:focus:bg-[var(--color-button-bg-hover)]"
                     />
                   </div>
                 </div>
@@ -238,7 +246,7 @@ export function RegisterForm() {
                   <motion.div
                     initial={{ opacity: 0, height: 0 }}
                     animate={{ opacity: 1, height: "auto" }}
-                    className="text-red-500 text-sm text-center font-medium bg-red-50 p-2 rounded-lg"
+                    className="text-red-500 text-sm text-center font-medium bg-red-50 p-2 rounded-lg dark:bg-red-950 dark:text-red-300"
                   >
                     {error}
                   </motion.div>
@@ -248,14 +256,14 @@ export function RegisterForm() {
                   <button
                     type="button"
                     onClick={() => setStep(1)}
-                    className="flex-1 bg-gray-100 dark:bg-primary text-gray-600 font-bold text-lg py-3.5 rounded-xl hover:bg-gray-200 active:scale-[0.98] transition-all"
+                    className="flex-1 bg-gray-100 text-gray-600 font-bold text-lg py-3.5 rounded-xl hover:bg-gray-200 active:scale-[0.98] transition-all dark:bg-[var(--color-button-bg)] dark:text-[var(--color-button-text)] dark:hover:bg-[var(--color-button-bg-hover)]"
                   >
                     Back
                   </button>
                   <button
                     type="submit"
                     disabled={isLoading}
-                    className="flex-[2] bg-[var(--color-primary)] text-white font-bold text-lg py-3.5 rounded-xl hover:bg-[var(--color-primary-dark)] active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed transition-all shadow-lg shadow-[var(--color-primary)]/20"
+                    className="flex-[2] bg-[var(--color-primary)] text-white font-bold text-lg py-3.5 rounded-xl hover:bg-[var(--color-primary-dark)] active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed transition-all shadow-lg shadow-[var(--color-primary)]/20 dark:bg-[var(--color-button-bg)] dark:text-[var(--color-button-text)] dark:hover:bg-[var(--color-button-bg-hover)]"
                   >
                     {isLoading ? (
                       <span className="flex items-center justify-center gap-2">
@@ -273,11 +281,11 @@ export function RegisterForm() {
         </div>
       </div>
 
-      <p className="text-center mt-6 text-gray-500 font-figtree">
+      <p className="text-center mt-6 text-gray-500 font-figtree dark:text-[var(--color-secondary)]">
         Already have an account?{" "}
         <button
           onClick={() => router.push("/login")}
-          className="text-[var(--color-secondary)]  dark:bg-primary font-bold hover:underline"
+          className="text-[var(--color-secondary)] dark:text-[var(--color-foreground)] font-bold hover:underline"
         >
           Sign in
         </button>

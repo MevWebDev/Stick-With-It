@@ -17,7 +17,7 @@ export default function ToDoItem({
   formatDeadline,
 }: Props) {
   return (
-    <div className="rounded border border-gray-500 px-4 py-3 shadow-sm dark:border-gray-400">
+    <div className="rounded border border-gray-300 px-4 py-3 shadow-sm dark:border-[var(--color-border)] dark:bg-[var(--color-primary)]">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <label className="flex items-center gap-3">
           <input
@@ -26,16 +26,26 @@ export default function ToDoItem({
             onChange={() => onToggle(todo.id)}
             className="h-4 w-4"
           />
-          <span className={todo.completed ? "line-through" : ""}>
+          <span
+            className={
+              todo.completed
+                ? "line-through dark:text-[var(--color-secondary)]"
+                : "dark:text-[var(--color-foreground)]"
+            }
+          >
             {todo.name}
           </span>
         </label>
       </div>
-      <div className="mt-4 flex items-center justify-between text-sm">
+      <div className="mt-4 flex items-center justify-between text-sm dark:text-[var(--color-secondary)]">
         <span>{formatDeadline(todo.deadline)}</span>
         <div className="flex items-center gap-2">
-          <button onClick={() => onEdit(todo)}>Edit</button>
-          <button onClick={() => onRemove(todo.id)}>Remove</button>
+          <button onClick={() => onEdit(todo)} className="">
+            Edit
+          </button>
+          <button onClick={() => onRemove(todo.id)} className="">
+            Remove
+          </button>
         </div>
       </div>
     </div>
