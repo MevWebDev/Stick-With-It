@@ -29,3 +29,17 @@ class HabitCompletion(models.Model):
 
     def __str__(self):
         return f"{self.habit.name} - {self.completion_date}"
+
+
+class DailyNote(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='daily_notes')
+    date = models.DateField()
+    content = models.TextField(blank=True, default='')
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        unique_together = ['user', 'date']
+        ordering = ['-date']
+
+    def __str__(self):
+        return f"Note by {self.user.username} on {self.date}"

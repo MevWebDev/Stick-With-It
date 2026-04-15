@@ -5,13 +5,17 @@ from rest_framework import status
 from django.shortcuts import get_object_or_404
 from django.db import transaction, IntegrityError
 from django.utils import timezone
+from django.utils.dateparse import parse_date
 from datetime import datetime, timedelta
 from accounts.models import XpLog
 import pytz
 
-from .models import Habit, HabitCompletion
-from .serializers import HabitSerializer
+from .models import Habit, HabitCompletion, DailyNote
+from .serializers import HabitSerializer, DailyNoteSerializer
 from accounts.services import XpService, check_and_award_badges
+
+MAX_NOTE_CONTENT_LENGTH = 10000
+MAX_JOURNAL_RANGE_DAYS = 90
 
 def get_user_date(request):
     """
@@ -294,3 +298,84 @@ def uncheck_habit(request, id):
 
     except Exception as e:
         return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@api_view(['GET', 'PUT'])
+@permission_classes([IsAuthenticated])
+def daily_note_view(request):
+    if request.method == 'GET':
+        date_str = request.query_params.get('date')
+
+        if not date_str:
+            return Response({'error': 'date is required (YYYY-MM-DD)'}, status=status.HTTP_400_BAD_REQUEST)
+
+        note_date = parse_date(date_str)
+        if not note_date:
+            return Response({'error': 'invalid date format, expected YYYY-MM-DD'}, status=status.HTTP_400_BAD_REQUEST)
+
+        note, _ = DailyNote.objects.get_or_create(user=request.user, date=note_date)
+        serializer = DailyNoteSerializer(note)
+        return Response({'note': serializer.data}, status=status.HTTP_200_OK)
+
+    date_str = request.data.get('date')
+    content = request.data.get('content', '')
+
+    if not date_str:
+        return Response({'error': 'date is required (YYYY-MM-DD)'}, status=status.HTTP_400_BAD_REQUEST)
+
+    note_date = parse_date(date_str)
+    if not note_date:
+        return Response({'error': 'invalid date format, expected YYYY-MM-DD'}, status=status.HTTP_400_BAD_REQUEST)
+
+    if content is None:
+        content = ''
+
+    if not isinstance(content, str):
+        return Response({'error': 'content must be a string'}, status=status.HTTP_400_BAD_REQUEST)
+
+    if len(content) > MAX_NOTE_CONTENT_LENGTH:
+        return Response(
+            {'error': f'content length cannot exceed {MAX_NOTE_CONTENT_LENGTH} characters'},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
+    with transaction.atomic():
+        note, _ = DailyNote.objects.get_or_create(user=request.user, date=note_date)
+        note.content = content
+        note.save(update_fields=['content', 'updated_at'])
+
+    serializer = DailyNoteSerializer(note)
+    return Response({'note': serializer.data}, status=status.HTTP_200_OK)
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def daily_notes_range_view(request):
+    start_str = request.query_params.get('start')
+    end_str = request.query_params.get('end')
+
+    if not start_str or not end_str:
+        return Response({'error': 'start and end are required (YYYY-MM-DD)'}, status=status.HTTP_400_BAD_REQUEST)
+
+    start_date = parse_date(start_str)
+    end_date = parse_date(end_str)
+
+    if not start_date or not end_date:
+        return Response({'error': 'invalid date format, expected YYYY-MM-DD'}, status=status.HTTP_400_BAD_REQUEST)
+
+    if start_date > end_date:
+        return Response({'error': 'start must be before or equal to end'}, status=status.HTTP_400_BAD_REQUEST)
+
+    if (end_date - start_date).days > MAX_JOURNAL_RANGE_DAYS:
+        return Response(
+            {'error': f'date range cannot exceed {MAX_JOURNAL_RANGE_DAYS} days'},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
+    notes = DailyNote.objects.filter(
+        user=request.user,
+        date__gte=start_date,
+        date__lte=end_date,
+    ).order_by('date')
+    serializer = DailyNoteSerializer(notes, many=True)
+    return Response({'notes': serializer.data}, status=status.HTTP_200_OK)
