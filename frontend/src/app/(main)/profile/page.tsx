@@ -128,21 +128,6 @@ export default function ProfilePage() {
             </button>
           </div>
 
-<<<<<<< HEAD
-          {badges && badges.length > 0 ? (
-            <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide">
-              {badges.map((badge) => (
-                <div
-                  key={badge.key}
-                  className="flex-shrink-0 flex flex-col items-center gap-2 w-20"
-                >
-                  <div className="w-16 h-16 bg-white rounded-full shadow-sm border border-secondary flex items-center justify-center text-2xl dark:bg-[var(--color-primary)] dark:border-[var(--color-border)] dark:text-[var(--color-foreground)]">
-                    {badge.icon}
-                  </div>
-                  <span className="text-xs text-center text-gray-600 font-medium truncate w-full dark:text-[var(--color-secondary)]">
-                    {badge.title}
-                  </span>
-=======
           {earnedBadges.length > 0 ? (
             <div className="flex gap-3 overflow-x-auto pb-4 scrollbar-hide">
               {earnedBadges.slice(0, 5).map((badge) => (
@@ -156,7 +141,6 @@ export default function ProfilePage() {
                     earnedDate={badge.earnedDate}
                     compact
                   />
->>>>>>> 5d0c17d (added better styles for badges, added notifications when badge or xp is earned)
                 </div>
               ))}
             </div>

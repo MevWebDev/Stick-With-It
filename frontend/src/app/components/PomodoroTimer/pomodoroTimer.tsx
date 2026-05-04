@@ -8,10 +8,7 @@ import { apiClient } from "@/app/lib/api/client";
 import { authService } from "../../lib/auth/authService";
 import { useUserStats } from "@/app/lib/userStats/UserStatsContext";
 import { useToast } from "@/app/lib/toast/ToastContext";
-<<<<<<< HEAD
 import { notificationPreferencesService } from "@/app/lib/pushNotifications/notificationPreferencesService";
-=======
->>>>>>> 5d0c17d (added better styles for badges, added notifications when badge or xp is earned)
 
 const getStorageValue = (key: string, defaultValue: number): number => {
   if (typeof window === "undefined") return defaultValue;
@@ -92,7 +89,7 @@ export default function PomodoroTimer() {
     try {
       // Check if user has pomodoro notifications enabled
       const prefs = await notificationPreferencesService.getPreferences();
-      
+
       if (!prefs.is_enabled_pomodoro) {
         console.log("Pomodoro notifications are disabled");
         return;
@@ -115,7 +112,7 @@ export default function PomodoroTimer() {
       }
 
       const registration = await navigator.serviceWorker.ready;
-      
+
       const title = isBreakEnd ? "Break Complete!" : "Focus Session Complete!";
       const message = isBreakEnd
         ? "Time to get back to work! Ready for another focus session?"
