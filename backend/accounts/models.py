@@ -1,6 +1,7 @@
 from django.db import models
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.contrib.auth.models import User
+from django.conf import settings
 
 class Challenge(models.Model):
     title = models.CharField(max_length=50)
@@ -105,3 +106,57 @@ class CompletedChallenge(models.Model):
         ordering = ['-completed_date']
     def __str__(self):
         return f"{self.user.username} - {self.challenge.title}"
+
+
+class PushSubscription(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='push_subscriptions')
+    endpoint = models.URLField(max_length=500)
+    p256dh = models.CharField(max_length=255)
+    auth = models.CharField(max_length=255)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('user', 'endpoint')
+
+    def __str__(self):
+        return f"Subscription for {self.user.username}"
+
+
+class NotificationPreference(models.Model):
+    """User preferences for push notifications with per-tool scheduling"""
+    
+    TIMEZONE_CHOICES = [
+        ('UTC', 'UTC'),
+        ('Europe/London', 'London (GMT/BST)'),
+        ('Europe/Paris', 'Paris (CET/CEST)'),
+        ('Europe/Warsaw', 'Warsaw (CET/CEST)'),
+        ('America/New_York', 'New York (EST/EDT)'),
+        ('America/Chicago', 'Chicago (CST/CDT)'),
+        ('America/Los_Angeles', 'Los Angeles (PST/PDT)'),
+        ('Asia/Tokyo', 'Tokyo (JST)'),
+        ('Asia/Shanghai', 'Shanghai (CST)'),
+        ('Australia/Sydney', 'Sydney (AEDT/AEST)'),
+    ]
+    
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='notification_preferences')
+    timezone = models.CharField(max_length=50, choices=TIMEZONE_CHOICES, default='UTC')
+    
+    # Habit notifications
+    is_enabled_habits = models.BooleanField(default=True)
+    notification_time_habits = models.TimeField(default='09:00')
+    
+    # Daily Challenge notifications
+    is_enabled_challenges = models.BooleanField(default=True)
+    notification_time_challenges = models.TimeField(default='14:00')
+    
+    # Pomodoro notifications
+    is_enabled_pomodoro = models.BooleanField(default=False)
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    def __str__(self):
+        return f"Notification preferences for {self.user.username}"
+    
+    class Meta:
+        verbose_name_plural = "Notification preferences"
