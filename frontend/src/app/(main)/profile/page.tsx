@@ -65,13 +65,13 @@ export default function ProfilePage() {
       <div className="px-4 pt-6 pb-8">
         {/* Profile Info */}
         <div className="flex flex-col items-center mb-8">
-          <div className="w-24 h-24 bg-primary dark:text-foreground rounded-full flex items-center justify-center text-4xl font-bold text-white shadow-lg mb-4 border-2 border-secondary">
+          <div className="w-24 h-24 bg-primary dark:text-[var(--color-foreground)] rounded-full flex items-center justify-center text-4xl font-bold text-white shadow-lg mb-4 border-2 border-secondary">
             {user.username.charAt(0).toUpperCase()}
           </div>
           <h2 className="text-2xl font-bold text-gray-900 font-geologica mb-1 dark:text-foreground">
             {user.username}
           </h2>
-          <p className="text-sm font-bold  text-primary-dark dark:text-secondary-light tracking-wider mb-3">
+          <p className="text-sm font-bold  text-primary-dark dark:text-[var(--color-secondary)] tracking-wider mb-3">
             LEVEL {level}
           </p>
 
@@ -81,7 +81,7 @@ export default function ProfilePage() {
               <span>{currentExp} XP</span>
               <span>{expToNextLevel} XP</span>
             </div>
-            <div className="h-3 bg-gray-200  rounded-full overflow-hidden shadow-inner dark:bg-secondary-light  ">
+            <div className="h-3 bg-gray-200  rounded-full overflow-hidden shadow-inner dark:bg-[var(--color-secondary)]  ">
               <motion.div
                 className="h-full bg-linear-to-r from-primary to-secondary rounded-full"
                 initial={{ width: 0 }}
@@ -117,7 +117,7 @@ export default function ProfilePage() {
         {/* Badges Section - Preview of Earned Badges */}
         <div className="mb-8">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-bold text-gray-900 font-geologica dark:text-foreground">
+            <h3 className="text-lg font-bold text-gray-900 font-geologica dark:text-[var(--color-foreground)]">
               Badges
             </h3>
             <button
@@ -135,18 +135,18 @@ export default function ProfilePage() {
                   key={badge.key}
                   className="flex-shrink-0 flex flex-col items-center gap-2 w-20"
                 >
-                  <div className="w-16 h-16 bg-white rounded-full shadow-sm border border-secondary flex items-center justify-center text-2xl dark:bg-zinc-900 dark:border-zinc-800 dark:text-gray-200">
+                  <div className="w-16 h-16 bg-white rounded-full shadow-sm border border-secondary flex items-center justify-center text-2xl dark:bg-[var(--color-primary)] dark:border-[var(--color-border)] dark:text-[var(--color-foreground)]">
                     {badge.icon}
                   </div>
-                  <span className="text-xs text-center text-gray-600 font-medium truncate w-full dark:text-gray-400">
+                  <span className="text-xs text-center text-gray-600 font-medium truncate w-full dark:text-[var(--color-secondary)]">
                     {badge.title}
                   </span>
                 </div>
               ))}
             </div>
           ) : (
-            <div className="bg-white rounded-xl p-6 text-center border border-secondary dark:bg-zinc-900 dark:border-zinc-800">
-              <p className="text-gray-500 text-sm dark:text-gray-400">
+            <div className="bg-white rounded-xl p-6 text-center border border-secondary dark:bg-[var(--color-primary)] dark:border-[var(--color-border)]">
+              <p className="text-gray-500 text-sm dark:text-[var(--color-secondary)]">
                 No badges earned yet
               </p>
             </div>
@@ -210,10 +210,10 @@ export default function ProfilePage() {
                   ))}
                 </div>
               ) : (
-                <div className="flex flex-col items-center justify-center h-full text-gray-500">
-                  <FaMedal className="text-6xl text-gray-300 mb-4" />
+                <div className="flex flex-col items-center justify-center h-full text-gray-500 dark:text-[var(--color-secondary)]">
+                  <FaMedal className="text-6xl text-gray-300 mb-4 dark:text-[var(--color-secondary)]" />
                   <p className="text-lg font-medium">No badges available</p>
-                  <p className="text-sm text-gray-400">
+                  <p className="text-sm text-gray-400 dark:text-[var(--color-secondary)]">
                     Check back later for new badges!
                   </p>
                 </div>
@@ -239,7 +239,7 @@ function StatCard({
 }) {
   return (
     <div
-      className={`bg-white p-3 rounded-2xl shadow-sm border border-secondary flex flex-col items-center text-center dark:bg-zinc-900 dark:border-zinc-800 ${className}`}
+      className={`bg-white p-3 rounded-2xl shadow-sm border border-secondary flex flex-col items-center text-center dark:bg-[var(--color-primary)] dark:border-[var(--color-border)] ${className}`}
     >
       <div className="mb-2 text-xl">{icon}</div>
       <span className="text-lg font-bold text-foreground leading-none mb-1">

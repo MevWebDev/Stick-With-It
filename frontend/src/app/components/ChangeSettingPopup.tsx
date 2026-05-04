@@ -114,13 +114,13 @@ function ChangeSettingPopup({
   const renderInputs = () => {
     const commonInputProps = {
       className:
-        "w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-secondary)]",
+        "w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-secondary)] dark:bg-[var(--color-primary)] dark:text-[var(--color-foreground)] dark:border-[var(--color-border)]",
     };
 
     if (step === 2) {
       return (
         <div className="w-full mb-4">
-          <p className="text-sm text-gray-600 mb-2">
+          <p className="text-sm text-gray-600 mb-2 dark:text-[var(--color-secondary)]">
             Please enter your current password to confirm changes.
           </p>
           <input
@@ -161,7 +161,7 @@ function ChangeSettingPopup({
         return (
           <div className="w-full flex flex-col items-center gap-4 mb-6">
             <div
-              className="w-32 h-32 bg-gray-100 rounded-full flex items-center justify-center overflow-hidden border-2 border-dashed border-gray-300 cursor-pointer hover:border-[var(--color-secondary)] transition-colors"
+              className="w-32 h-32 bg-gray-100 rounded-full flex items-center justify-center overflow-hidden border-2 border-dashed border-gray-300 cursor-pointer hover:border-[var(--color-secondary)] transition-colors dark:bg-[var(--color-primary)] dark:border-[var(--color-border)] dark:hover:border-[var(--color-secondary)]"
               onClick={() => fileInputRef.current?.click()}
             >
               {previewUrl ? (
@@ -171,7 +171,7 @@ function ChangeSettingPopup({
                   className="w-full h-full object-cover"
                 />
               ) : (
-                <span className="text-gray-400 text-sm p-4 text-center">
+                <span className="text-gray-400 text-sm p-4 text-center dark:text-[var(--color-secondary)]">
                   Click to upload
                 </span>
               )}
@@ -183,7 +183,7 @@ function ChangeSettingPopup({
               onChange={handleFileChange}
               className="hidden"
             />
-            <p className="text-xs text-gray-500">
+            <p className="text-xs text-gray-500 dark:text-[var(--color-secondary)]">
               Supported formats: JPG, PNG, GIF
             </p>
           </div>
@@ -219,15 +219,15 @@ function ChangeSettingPopup({
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <div className="bg-white dark:bg-black  rounded-2xl p-6 w-full max-w-md mx-4 relative shadow-xl">
+      <div className="bg-white dark:bg-[var(--color-primary)] dark:text-[var(--color-foreground)] rounded-2xl p-6 w-full max-w-md mx-4 relative shadow-xl">
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 dark:text-gray-200 dark:hover:text-gray-400 text-2xl font-bold"
+          className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 dark:text-[var(--color-secondary)] dark:hover:text-[var(--color-foreground)] text-2xl font-bold"
         >
           
         </button>
 
-        <h1 className="text-xl font-bold text-gray-900 mb-6 capitalize dark:text-white">
+        <h1 className="text-xl font-bold text-gray-900 mb-6 capitalize dark:text-[var(--color-foreground)]">
           Change {setting}
         </h1>
 
@@ -238,14 +238,14 @@ function ChangeSettingPopup({
         <div className="flex gap-2">
           <button
             onClick={onClose}
-            className="flex-1 px-4 py-2 bg-gray-300 dark:bg-primary-secondary text-gray-700 rounded-lg hover:bg-gray-200 transition-colors font-medium"
+            className="flex-1 px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors font-medium dark:bg-[var(--color-button-bg)] dark:text-[var(--color-button-text)] dark:hover:bg-[var(--color-button-bg-hover)]"
           >
             Cancel
           </button>
           {setting !== "avatar" ? (
             <button
               onClick={step === 1 ? handleNextStep : handleSubmit}
-              className="flex-1 px-4 py-2 bg-[var(--color-secondary)] text-white rounded-lg hover:opacity-90 transition-opacity font-medium"
+              className="flex-1 px-4 py-2 bg-[var(--color-secondary)] text-white rounded-lg hover:opacity-90 transition-opacity font-medium dark:bg-[var(--color-button-bg)] dark:text-[var(--color-button-text)] dark:hover:bg-[var(--color-button-bg-hover)]"
             >
               {step === 1 ? "Next" : "Save"}
             </button>
@@ -254,7 +254,7 @@ function ChangeSettingPopup({
               onClick={() => {
                 if (file) onSubmit(file);
               }}
-              className="flex-1 px-4 py-2 bg-[var(--color-secondary)] text-white rounded-lg hover:opacity-90 transition-opacity font-medium"
+              className="flex-1 px-4 py-2 bg-[var(--color-secondary)] text-white rounded-lg hover:opacity-90 transition-opacity font-medium dark:bg-[var(--color-button-bg)] dark:text-[var(--color-button-text)] dark:hover:bg-[var(--color-button-bg-hover)]"
             >
               Save
             </button>

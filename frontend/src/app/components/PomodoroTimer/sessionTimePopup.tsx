@@ -22,7 +22,7 @@ export default function SessionTimePopup({
 
   return (
     <div className="bg-black/40 fixed inset-0 flex items-center justify-center ">
-      <div className="bg-white dark:bg-black dark:border-white dark:border-1 p-6 rounded-lg shadow-lg">
+      <div className="bg-white dark:bg-[var(--color-primary)] dark:text-[var(--color-foreground)] dark:border dark:border-[var(--color-border)] p-6 rounded-lg shadow-lg">
         <h2 className="text-xl font-bold">Set Session Time</h2>
         <div className="flex flex-col gap-4 mb-4">
           <div className="flex flex-col items-start">
@@ -37,10 +37,9 @@ export default function SessionTimePopup({
                   let val = Number(e.target.value);
                   if (val < 1) val = 0.2;
                   if (val > 60) val = 60;
-                  if (val < breakInput) setBreakInput(val);
                   setFocusInput(val);
                 }}
-                className="border px-3 py-1 rounded w-[90px]"
+                className="border px-3 py-1 rounded w-[90px] dark:bg-[var(--color-input-bg)] dark:text-[var(--color-foreground)] dark:border-[var(--color-input-border)]"
               />
               <span>mins</span>
             </div>
@@ -58,20 +57,25 @@ export default function SessionTimePopup({
                   let val = Number(e.target.value);
                   if (val < 1) val = 0.2;
                   if (val > 60) val = 60;
-                  if (val > focusInput) val = focusInput;
                   setBreakInput(val);
                 }}
-                className="border px-3 py-1 rounded w-[90px]"
+                className="border px-3 py-1 rounded w-[90px] dark:bg-[var(--color-input-bg)] dark:text-[var(--color-foreground)] dark:border-[var(--color-input-border)]"
               />
               <span>mins</span>
             </div>
           </div>
         </div>
         <div className="flex gap-2 mt-4">
-          <button onClick={onClose} className="px-4 py-2 text-gray-600">
+          <button
+            onClick={onClose}
+            className="px-4 py-2 text-gray-600 dark:text-[var(--color-button-text)]"
+          >
             Cancel
           </button>
-          <button onClick={handleSubmit} className="px-4 py-2 text-blue-600">
+          <button
+            onClick={handleSubmit}
+            className="px-4 py-2 text-blue-600 dark:text-[var(--color-button-text)]"
+          >
             Set
           </button>
         </div>
