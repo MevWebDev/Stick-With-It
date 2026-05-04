@@ -30,7 +30,6 @@ export default function HabitTracker() {
   const [isLoading, setIsLoading] = useState(false);
   const [isEmojiPickerOpen, setIsEmojiPickerOpen] = useState(false);
   const [is_custom, setIs_custom] = useState(false);
-<<<<<<< HEAD
 
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
@@ -38,9 +37,6 @@ export default function HabitTracker() {
 
   //Ref for our custom dropdown
   const dropdownRef = useRef<HTMLDivElement>(null);
-=======
-  const { showXpToast, showBadgeToast } = useToast();
->>>>>>> 5d0c17d (added better styles for badges, added notifications when badge or xp is earned)
 
   useEffect(() => {
     loadHabits();
@@ -101,18 +97,10 @@ export default function HabitTracker() {
       if (isCompleting) {
         response = await habitService.checkHabit(id);
 
-<<<<<<< HEAD
-=======
-        // Show XP toast
->>>>>>> 5d0c17d (added better styles for badges, added notifications when badge or xp is earned)
         if (response.xp_earned && response.xp_earned > 0) {
           showXpToast(response.xp_earned, "Habit Complete!");
         }
 
-<<<<<<< HEAD
-=======
-        // Show badge toasts
->>>>>>> 5d0c17d (added better styles for badges, added notifications when badge or xp is earned)
         if (response.new_badges && response.new_badges.length > 0) {
           response.new_badges.forEach((badge, index) => {
             setTimeout(
@@ -197,13 +185,7 @@ export default function HabitTracker() {
 
   return (
     <div className="flex flex-col items-center p-6">
-<<<<<<< HEAD
       <h1 className="text-5xl font-bold mb-10">Habit Tracker</h1>
-=======
-      <h1 className="text-5xl font-bold mb-10 dark:text-slate-400">
-        Habit Tracker
-      </h1>
->>>>>>> 5d0c17d (added better styles for badges, added notifications when badge or xp is earned)
 
       {/* nawyki */}
       <div className="grid grid-cols-2 gap-6">
@@ -237,7 +219,6 @@ export default function HabitTracker() {
 
       {/* Menu do dodawania nawyku */}
       {isModalOpen && (
-<<<<<<< HEAD
         <div className="fixed inset-0 bg-background bg-opacity-50 flex items-center justify-center z-50">
           <div className="p-6 rounded-2xl shadow-xl border border-foreground/20 max-w-[320px] w-full flex flex-col bg-background relative">
             <h2 className="text-2xl font-geologica font-bold mb-6 text-center">
@@ -253,16 +234,6 @@ export default function HabitTracker() {
                     : "text-foreground/50 hover:text-foreground/80"
                 }`}
               >
-=======
-        <div className="fixed inset-0 bg-white dark:bg-black dark:border-white bg-opacity-50 flex items-center justify-center z-50">
-          <div className="p-8 rounded-lg shadow-xl border-2  max-w-[330px] flex flex-col">
-            <h2 className="text-2xl font-geologica font-bold mb-4">
-              Add a New Habit
-            </h2>
-
-            <div className="flex gap-4 mb-4">
-              <label className="flex items-center gap-2 cursor-pointer">
->>>>>>> 5d0c17d (added better styles for badges, added notifications when badge or xp is earned)
                 <input
                   type="radio"
                   name="inputMode"
@@ -295,7 +266,6 @@ export default function HabitTracker() {
 
             {inputMode === "template" ? (
               availableTemplates.length > 0 ? (
-<<<<<<< HEAD
                 /* DROPDOWN WITH REF ATTACHED */
                 <div className="relative w-full mb-6" ref={dropdownRef}>
                   <div
@@ -345,34 +315,6 @@ export default function HabitTracker() {
                 </div>
               ) : (
                 <p className="mb-6 text-foreground/60 text-sm text-center font-figtree w-full">
-=======
-                <select
-                  value={selectedTemplateIndex}
-                  onChange={(e) =>
-                    setSelectedTemplateIndex(Number(e.target.value))
-                  }
-                  className="w-full p-2 border rounded mb-4 border-black "
-                >
-                  {availableHabitTemplates.map((template, index) => {
-                    const isTracked = myTrackedHabits.some(
-                      (h) => h.name === template.name,
-                    );
-                    if (isTracked) return null;
-
-                    return (
-                      <option
-                        key={index}
-                        value={index}
-                        className="font-figtree font-semibold rounded-md"
-                      >
-                        {template.name}
-                      </option>
-                    );
-                  })}
-                </select>
-              ) : (
-                <p className="mb-4 text-gray-600 text-xs font-figtree">
->>>>>>> 5d0c17d (added better styles for badges, added notifications when badge or xp is earned)
                   You are tracking all available templates!
                 </p>
               )
@@ -435,11 +377,7 @@ export default function HabitTracker() {
                   (inputMode === "custom" && !customHabitName) ||
                   (inputMode === "template" && availableTemplates.length === 0)
                 }
-<<<<<<< HEAD
                 className="flex-1 py-3 rounded-lg font-figtree text-background font-bold shadow-md bg-primary hover:opacity-90 transition-opacity cursor-pointer text-sm disabled:opacity-50 disabled:cursor-not-allowed"
-=======
-                className="px-6 py-2 rounded-xl font-figtree  text-white font-bold shadow-lg bg-teal-400 hover:scale-105 transition-transform  cursor-pointer duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
->>>>>>> 5d0c17d (added better styles for badges, added notifications when badge or xp is earned)
               >
                 {isLoading ? "Adding..." : "Add"}
               </button>
