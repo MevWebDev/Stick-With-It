@@ -8,6 +8,12 @@ ENV PYTHONUNBUFFERED=1 \
     PIP_DISABLE_PIP_VERSION_CHECK=1 \
     PORT=8000
 
+RUN apt-get update && apt-get install -y \
+    graphviz \
+    graphviz-dev \
+    gcc \
+    && rm -rf /var/lib/apt/lists/*
+
 # Ustawiamy katalog roboczy
 WORKDIR /app
 

@@ -3,7 +3,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth import authenticate
 from django.core.validators import validate_email
 from django.core.exceptions import ValidationError as DjangoValidationError
-
+from .models import PushSubscription, NotificationPreference
 
 class ChangePasswordSerializer(serializers.Serializer):
     """Serializer do zmiany hasła - wymaga potwierdzenia obecnym hasłem"""
@@ -116,3 +116,48 @@ class ConfirmPasswordResetSerializer(serializers.Serializer):
         if len(value) < 8:
             raise serializers.ValidationError("Hasło musi mieć minimum 8 znaków")
         return value
+
+
+class PushSubscriptionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PushSubscription
+        fields = ['endpoint', 'p256dh', 'auth']
+
+    def create(self, validated_data):
+        user = self.context['request'].user
+        endpoint = validated_data['endpoint']
+        
+        # Use update_or_create with user + endpoint (now allows same endpoint for different users)
+        subscription, created = PushSubscription.objects.update_or_create(
+            user=user,
+            endpoint=endpoint,
+            defaults={
+                'p256dh': validated_data['p256dh'],
+                'auth': validated_data['auth']
+            }
+        )
+        return subscription
+
+
+class NotificationPreferenceSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = NotificationPreference
+        fields = [
+            'timezone',
+            'is_enabled_habits',
+            'notification_time_habits',
+            'is_enabled_challenges',
+            'notification_time_challenges',
+            'is_enabled_pomodoro',
+        ]
+    
+    def update(self, instance, validated_data):
+        """Update notification preferences"""
+        instance.timezone = validated_data.get('timezone', instance.timezone)
+        instance.is_enabled_habits = validated_data.get('is_enabled_habits', instance.is_enabled_habits)
+        instance.notification_time_habits = validated_data.get('notification_time_habits', instance.notification_time_habits)
+        instance.is_enabled_challenges = validated_data.get('is_enabled_challenges', instance.is_enabled_challenges)
+        instance.notification_time_challenges = validated_data.get('notification_time_challenges', instance.notification_time_challenges)
+        instance.is_enabled_pomodoro = validated_data.get('is_enabled_pomodoro', instance.is_enabled_pomodoro)
+        instance.save()
+        return instance

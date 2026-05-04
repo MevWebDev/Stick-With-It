@@ -8,6 +8,7 @@ import { apiClient } from "@/app/lib/api/client";
 import { authService } from "../../lib/auth/authService";
 import { useUserStats } from "@/app/lib/userStats/UserStatsContext";
 import { useToast } from "@/app/lib/toast/ToastContext";
+import { notificationPreferencesService } from "@/app/lib/pushNotifications/notificationPreferencesService";
 
 const getStorageValue = (key: string, defaultValue: number): number => {
   if (typeof window === "undefined") return defaultValue;
@@ -78,6 +79,56 @@ export default function PomodoroTimer() {
       .padStart(2, "0");
     const s = (seconds % 60).toString().padStart(2, "0");
     return `${m}:${s}`;
+  };
+
+  /**
+   * Show a local browser notification using Service Worker
+   * This is called when Pomodoro session completes
+   */
+  const showPomodoroNotification = async (isBreakEnd: boolean) => {
+    try {
+      // Check if user has pomodoro notifications enabled
+      const prefs = await notificationPreferencesService.getPreferences();
+      
+      if (!prefs.is_enabled_pomodoro) {
+        console.log("Pomodoro notifications are disabled");
+        return;
+      }
+
+      // Request permission if not already granted
+      if (Notification.permission === "denied") {
+        console.log("Notification permission denied");
+        return;
+      }
+
+      if (Notification.permission === "default") {
+        await Notification.requestPermission();
+      }
+
+      // Get Service Worker registration
+      if (!("serviceWorker" in navigator)) {
+        console.log("Service Worker not supported");
+        return;
+      }
+
+      const registration = await navigator.serviceWorker.ready;
+      
+      const title = isBreakEnd ? "Break Complete!" : "Focus Session Complete!";
+      const message = isBreakEnd
+        ? "Time to get back to work! Ready for another focus session?"
+        : "Great work! Time for a well-deserved break.";
+
+      // Show notification via Service Worker
+      await registration.showNotification(title, {
+        body: message,
+        icon: "/icon.png",
+        badge: "/badge.png",
+        tag: "pomodoro-notification",
+        requireInteraction: false,
+      });
+    } catch (error) {
+      console.error("Failed to show Pomodoro notification:", error);
+    }
   };
 
   const completePomodoroSession = async () => {
@@ -190,10 +241,14 @@ export default function PomodoroTimer() {
     }
 
     if (mode === "focus") {
+      // Focus session ended, show notification
+      showPomodoroNotification(false);
       setMode("break");
       setEndTimestamp(Date.now() + breakTime * 1000);
       setTimeLeft(breakTime);
     } else {
+      // Break session ended, show notification
+      showPomodoroNotification(true);
       // Call API to award XP for completed focus session
       completePomodoroSession();
       setTimerStatus("idle");

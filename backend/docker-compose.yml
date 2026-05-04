@@ -50,11 +50,68 @@ services:
       - DB_PORT=5432
       - REDIS_URL=redis://redis:6379/0
       - CORS_ALLOWED_ORIGINS=http://localhost:3000,https://stick-with-it-production.up.railway.app,https://upbeat-patience-production.up.railway.app
+      - VAPID_PUBLIC_KEY=BLIwFiAyd2t9WUoT39RTktDt-wV6-4pqNb9K9FTlUj-lXki2f7ueO_L-YQhdfL8NR3z5R_hYl8JM4RnFGDeCHWc
+      - VAPID_PRIVATE_KEY=r4RevYwy5RwpBc4h373WnO0Q43hArMZ_dZ_fUWXsVDI
+      - VAPID_ADMIN_EMAIL=mailto:grzegorzalwasiak@gmail.com
     depends_on:
       db:
         condition: service_healthy
       redis:
         condition: service_healthy
+    restart: unless-stopped
+
+  celery_worker:
+    build: .
+    container_name: celery-worker
+    command: celery -A backend worker -l info --concurrency=4
+    volumes:
+      - ./data:/app/data
+    environment:
+      - DJANGO_SECRET_KEY=django-insecure-mlc@tkg4$$lm_jes(4%^8$$1g7i=+-bhd14t_3uzngy5w$$y$$w#3s
+      - DJANGO_DEBUG=True
+      - DB_ENGINE=postgresql
+      - DB_NAME=habittracker
+      - DB_USER=habituser
+      - DB_PASSWORD=habitpass123
+      - DB_HOST=db
+      - DB_PORT=5432
+      - REDIS_URL=redis://redis:6379/0
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+      - VAPID_PUBLIC_KEY=BLIwFiAyd2t9WUoT39RTktDt-wV6-4pqNb9K9FTlUj-lXki2f7ueO_L-YQhdfL8NR3z5R_hYl8JM4RnFGDeCHWc
+      - VAPID_PRIVATE_KEY=r4RevYwy5RwpBc4h373WnO0Q43hArMZ_dZ_fUWXsVDI
+      - VAPID_ADMIN_EMAIL=mailto:grzegorzalwasiak@gmail.com
+    depends_on:
+      - db
+      - redis
+      - web
+    restart: unless-stopped
+
+  celery_beat:
+    build: .
+    container_name: celery-beat
+    command: celery -A backend beat -l info --scheduler django_celery_beat.schedulers:DatabaseScheduler
+    volumes:
+      - ./data:/app/data
+    environment:
+      - DJANGO_SECRET_KEY=django-insecure-mlc@tkg4$$lm_jes(4%^8$$1g7i=+-bhd14t_3uzngy5w$$y$$w#3s
+      - DJANGO_DEBUG=True
+      - DB_ENGINE=postgresql
+      - DB_NAME=habittracker
+      - DB_USER=habituser
+      - DB_PASSWORD=habitpass123
+      - DB_HOST=db
+      - DB_PORT=5432
+      - REDIS_URL=redis://redis:6379/0
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+      - VAPID_PUBLIC_KEY=BLIwFiAyd2t9WUoT39RTktDt-wV6-4pqNb9K9FTlUj-lXki2f7ueO_L-YQhdfL8NR3z5R_hYl8JM4RnFGDeCHWc
+      - VAPID_PRIVATE_KEY=r4RevYwy5RwpBc4h373WnO0Q43hArMZ_dZ_fUWXsVDI
+      - VAPID_ADMIN_EMAIL=mailto:grzegorzalwasiak@gmail.com
+    depends_on:
+      - db
+      - redis
+      - web
     restart: unless-stopped
 
 volumes:

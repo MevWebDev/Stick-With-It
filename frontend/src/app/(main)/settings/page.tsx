@@ -2,7 +2,9 @@
 import { useAuth } from "@/app/lib/auth/authContext";
 import { authService } from "@/app/lib/auth/authService";
 import { useRouter } from "next/navigation";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
+import { subscribeToPushNotifications } from "@/app/lib/pushNotifications/pushNotifications";
+import { NotificationPreferencesForm } from "@/app/components/NotificationPreferencesForm";
 import {
   ChangeEmailCredentials,
   ChangePasswordCredentials,
@@ -32,6 +34,36 @@ function SettingsPage() {
   const { theme, setTheme } = useTheme();
 
   const [expandedSetting, setExpandedSetting] = useState<string | null>(null);
+  const [pushError, setPushError] = useState<string | null>(null);
+  const [pushSuccess, setPushSuccess] = useState<string | null>(null);
+  const [pushLoading, setPushLoading] = useState(false);
+  const [notificationsEnabled, setNotificationsEnabled] = useState(false);
+
+  // Check if THIS USER account is subscribed on mount
+  useEffect(() => {
+    const checkNotificationStatus = async () => {
+      try {
+        const token = localStorage.getItem("access_token");
+        if (!token) return;
+        
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000"}/api/auth/push/subscribe/`, {
+          method: "GET",
+          headers: {
+            "Authorization": `Bearer ${token}`,
+          },
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          setNotificationsEnabled(data.is_subscribed);
+        }
+      } catch (error) {
+        console.error("Error checking notification status:", error);
+      }
+    };
+    
+    checkNotificationStatus();
+  }, []);
 
   const toggleSetting = (setting: string) => {
     if (expandedSetting === setting) {
@@ -97,6 +129,24 @@ function SettingsPage() {
     return false;
   };
 
+  const handleEnablePush = async () => {
+    try {
+      setPushLoading(true);
+      setPushError(null);
+      setPushSuccess(null);
+      await subscribeToPushNotifications();
+      setNotificationsEnabled(true);
+      setPushSuccess("✓ Notifications enabled successfully!");
+      setTimeout(() => setPushSuccess(null), 4000);
+    } catch (error: any) {
+      const msg = error instanceof Error ? error.message : "Failed to enable notifications";
+      setPushError(msg);
+      setTimeout(() => setPushError(null), 5000);
+    } finally {
+      setPushLoading(false);
+    }
+  };
+
   return (
     <div className="">
       <motion.div
@@ -107,11 +157,11 @@ function SettingsPage() {
       >
         {/* Account Section */}
         <section>
-          <h2 className="text-sm font-bold text-gray-500 dark:text-gray-200 uppercase tracking-wider mb-3 px-2">
+          <h2 className="text-sm font-bold text-foreground/60 uppercase tracking-wider mb-3 px-2">
             Account
           </h2>
           <motion.div
-            className="rounded-2xl shadow-sm border text-gray-500 border-gray-100 dark:border-gray-700 overflow-hidden bg-white dark:bg-black"
+            className="rounded-2xl shadow-sm border border-secondary/40 text-foreground overflow-hidden bg-background"
             variants={itemVariants}
           >
             <ExpandableSettingItem
@@ -169,11 +219,11 @@ function SettingsPage() {
 
         {/* General Section */}
         <section>
-          <h2 className="text-sm font-bold text-gray-200 uppercase tracking-wider mb-3 px-2">
+          <h2 className="text-sm font-bold text-foreground/60 uppercase tracking-wider mb-3 px-2">
             General
           </h2>
           <motion.div
-            className="rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden bg-white dark:bg-black"
+            className="rounded-2xl shadow-sm border border-secondary/40 overflow-hidden bg-background"
             variants={itemVariants}
           >
             <ExpandableSettingItem
@@ -183,20 +233,20 @@ function SettingsPage() {
               onToggle={() => toggleSetting("music")}
             >
               <div className="pt-2 w-full space-y-4">
-                <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900 rounded-xl border border-transparent dark:border-gray-800">
-                  <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                <div className="flex items-center justify-between p-4 bg-background border border-secondary/40 rounded-lg">
+                  <span className="text-sm font-medium text-foreground">
                     Background Harmony
                   </span>
-                  <div className="w-12 h-6 bg-gray-300 dark:bg-gray-700 rounded-full flex items-center p-1 justify-start cursor-pointer transition-colors">
-                    <div className="w-5 h-5 rounded-full bg-white shadow-sm transition-transform" />
+                  <div className="w-12 h-6 bg-foreground/20 rounded-full flex items-center p-1 justify-start cursor-pointer transition-colors">
+                    <div className="w-5 h-5 rounded-full bg-foreground shadow-sm transition-transform" />
                   </div>
                 </div>
                 <div className="space-y-2 px-2 opacity-50 pointer-events-none">
-                  <div className="flex justify-between items-center text-xs font-bold text-gray-500 uppercase">
+                  <div className="flex justify-between items-center text-xs font-bold text-foreground/60 uppercase">
                     <span>Volume</span>
                     <span>50%</span>
                   </div>
-                  <div className="w-full h-2 bg-gray-200 dark:bg-gray-800 rounded-full overflow-hidden">
+                  <div className="w-full h-2 bg-foreground/20 rounded-full overflow-hidden">
                     <div className="w-1/2 h-full bg-secondary"></div>
                   </div>
                 </div>
@@ -216,11 +266,11 @@ function SettingsPage() {
                     setTheme("light");
                     setExpandedSetting(null);
                   }}
-                  className={`w-full px-4 py-3 rounded-xl border flex items-center justify-between transition-colors ${theme === "light" ? "border-secondary bg-secondary/10 text-secondary font-bold" : "border-gray-200 dark:border-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-900"}`}
+                  className={`w-full px-4 py-3 rounded-lg border flex items-center justify-between transition-colors ${theme === "light" ? "border-primary bg-primary/10 text-primary font-bold" : "border-secondary/40 text-foreground hover:bg-foreground/5"}`}
                 >
                   Light Mode
                   {theme === "light" && (
-                    <div className="w-2 h-2 rounded-full bg-secondary" />
+                    <div className="w-2 h-2 rounded-full bg-primary" />
                   )}
                 </button>
                 <button
@@ -228,11 +278,11 @@ function SettingsPage() {
                     setTheme("dark");
                     setExpandedSetting(null);
                   }}
-                  className={`w-full px-4 py-3 rounded-xl border flex items-center justify-between transition-colors ${theme === "dark" ? "border-secondary bg-secondary/10 text-secondary font-bold" : "border-gray-200 dark:border-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-900"}`}
+                  className={`w-full px-4 py-3 rounded-lg border flex items-center justify-between transition-colors ${theme === "dark" ? "border-primary bg-primary/10 text-primary font-bold" : "border-secondary/40 text-foreground hover:bg-foreground/5"}`}
                 >
                   Dark Mode
                   {theme === "dark" && (
-                    <div className="w-2 h-2 rounded-full bg-secondary" />
+                    <div className="w-2 h-2 rounded-full bg-primary" />
                   )}
                 </button>
               </div>
@@ -245,36 +295,49 @@ function SettingsPage() {
               onToggle={() => toggleSetting("notifications")}
             >
               <div className="pt-2 w-full space-y-3">
-                <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900 rounded-xl border border-transparent dark:border-gray-800">
-                  <div>
-                    <span className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                      Push Notifications
-                    </span>
-                    <span className="block text-xs text-gray-500 mt-1">
-                      Receive alerts for reminders
-                    </span>
-                  </div>
-                  <div className="w-12 h-6 bg-secondary rounded-full flex items-center p-1 justify-end cursor-pointer">
-                    <div className="w-5 h-5 rounded-full bg-white shadow-sm" />
+                <div className="p-3 bg-primary/5 border border-primary/30 rounded-lg">
+                  <div className="flex items-center justify-between">
+                    <p className="text-xs text-foreground/80">
+                      Enable push notifications to receive reminders even when the app is closed.
+                    </p>
+                    {notificationsEnabled && (
+                      <span className="inline-block px-2 py-1 text-xs font-semibold bg-secondary/20 text-secondary rounded-full whitespace-nowrap ml-2">
+                        ✓ Enabled
+                      </span>
+                    )}
                   </div>
                 </div>
 
-                <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900 rounded-xl border border-transparent dark:border-gray-800">
-                  <div>
-                    <span className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                      Email Updates
-                    </span>
-                    <span className="block text-xs text-gray-500 mt-1">
-                      Weekly digests & reports
-                    </span>
+                {pushError && (
+                  <div className="p-3 bg-primary/10 border border-primary/30 rounded-lg">
+                    <p className="text-xs text-primary">{pushError}</p>
                   </div>
-                  <div className="w-12 h-6 bg-gray-300 dark:bg-gray-700 rounded-full flex items-center p-1 justify-start cursor-pointer">
-                    <div className="w-5 h-5 rounded-full bg-white shadow-sm" />
+                )}
+
+                {pushSuccess && (
+                  <div className="p-3 bg-secondary/10 border border-secondary/30 rounded-lg">
+                    <p className="text-xs text-secondary">{pushSuccess}</p>
                   </div>
+                )}
+
+                <button
+                  onClick={handleEnablePush}
+                  disabled={pushLoading || notificationsEnabled}
+                  className="w-full p-3 bg-primary text-white rounded-lg font-semibold hover:bg-primary-dark disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm"
+                >
+                  {pushLoading ? "Enabling..." : notificationsEnabled ? "✓ Notifications Enabled" : "Enable Notifications"}
+                </button>
+
+                <div className="border-t border-secondary/40 pt-4">
+                  <h3 className="text-xs font-semibold text-foreground/60 uppercase tracking-wide mb-3">
+                    Preferences
+                  </h3>
+                  <NotificationPreferencesForm
+                    onSaved={() => {
+                      // Optionally close the notification settings
+                    }}
+                  />
                 </div>
-                <p className="text-xs text-center text-gray-400 mt-2">
-                  Mock preferences
-                </p>
               </div>
             </ExpandableSettingItem>
 
@@ -285,15 +348,15 @@ function SettingsPage() {
               onToggle={() => toggleSetting("privacy")}
             >
               <div className="pt-2 w-full flex flex-col items-center">
-                <p className="text-sm text-gray-500 mb-6 text-center px-2">
+                <p className="text-sm text-foreground/80 mb-6 text-center px-2">
                   Control your data visibility and learn how we manage your
                   personal information.
                 </p>
-                <button className="px-4 py-3 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors rounded-xl text-sm w-full font-medium flex justify-between items-center group">
+                <button className="px-4 py-3 bg-background border border-secondary/40 text-foreground hover:bg-foreground/5 transition-colors rounded-lg text-sm w-full font-medium flex justify-between items-center group">
                   <span>Export User Data</span>
-                  <FaChevronRight className="text-gray-400 group-hover:text-gray-600 dark:group-hover:text-gray-200 transition-colors" />
+                  <FaChevronRight className="text-foreground/60 group-hover:text-foreground transition-colors" />
                 </button>
-                <button className="px-4 py-3 mt-3 bg-red-50 dark:bg-red-900/10 border border-red-100 dark:border-red-900/30 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors rounded-xl text-sm w-full font-bold flex justify-center items-center">
+                <button className="px-4 py-3 mt-3 bg-background border border-primary/40 text-primary hover:bg-primary/5 transition-colors rounded-lg text-sm w-full font-bold flex justify-center items-center">
                   Delete Account
                 </button>
               </div>
@@ -307,15 +370,15 @@ function SettingsPage() {
               onToggle={() => toggleSetting("other")}
             >
               <div className="pt-2 w-full pb-2">
-                <div className="p-4 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl">
-                  <span className="block text-sm font-bold text-gray-700 dark:text-gray-200 mb-1">
+                <div className="p-4 bg-background border border-secondary/40 rounded-lg">
+                  <span className="block text-sm font-bold text-foreground mb-1">
                     Developer Mode
                   </span>
-                  <span className="block text-xs text-gray-500">
+                  <span className="block text-xs text-foreground/60">
                     Enable advanced debugging tools and experimental features.
                     (Mock)
                   </span>
-                  <button className="mt-4 w-full py-2 bg-gray-200 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-lg text-sm font-medium opacity-50 cursor-not-allowed">
+                  <button className="mt-4 w-full py-2 bg-foreground/20 text-foreground rounded-lg text-sm font-medium opacity-50 cursor-not-allowed">
                     Activate
                   </button>
                 </div>
@@ -331,13 +394,13 @@ function SettingsPage() {
             await logout();
             router.push("/login");
           }}
-          className="w-full bg-background rounded-2xl p-4 shadow-sm border border-red-100 flex items-center justify-center gap-2 text-red-500 font-bold hover:bg-red-50 active:scale-[0.98] transition-all"
+          className="w-full bg-background rounded-2xl p-4 shadow-sm border border-primary/40 flex items-center justify-center gap-2 text-primary font-bold hover:bg-primary/5 active:scale-[0.98] transition-all"
         >
           <FaSignOutAlt />
           Log Out
         </motion.button>
 
-        <p className="text-center text-xs text-gray-400 mt-8">
+        <p className="text-center text-xs text-foreground/60 mt-8">
           Version 1.0.0 • Stick With It
         </p>
       </motion.div>
@@ -364,29 +427,29 @@ function ExpandableSettingItem({
 }) {
   return (
     <div
-      className={`w-full overflow-hidden ${!last ? "border-b border-gray-100 dark:border-gray-800" : ""}`}
+      className={`w-full overflow-hidden ${!last ? "border-b border-secondary/40" : ""}`}
     >
       <button
         onClick={onToggle}
-        className="w-full flex items-center justify-between p-4 hover:bg-gray-50 dark:hover:bg-gray-900 transition-colors"
+        className="w-full flex items-center justify-between p-4 hover:bg-foreground/5 transition-colors"
       >
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-full bg-gray-50 dark:bg-gray-800 flex items-center justify-center text-gray-500 text-sm">
+          <div className="w-8 h-8 rounded-full bg-foreground/10 flex items-center justify-center text-foreground/80 text-sm">
             {icon}
           </div>
           <div className="text-left">
-            <span className="block text-gray-900 dark:text-gray-200 font-medium font-figtree">
+            <span className="block text-foreground font-medium">
               {label}
             </span>
             {value && (
-              <span className="block text-xs text-gray-400">{value}</span>
+              <span className="block text-xs text-foreground/60">{value}</span>
             )}
           </div>
         </div>
         {isExpanded ? (
-          <FaChevronDown className="text-gray-300 text-xs" />
+          <FaChevronDown className="text-foreground/60 text-xs" />
         ) : (
-          <FaChevronRight className="text-gray-300 text-xs" />
+          <FaChevronRight className="text-foreground/60 text-xs" />
         )}
       </button>
       <AnimatePresence>
@@ -421,24 +484,24 @@ function SimpleSettingItem({
   return (
     <button
       onClick={onClick}
-      className={`w-full flex items-center justify-between p-4 hover:bg-gray-50 dark:hover:bg-gray-900 transition-colors rounded-none ${
-        !last ? "border-b border-gray-100 dark:border-gray-800" : ""
+      className={`w-full flex items-center justify-between p-4 hover:bg-foreground/5 transition-colors rounded-none ${
+        !last ? "border-b border-secondary/40" : ""
       }`}
     >
       <div className="flex items-center gap-3">
-        <div className="w-8 h-8 rounded-full bg-gray-50 dark:bg-gray-800 flex items-center justify-center text-gray-500 text-sm">
+        <div className="w-8 h-8 rounded-full bg-foreground/10 flex items-center justify-center text-foreground/80 text-sm">
           {icon}
         </div>
         <div className="text-left">
-          <span className="block text-gray-900 dark:text-gray-200 font-medium font-figtree">
+          <span className="block text-foreground font-medium">
             {label}
           </span>
           {value && (
-            <span className="block text-xs text-gray-400">{value}</span>
+            <span className="block text-xs text-foreground/60">{value}</span>
           )}
         </div>
       </div>
-      <FaChevronRight className="text-gray-300 text-xs" />
+      <FaChevronRight className="text-foreground/60 text-xs" />
     </button>
   );
 }
@@ -461,7 +524,7 @@ function SettingForm({
 
   const commonInputProps = {
     className:
-      "w-full px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-secondary)] bg-transparent text-gray-900 dark:text-white placeholder-gray-400",
+      "w-full px-4 py-2 border border-secondary/40 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary bg-background text-foreground placeholder-foreground/40",
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -600,7 +663,7 @@ function SettingForm({
         return (
           <div className="w-full flex flex-col items-center gap-4">
             <div
-              className="w-24 h-24 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center overflow-hidden border-2 border-dashed border-gray-300 dark:border-gray-700 cursor-pointer hover:border-secondary transition-colors"
+              className="w-24 h-24 bg-foreground/10 rounded-full flex items-center justify-center overflow-hidden border-2 border-dashed border-secondary/40 cursor-pointer hover:border-primary transition-colors"
               onClick={() => fileInputRef.current?.click()}
             >
               {previewUrl ? (
@@ -612,7 +675,7 @@ function SettingForm({
                   className="w-full h-full object-cover"
                 />
               ) : (
-                <span className="text-gray-400 text-xs p-2 text-center">
+                <span className="text-foreground/60 text-xs p-2 text-center">
                   Click to upload
                 </span>
               )}
@@ -624,7 +687,7 @@ function SettingForm({
               onChange={handleFileChange}
               className="hidden"
             />
-            <p className="text-[10px] text-gray-500">
+            <p className="text-[10px] text-foreground/60">
               Supported formats: JPG, PNG, GIF
             </p>
           </div>
@@ -676,12 +739,12 @@ function SettingForm({
     <div className="pt-2 w-full">
       {renderInputs()}
       {error && (
-        <p className="text-red-500 text-xs mt-2 text-center">{error}</p>
+        <p className="text-primary text-xs mt-2 text-center">{error}</p>
       )}
       <button
         onClick={handleSubmit}
         disabled={isLoading}
-        className="w-full mt-4 px-4 py-2 bg-secondary text-white rounded-lg hover:opacity-90 transition-opacity font-medium disabled:opacity-50"
+        className="w-full mt-4 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors font-medium disabled:opacity-50"
       >
         {isLoading ? "Saving..." : "Save Changes"}
       </button>
