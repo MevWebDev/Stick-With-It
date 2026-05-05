@@ -3,7 +3,7 @@ import { useAuth } from "@/app/lib/auth/authContext";
 import { authService } from "@/app/lib/auth/authService";
 import { useRouter } from "next/navigation";
 import { useState, useRef, useEffect } from "react";
-import { subscribeToPushNotifications } from "@/app/lib/pushNotifications/pushNotifications";
+import { subscribeToPushNotifications, unsubscribeFromPushNotifications } from "@/app/lib/pushNotifications/pushNotifications";
 import { NotificationPreferencesForm } from "@/app/components/NotificationPreferencesForm";
 import {
   ChangeEmailCredentials,
@@ -34,8 +34,6 @@ function SettingsPage() {
   const { theme, setTheme } = useTheme();
 
   const [expandedSetting, setExpandedSetting] = useState<string | null>(null);
-  const [pushError, setPushError] = useState<string | null>(null);
-  const [pushSuccess, setPushSuccess] = useState<string | null>(null);
   const [pushLoading, setPushLoading] = useState(false);
   const [notificationsEnabled, setNotificationsEnabled] = useState(false);
 
@@ -132,16 +130,24 @@ function SettingsPage() {
   const handleEnablePush = async () => {
     try {
       setPushLoading(true);
-      setPushError(null);
-      setPushSuccess(null);
       await subscribeToPushNotifications();
       setNotificationsEnabled(true);
-      setPushSuccess("✓ Notifications enabled successfully!");
-      setTimeout(() => setPushSuccess(null), 4000);
     } catch (error: any) {
-      const msg = error instanceof Error ? error.message : "Failed to enable notifications";
-      setPushError(msg);
-      setTimeout(() => setPushError(null), 5000);
+      console.error("Failed to enable notifications:", error);
+      // Could show a toast notification here if needed
+    } finally {
+      setPushLoading(false);
+    }
+  };
+
+  const handleDisablePush = async () => {
+    try {
+      setPushLoading(true);
+      await unsubscribeFromPushNotifications();
+      setNotificationsEnabled(false);
+    } catch (error: any) {
+      console.error("Failed to disable notifications:", error);
+      // Could show a toast notification here if needed
     } finally {
       setPushLoading(false);
     }
@@ -308,25 +314,31 @@ function SettingsPage() {
                   </div>
                 </div>
 
-                {pushError && (
-                  <div className="p-3 bg-primary/10 border border-primary/30 rounded-lg">
-                    <p className="text-xs text-primary">{pushError}</p>
-                  </div>
-                )}
+                <div className="space-y-3">
+                  <button
+                    onClick={handleEnablePush}
+                    disabled={pushLoading || notificationsEnabled}
+                    className={`w-full p-3 rounded-lg font-semibold text-sm transition-colors ${
+                      notificationsEnabled
+                        ? "bg-secondary/20 text-secondary/60 cursor-not-allowed"
+                        : "bg-primary text-white hover:bg-primary-dark"
+                    }`}
+                  >
+                    {pushLoading && !notificationsEnabled ? "Enabling..." : notificationsEnabled ? "✓ Notifications Enabled" : "Enable Notifications"}
+                  </button>
 
-                {pushSuccess && (
-                  <div className="p-3 bg-secondary/10 border border-secondary/30 rounded-lg">
-                    <p className="text-xs text-secondary">{pushSuccess}</p>
-                  </div>
-                )}
-
-                <button
-                  onClick={handleEnablePush}
-                  disabled={pushLoading || notificationsEnabled}
-                  className="w-full p-3 bg-primary text-white rounded-lg font-semibold hover:bg-primary-dark disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm"
-                >
-                  {pushLoading ? "Enabling..." : notificationsEnabled ? "✓ Notifications Enabled" : "Enable Notifications"}
-                </button>
+                  <button
+                    onClick={handleDisablePush}
+                    disabled={pushLoading || !notificationsEnabled}
+                    className={`w-full p-3 rounded-lg font-semibold text-sm transition-colors ${
+                      !notificationsEnabled
+                        ? "bg-secondary/20 text-secondary/60 cursor-not-allowed"
+                        : "bg-red-500/10 text-red-600 border border-red-500/30 hover:bg-red-500/20"
+                    }`}
+                  >
+                    {pushLoading && notificationsEnabled ? "Disabling..." : "Disable Notifications"}
+                  </button>
+                </div>
 
                 <div className="border-t border-secondary/40 pt-4">
                   <h3 className="text-xs font-semibold text-foreground/60 uppercase tracking-wide mb-3">

@@ -876,6 +876,14 @@ class PushSubscriptionView(APIView):
             return Response({"status": "subscribed"}, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+    def delete(self, request):
+        """Unsubscribe from push notifications by deleting all subscriptions for this user"""
+        deleted_count, _ = PushSubscription.objects.filter(user=request.user).delete()
+        return Response({
+            "status": "unsubscribed",
+            "subscriptions_removed": deleted_count
+        }, status=status.HTTP_200_OK)
+
 
 class NotificationPreferenceView(APIView):
     """API view for managing user notification preferences"""
