@@ -32,7 +32,11 @@ export default function worker() {
     event.notification.close();
 
     // Safely get the URL from notification data
-    const url = (event.notification && event.notification.data && event.notification.data.url) || "/";
+    const url =
+      (event.notification &&
+        event.notification.data &&
+        event.notification.data.url) ||
+      "/";
 
     event.waitUntil(self.clients.openWindow(url));
   });
