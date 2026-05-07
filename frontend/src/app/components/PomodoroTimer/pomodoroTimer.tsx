@@ -89,7 +89,7 @@ export default function PomodoroTimer() {
     try {
       // Check if user has pomodoro notifications enabled
       const prefs = await notificationPreferencesService.getPreferences();
-      
+
       if (!prefs.is_enabled_pomodoro) {
         console.log("Pomodoro notifications are disabled");
         return;
@@ -112,7 +112,7 @@ export default function PomodoroTimer() {
       }
 
       const registration = await navigator.serviceWorker.ready;
-      
+
       const title = isBreakEnd ? "Break Complete!" : "Focus Session Complete!";
       const message = isBreakEnd
         ? "Time to get back to work! Ready for another focus session?"
