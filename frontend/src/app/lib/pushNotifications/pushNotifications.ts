@@ -205,13 +205,36 @@ export async function subscribeToPushNotifications(): Promise<boolean> {
  */
 export async function unsubscribeFromPushNotifications(): Promise<void> {
   try {
+    // First, unsubscribe from browser push manager
     const registration = await navigator.serviceWorker.ready;
     const subscription = await registration.pushManager.getSubscription();
 
     if (subscription) {
       await subscription.unsubscribe();
-      console.log("Unsubscribed from push notifications");
+      console.log("Unsubscribed from push notifications (browser)");
     }
+
+    // Then, remove subscription from backend
+    const token = typeof window !== 'undefined' ? localStorage.getItem("access_token") : null;
+
+    if (!token) {
+      throw new Error("Not authenticated. Please log in first.");
+    }
+
+    const response = await fetch(`${API_URL}/api/auth/push/subscribe/`, {
+      method: "DELETE",
+      headers: {
+        "Authorization": `Bearer ${token}`,
+      },
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.detail || "Failed to unsubscribe from backend");
+    }
+
+    console.log("✅ Unsubscribed from push notifications (backend)");
+    return await response.json();
   } catch (error) {
     console.error("Error unsubscribing from push notifications:", error);
     throw error;
