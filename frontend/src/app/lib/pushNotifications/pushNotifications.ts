@@ -5,7 +5,6 @@
 import { API_URL } from "@/app/lib/api/apiConfig";
 
 const VAPID_PUBLIC_KEY = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY || "";
-const SERVICE_WORKER_READY_TIMEOUT_MS = 10000;
 
 /**
  * Convert VAPID public key from base64 to Uint8Array
@@ -35,50 +34,13 @@ async function registerServiceWorker(): Promise<ServiceWorkerRegistration> {
         scope: "/",
       });
       console.log("Service Worker registered:", registration);
-      return await waitForActiveServiceWorker(registration);
+      return registration;
     } catch (error) {
       console.error("Service Worker registration failed:", error);
-      throw new Error(
-        error instanceof Error
-          ? error.message
-          : "Failed to register Service Worker"
-      );
+      throw new Error("Failed to register Service Worker");
     }
   }
   throw new Error("Service Workers are not supported in this browser");
-}
-
-/**
- * Push subscriptions require an active service worker. navigator.serviceWorker.register()
- * can resolve while the new worker is still installing, so wait before subscribing.
- */
-async function waitForActiveServiceWorker(
-  registration: ServiceWorkerRegistration
-): Promise<ServiceWorkerRegistration> {
-  if (registration.active) {
-    return registration;
-  }
-
-  return new Promise((resolve, reject) => {
-    const timeout = window.setTimeout(() => {
-      reject(
-        new Error(
-          "Service Worker did not become active. Please refresh the page and try again."
-        )
-      );
-    }, SERVICE_WORKER_READY_TIMEOUT_MS);
-
-    navigator.serviceWorker.ready.then(
-      (readyRegistration) => {
-        window.clearTimeout(timeout);
-        resolve(readyRegistration);
-      },
-      (error) => {
-        window.clearTimeout(timeout);
-        reject(error);
-      }
-    );
-  });
 }
 
 /**
