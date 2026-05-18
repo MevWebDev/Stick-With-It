@@ -1,6 +1,6 @@
 from django.urls import path
 from . import views
-
+from .views import PushSubscriptionView, NotificationPreferenceView
 urlpatterns = [
     path("register/", views.register_view, name="register"),
     path("check-email/", views.check_email_view, name="check_email"),
@@ -25,4 +25,16 @@ urlpatterns = [
     path('pomodoro/complete/', views.complete_pomodoro, name='complete_pomodoro'),
     path('blacklist/', views.manage_blacklist, name='manage_blacklist'),
     path('badges/', views.get_all_badges, name='all_badges'),
+    path('push/subscribe/', PushSubscriptionView.as_view(), name='push_subscribe'),
+    
+    # Notification preferences
+    path('notification-preferences/', NotificationPreferenceView.as_view(), name='notification_preferences'),
+    path('notification-preferences/test/', views.send_test_notification, name='send_test_notification'),
+    
+    # Debug & Test endpoints (for development)
+    path('test/simulate-habits/', views.test_simulate_habit_notifications, name='test_simulate_habits'),
+    path('test/simulate-challenges/', views.test_simulate_challenge_notifications, name='test_simulate_challenges'),
+    path('test/debug-preferences/', views.debug_notification_preferences, name='debug_preferences'),
+    path('test/debug-subscriptions/', views.debug_all_subscriptions_public, name='debug_subscriptions'),
+    path('test/send-test/', views.debug_send_test_to_user, name='send_test'),
 ]

@@ -42,4 +42,7 @@ next-env.d.ts
 
 #pwa
 /public/sw.js
-/public/workbox-4754cb34.js
+/public/sw.js.map
+/public/workbox-*.js
+/public/worker-*.js
+/public/workbox-*.js.map

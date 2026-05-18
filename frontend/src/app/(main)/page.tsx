@@ -14,7 +14,7 @@ export default function Home() {
   return (
     <div className="flex flex-col items-center justify-center gap-8 py-10 px-4">
       <div className="text-center">
-        <h1 className="text-4xl font-bold font-geologica my-2 text-white">
+        <h1 className="text-4xl font-bold font-geologica my-2">
           Hi {capitalizeFirstLetter(user?.username)}! 👋
         </h1>
         <p className="font-figtree text-lg">Ready for your daily task?</p>

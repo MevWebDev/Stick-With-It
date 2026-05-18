@@ -20,3 +20,10 @@ django-redis>=5.4.0
 pytest>=7.4.0
 pytest-django>=4.5.0
 pytest-cov>=4.1.0
+
+pywebpush==1.14.0
+cryptography<43.0.0
+celery==5.3.6
+django-celery-beat>=2.5.0
+django-extensions
+pygraphviz

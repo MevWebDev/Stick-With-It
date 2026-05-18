@@ -37,14 +37,14 @@ export function LoginForm() {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
-      className="w-full max-w-md mx-auto"
+      className="w-full max-w-md mx-auto dark:bg-[var(--color-background)]"
     >
-      <div className="bg-white rounded-3xl shadow-xl p-8 border border-gray-100">
+      <div className="bg-white rounded-3xl shadow-xl p-8 border border-gray-100 dark:bg-[var(--color-primary)] dark:border-[var(--color-border)]">
         <div className="text-center mb-8">
-          <h2 className="text-3xl font-bold font-geologica text-foreground dark:text-background mb-2">
+          <h2 className="text-3xl font-bold font-geologica text-foreground dark:text-[var(--color-foreground)] mb-2">
             Welcome Back
           </h2>
-          <p className="text-gray-500 font-figtree">
+          <p className="text-gray-500 font-figtree dark:text-[var(--color-secondary)]">
             Please enter your details to sign in
           </p>
         </div>
@@ -62,7 +62,7 @@ export function LoginForm() {
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 required
-                className="dark:text-gray-500 block w-full pl-11 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-[var(--color-secondary)] focus:border-transparent transition-all font-figtree"
+                className="block w-full pl-11 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-[var(--color-secondary)] focus:border-transparent transition-all font-figtree dark:bg-[var(--color-input-bg)] dark:text-[var(--color-foreground)] dark:border-[var(--color-input-border)] dark:focus:bg-[var(--color-button-bg-hover)]"
               />
             </div>
 
@@ -77,14 +77,18 @@ export function LoginForm() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                className="block w-full pl-11 dark:text-gray-500 pr-11 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-[var(--color-secondary)] focus:border-transparent transition-all font-figtree"
+                className="block w-full pl-11 pr-11 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-[var(--color-secondary)] focus:border-transparent transition-all font-figtree dark:bg-[var(--color-input-bg)] dark:text-[var(--color-foreground)] dark:border-[var(--color-input-border)] dark:focus:bg-[var(--color-button-bg-hover)]"
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-0 inset-y-0 pr-4 flex items-center text-gray-400 hover:text-gray-600 cursor-pointer transition-colors"
+                className="absolute right-0 inset-y-0 pr-4 flex items-center text-gray-400 hover:text-gray-600 cursor-pointer transition-colors dark:text-[var(--color-secondary)] dark:hover:text-[var(--color-foreground)]"
               >
-                {showPassword ? <FaEyeSlash style={{ color: '#9ca3af' }} /> : <FaEye style={{ color: '#9ca3af' }} />}
+                {showPassword ? (
+                  <FaEyeSlash className="text-gray-400 dark:text-[var(--color-secondary)]" />
+                ) : (
+                  <FaEye className="text-gray-400 dark:text-[var(--color-secondary)]" />
+                )}
               </button>
             </div>
           </div>
@@ -95,7 +99,7 @@ export function LoginForm() {
                 initial={{ opacity: 0, height: 0 }}
                 animate={{ opacity: 1, height: "auto" }}
                 exit={{ opacity: 0, height: 0 }}
-                className="text-red-500 text-sm text-center font-medium bg-red-50 p-2 rounded-lg"
+                className="text-red-500 text-sm text-center font-medium bg-red-50 p-2 rounded-lg dark:bg-red-950 dark:text-red-300"
               >
                 {error}
               </motion.div>
@@ -105,7 +109,7 @@ export function LoginForm() {
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full bg-[var(--color-primary)] text-white font-bold text-lg py-3.5 rounded-xl hover:bg-[var(--color-primary-dark)] active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed transition-all shadow-lg shadow-[var(--color-primary)]/20"
+            className="w-full bg-[var(--color-primary)] text-white font-bold text-lg py-3.5 rounded-xl hover:bg-[var(--color-primary-dark)] active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed transition-all shadow-lg shadow-[var(--color-primary)]/20 dark:bg-[var(--color-button-bg)] dark:text-[var(--color-button-text)] dark:hover:bg-[var(--color-button-bg-hover)]"
           >
             {isLoading ? (
               <span className="flex items-center justify-center gap-2">
@@ -119,11 +123,11 @@ export function LoginForm() {
         </form>
       </div>
 
-      <p className="text-center mt-6 text-gray-500 font-figtree">
+      <p className="text-center mt-6 text-gray-500 font-figtree dark:text-[var(--color-secondary)]">
         Don't have an account?{" "}
         <button
           onClick={() => router.push("/register")}
-          className="text-[var(--color-secondary)] dark:bg-[var(--color-primary)] dark:text-foreground font-bold hover:underline"
+          className="text-[var(--color-secondary)] dark:text-[var(--color-foreground)] font-bold hover:underline"
         >
           Sign up
         </button>
