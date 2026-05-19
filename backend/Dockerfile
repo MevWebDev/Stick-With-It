@@ -31,4 +31,4 @@ RUN mkdir -p /app/data
 EXPOSE 8000
 
 # Uruchamiamy migracje i serwer
-CMD ["sh", "-c", "python manage.py makemigrations --verbosity 2 && python manage.py migrate --verbosity 2 && python manage.py seed_badges && exec python manage.py runserver 0.0.0.0:$PORT"]
+CMD ["sh", "-c", "python manage.py makemigrations --verbosity 2 && python manage.py migrate --verbosity 2 && python manage.py collectstatic --noinput && python manage.py seed_badges && exec gunicorn backend.wsgi:application --bind 0.0.0.0:$PORT --workers 2 --timeout 120"]

@@ -6,7 +6,7 @@ from django.core.validators import validate_email
 from django.core.exceptions import ValidationError
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
-from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.tokens import RefreshToken, AccessToken
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework import status
@@ -186,18 +186,32 @@ def login_view(request):
 @require_http_methods(["POST"])
 def logout_view(request):
     """Wylogowanie - dodaje refresh token do blacklisty"""
+    import time
+
     try:
         data = json.loads(request.body)
         refresh_token = data.get('refresh')
-        
+
         # Sprawdź czy token został podany i nie jest pusty
         if refresh_token is not None and refresh_token != '':
             token = RefreshToken(refresh_token)
-            token.blacklist()  # Dodaj token do czarnej listy
+            token.blacklist()  # Dodaj token do czarnej listy (PostgreSQL)
         elif refresh_token == '':
-            # Pusty string to błąd
             raise ValueError('Empty token')
-        
+
+        # Blacklist access token in Redis so it's immediately invalid
+        auth_header = request.META.get('HTTP_AUTHORIZATION', '')
+        if auth_header.startswith('Bearer '):
+            try:
+                raw_access = auth_header.split(' ', 1)[1]
+                access_token = AccessToken(raw_access)
+                jti = access_token.get('jti')
+                exp = access_token.get('exp')
+                ttl = max(1, int(exp - time.time()))
+                cache.set(f'blacklisted_jti_{jti}', True, timeout=ttl)
+            except Exception:
+                pass  # Don't fail logout if access token is already expired
+
         return JsonResponse({'success': True})
     except Exception as e:
         return JsonResponse({
